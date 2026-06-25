@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Channel Intelligence — Internal Analytics</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     LOGIN
+══════════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">📊</div>
+    <h1>Channel Intelligence</h1>
+    <p class="login-subtitle">All-India Partner Analytics Platform</p>
+
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="login-user" placeholder="Username" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="login-btn">Sign In →</button>
+
+    <div class="login-divider">or try demo access</div>
+    <div class="login-demo-btns">
+      <button class="btn-demo" id="demo-admin-btn">🔐 Admin Demo</button>
+      <button class="btn-demo" id="demo-viewer-btn">👁 View-Only Demo</button>
+    </div>
+
+    <div id="login-error" class="login-error hidden"></div>
+    <p class="login-hint">Demo: admin / admin123 &nbsp;·&nbsp; demo / demo123</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════════════════════════ -->
+<div id="app-shell" class="hidden">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">📊</div>
+      <div class="brand-text">
+        <strong>Channel Intel</strong>
+        <em>v1.0 — Demo</em>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-item" data-page="partners">
+        <span class="nav-icon">🤝</span>
+        <span class="nav-label">All Partners</span>
+      </div>
+      <div class="nav-item" data-page="analytics">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Analytics</span>
+      </div>
+
+      <div class="nav-section-label">Data</div>
+      <div class="nav-item" data-page="data-sources">
+        <span class="nav-icon">🔗</span>
+        <span class="nav-label">Data Sources</span>
+      </div>
+      <div class="nav-item" data-page="excel-tools">
+        <span class="nav-icon">📥</span>
+        <span class="nav-label">Excel Tools</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-avatar-lg" id="sidebar-avatar">A</div>
+      <div class="user-details">
+        <div class="uname" id="sidebar-uname">Admin User</div>
+        <div class="urole" id="sidebar-urole">Administrator</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div id="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header id="topbar">
+      <button class="icon-btn" id="sidebar-toggle" title="Toggle sidebar">☰</button>
+      <span class="topbar-title" id="page-title">Dashboard</span>
+
+      <div class="topbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="global-search" placeholder="Search partners, codes, cities…">
+      </div>
+
+      <div class="topbar-right">
+        <span class="source-badge demo" id="source-badge">DEMO</span>
+        <button class="icon-btn" id="theme-toggle" title="Toggle theme">🌙</button>
+        <div class="user-pill">
+          <div class="avatar-sm" id="topbar-avatar">A</div>
+          <span class="uname-top" id="topbar-uname">Admin</span>
+        </div>
+        <button class="icon-btn" id="logout-btn" title="Logout" style="font-size:14px;">🚪</button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main id="main-content">
+
+      <!-- ─── DASHBOARD ─────────────────────────────────────────────── -->
+      <section id="page-dashboard" class="page active">
+
+        <!-- Filters -->
+        <div class="filters-bar" id="filters-bar">
+          <div class="fg">
+            <label>Year</label>
+            <select id="f-year"></select>
+          </div>
+          <div class="fg">
+            <label>Month</label>
+            <select id="f-month"></select>
+          </div>
+          <div class="fg">
+            <label>Zone</label>
+            <select id="f-zone"></select>
+          </div>
+          <div class="fg">
+            <label>Territory</label>
+            <select id="f-territory"></select>
+          </div>
+          <div class="fg">
+            <label>State</label>
+            <select id="f-state"></select>
+          </div>
+          <div class="fg">
+            <label>ASM</label>
+            <select id="f-asm"></select>
+          </div>
+          <div class="fg">
+            <label>RM</label>
+            <select id="f-rm"></select>
+          </div>
+          <div class="fg">
+            <label>Verification</label>
+            <select id="f-verification"></select>
+          </div>
+          <div class="fg">
+            <label>Tier</label>
+            <select id="f-tier"></select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn-sm outline" id="reset-btn">Reset</button>
+            <button class="btn-sm solid"   id="apply-btn">Apply</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="kpi-grid"></div>
+
+        <!-- Charts -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="cc-head">
+              <div>
+                <div class="cc-title">Monthly Sales Trend</div>
+                <div class="cc-sub" id="trend-sub">All partners — 2025 vs 2026</div>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:200px"><canvas id="trend-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="cc-head">
+              <div>
+                <div class="cc-title">Zone Performance</div>
+                <div class="cc-sub">CY Sales Distribution</div>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:200px"><canvas id="zone-chart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Partner Grid -->
+        <div class="sec-head">
+          <div>
+            <div class="sec-title">Channel Partners</div>
+            <div class="sec-sub">Click a card to view detailed analytics</div>
+          </div>
+          <span class="count-pill" id="partner-count">16 partners</span>
+        </div>
+        <div class="partner-grid" id="partner-grid"></div>
+
+      </section>
+
+      <!-- ─── ALL PARTNERS ───────────────────────────────────────────── -->
+      <section id="page-partners" class="page">
+        <div class="sec-head" style="margin-bottom:14px">
+          <div>
+            <div class="sec-title">All Channel Partners</div>
+            <div class="sec-sub">Complete partner registry</div>
+          </div>
+          <span class="count-pill" id="all-count">16 partners</span>
+        </div>
+        <div class="partner-grid" id="all-partner-grid"></div>
+      </section>
+
+      <!-- ─── ANALYTICS ─────────────────────────────────────────────── -->
+      <section id="page-analytics" class="page">
+        <div class="sec-head" style="margin-bottom:14px">
+          <div class="sec-title">Analytics Overview</div>
+          <div class="sec-sub">Aggregated performance across all partners</div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="chart-card">
+            <div class="cc-head"><div class="cc-title">Zone Sales — 2025 Full Year vs 2026 YTD</div></div>
+            <div class="chart-wrap" style="height:240px"><canvas id="a-zone-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="cc-head"><div class="cc-title">Tier Distribution</div></div>
+            <div class="chart-wrap" style="height:240px"><canvas id="a-tier-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:12px">
+          <div class="cc-head">
+            <div class="cc-title">Leads Pipeline — 2026 YTD by Partner</div>
+            <div class="cc-sub">AIS Provided · Worked · CRM Added</div>
+          </div>
+          <div class="chart-wrap" style="height:260px"><canvas id="a-leads-chart"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="cc-head"><div class="cc-title">Top 10 Partners by CY Sales (2026 YTD)</div></div>
+          <div class="chart-wrap" style="height:280px"><canvas id="a-top-chart"></canvas></div>
+        </div>
+      </section>
+
+      <!-- ─── DATA SOURCES ──────────────────────────────────────────── -->
+      <section id="page-data-sources" class="page">
+        <div class="sec-head" style="margin-bottom:16px">
+          <div class="sec-title">Data Sources</div>
+          <div class="sec-sub">Connect and manage data integrations</div>
+        </div>
+        <div class="ds-cards">
+
+          <!-- Demo -->
+          <div class="ds-card">
+            <div class="ds-icon">🧪</div>
+            <div class="ds-title">Demo Mode</div>
+            <div class="ds-desc">16 synthetic partners across all zones, 18 months of sales data. No credentials required.</div>
+            <span class="ds-status on">● Active</span>
+            <button class="btn outline" id="use-demo-btn">Load Demo Data</button>
+          </div>
+
+          <!-- Google Sheets -->
+          <div class="ds-card">
+            <div class="ds-icon">📋</div>
+            <div class="ds-title">Google Sheets</div>
+            <div class="ds-desc">Fetch from a published Google Sheet with Partner_Details and Sales_Data tabs.</div>
+            <span class="ds-status off" id="sheets-status">○ Not Connected</span>
+            <input class="ds-input" type="text" id="sheets-url" placeholder="Paste published Sheet URL…">
+            <button class="btn outline" id="connect-sheets-btn">Connect Sheet</button>
+          </div>
+
+          <!-- Firebase -->
+          <div class="ds-card">
+            <div class="ds-icon">🔥</div>
+            <div class="ds-title">Firebase / Firestore</div>
+            <div class="ds-desc">Real-time sync from Firestore collections. Add credentials in app.js to activate.</div>
+            <span class="ds-status off">○ Not Connected</span>
+            <div class="code-block">// app.js → APP_CONFIG.FIREBASE<br>// Collections: /partners<br>// /sales_data /users</div>
+            <button class="btn outline" id="connect-firebase-btn">Configure →</button>
+          </div>
+
+          <!-- Excel -->
+          <div class="ds-card">
+            <div class="ds-icon">📊</div>
+            <div class="ds-title">Excel Upload</div>
+            <div class="ds-desc">Upload a workbook with Partner_Details + Sales_Data sheets. Validates headers automatically.</div>
+            <span class="ds-status off" id="excel-ds-status">○ No File Uploaded</span>
+            <label class="btn primary" style="text-align:center;cursor:pointer;justify-content:center;">
+              📂 Upload Workbook
+              <input type="file" id="excel-upload-ds" accept=".xlsx,.xls" style="display:none">
+            </label>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ─── EXCEL TOOLS ────────────────────────────────────────────── -->
+      <section id="page-excel-tools" class="page">
+        <div class="sec-head" style="margin-bottom:16px">
+          <div class="sec-title">Excel Tools</div>
+          <div class="sec-sub">Download templates · Upload data · View schema</div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:14px">
+          <div class="cc-head"><div class="cc-title">Sample Workbook Download</div></div>
+          <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;line-height:1.6">
+            Pre-filled with 16 partners and 288 rows of sales data across 2025–2026.
+            Use as a template for real data — preserves exact schema required for upload.
+          </p>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+            <button class="btn primary" id="download-excel-btn">⬇ Download Sample Excel</button>
+            <button class="btn outline" id="schema-toggle-btn">📐 View Schema</button>
+          </div>
+          <div class="schema-info hidden" id="schema-info">
+            <strong>Sheet 1: Partner_Details</strong><br>
+            Serial Number | Partner Code | ASM | RM | Territory | Zone | City | State | Tier |<br>
+            Channel Partner Firm Name | Channel Partner Name | Verification Status | Verification Notes<br><br>
+            <strong>Sheet 2: Sales_Data</strong><br>
+            Serial Number | Partner Code | Year | Month | Sales | OBK | UEOB |<br>
+            AIS Leads Provided | Leads Worked | Leads Generated | Leads Added To CRM
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="cc-head"><div class="cc-title">Upload Partner Workbook</div></div>
+          <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📂</div>
+            <p>Click to browse or drag &amp; drop an Excel file</p>
+            <small>Accepts .xlsx files with Partner_Details and Sales_Data sheets</small>
+          </div>
+          <input type="file" id="excel-upload-main" accept=".xlsx,.xls" style="display:none">
+          <div id="upload-result" class="hidden"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PARTNER DETAIL MODAL
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="partner-modal">
+  <div class="modal-drawer">
+    <div class="modal-head">
+      <div class="modal-head-info">
+        <div class="modal-head-title" id="m-name">Partner Name</div>
+        <div class="modal-head-sub"   id="m-meta">Code · Zone · Territory</div>
+      </div>
+      <span class="source-badge demo" id="m-source">DEMO</span>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Partner Info -->
+      <div class="msec">
+        <div class="msec-title">Partner Information</div>
+        <div class="info-rows" id="m-info"></div>
+      </div>
+
+      <!-- Sales Performance -->
+      <div class="msec">
+        <div class="msec-title">Sales Performance</div>
+        <div class="stat-grid" id="m-sales"></div>
+      </div>
+
+      <!-- OBK / UEOB -->
+      <div class="msec">
+        <div class="msec-title">OBK &amp; UEOB</div>
+        <div class="stat-grid c2" id="m-obk"></div>
+      </div>
+
+      <!-- Leads -->
+      <div class="msec">
+        <div class="msec-title">Leads &amp; CRM Pipeline — CY YTD</div>
+        <div class="stat-grid c4" id="m-leads"></div>
+      </div>
+
+      <!-- Sales Chart -->
+      <div class="msec">
+        <div class="msec-title">Monthly Sales — 2025 vs 2026</div>
+        <div class="chart-wrap-modal"><canvas id="m-trend-chart"></canvas></div>
+      </div>
+
+      <!-- Leads Chart -->
+      <div class="msec">
+        <div class="msec-title">Monthly Leads Pipeline — 2026 YTD</div>
+        <div class="chart-wrap-modal"><canvas id="m-leads-chart"></canvas></div>
+      </div>
+
+      <!-- Verification -->
+      <div class="msec">
+        <div class="msec-title">Verification Notes</div>
+        <div class="notes-box" id="m-notes">—</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar backdrop (mobile) -->
+<div id="sidebar-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;"></div>
+
+<!-- Toast container -->
+<div id="toast-wrap"></div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="sampleData.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
