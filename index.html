@@ -4,334 +4,275 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Channel Intelligence — Internal Analytics</title>
-  <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #f5f7fb; --bg2: #ffffff; --text: #1e293b; --text-2: #475569;
+      --border: #e2e8f0; --primary: #2563eb; --primary-hover: #1d4ed8;
+      --shadow: 0 8px 30px rgba(0,0,0,0.06);
+      --radius: 12px; --radius-sm: 8px;
+      --transition: 0.2s ease;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a; --bg2: #1e293b; --text: #e2e8f0; --text-2: #94a3b8;
+      --border: #334155; --primary: #3b82f6; --primary-hover: #2563eb;
+      --shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); transition:0.2s; }
+    button { cursor:pointer; font-family:inherit; border:none; background:transparent; }
+    input,select { font-family:inherit; }
+    .hidden { display:none !important; }
+    .flex { display:flex; align-items:center; gap:8px; }
+    #login-screen { display:flex; justify-content:center; align-items:center; min-height:100vh; background:var(--bg); }
+    .login-card { background:var(--bg2); padding:36px 32px; border-radius:20px; width:400px; max-width:94%; box-shadow:var(--shadow); }
+    .login-card h1 { font-size:24px; font-weight:600; margin:10px 0 4px; }
+    .login-subtitle { color:var(--text-2); font-size:14px; margin-bottom:24px; }
+    .login-logo { font-size:40px; }
+    .form-group { margin-bottom:16px; }
+    .form-group label { display:block; font-weight:500; font-size:13px; margin-bottom:4px; }
+    .form-group input { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); }
+    .btn-primary { background:var(--primary); color:#fff; padding:10px 20px; border-radius:var(--radius-sm); font-weight:600; width:100%; font-size:15px; transition:0.2s; }
+    .btn-primary:hover { background:var(--primary-hover); }
+    .login-divider { text-align:center; margin:20px 0 12px; color:var(--text-2); font-size:13px; }
+    .login-demo-btns { display:flex; gap:8px; }
+    .btn-demo { flex:1; padding:8px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); font-size:13px; }
+    .login-error { background:#fee2e2; color:#b91c1c; padding:10px; border-radius:var(--radius-sm); margin-top:12px; font-size:13px; }
+    .login-hint { font-size:12px; color:var(--text-2); margin-top:16px; text-align:center; }
+    #app-shell { display:flex; min-height:100vh; }
+    #sidebar { width:220px; background:var(--bg2); border-right:1px solid var(--border); padding:20px 14px; display:flex; flex-direction:column; flex-shrink:0; transition:0.2s; position:sticky; top:0; height:100vh; overflow-y:auto; }
+    .sidebar-brand { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+    .brand-icon { font-size:28px; }
+    .brand-text strong { display:block; font-size:16px; } .brand-text em { font-size:11px; color:var(--text-2); font-style:normal; }
+    .nav-section-label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); margin:16px 0 8px; font-weight:600; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:var(--radius-sm); color:var(--text-2); transition:0.2s; cursor:pointer; }
+    .nav-item:hover,.nav-item.active { background:var(--primary); color:#fff; }
+    .nav-item .nav-icon { font-size:18px; width:22px; }
+    .sidebar-footer { margin-top:auto; padding-top:16px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+    .user-avatar-lg { width:36px; height:36px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; }
+    .user-details .uname { font-weight:600; font-size:13px; } .user-details .urole { font-size:11px; color:var(--text-2); }
+    #main-wrapper { flex:1; display:flex; flex-direction:column; min-width:0; }
+    #topbar { display:flex; align-items:center; gap:12px; padding:12px 24px; background:var(--bg2); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .topbar-title { font-weight:600; font-size:18px; }
+    .topbar-search { display:flex; align-items:center; background:var(--bg); border-radius:20px; padding:4px 14px; flex:1; min-width:140px; max-width:300px; }
+    .topbar-search input { background:transparent; border:none; padding:6px 0; outline:none; width:100%; color:var(--text); }
+    .topbar-right { display:flex; align-items:center; gap:12px; margin-left:auto; }
+    .source-badge { font-size:10px; padding:3px 10px; border-radius:20px; font-weight:600; }
+    .source-badge.demo { background:#dbeafe; color:#1e40af; }
+    .user-pill { display:flex; align-items:center; gap:6px; }
+    .avatar-sm { width:28px; height:28px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:12px; }
+    .icon-btn { font-size:20px; padding:4px 6px; border-radius:6px; transition:0.2s; color:var(--text-2); }
+    .icon-btn:hover { background:var(--bg); }
+    #main-content { padding:20px 24px 40px; flex:1; }
+    .page { display:none; } .page.active { display:block; }
+    .filters-bar { display:flex; flex-wrap:wrap; gap:10px 14px; background:var(--bg2); padding:16px 20px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; align-items:flex-end; }
+    .fg { display:flex; flex-direction:column; min-width:100px; }
+    .fg label { font-size:11px; font-weight:600; color:var(--text-2); margin-bottom:2px; }
+    .fg select { padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); }
+    .filter-actions { display:flex; gap:6px; align-items:center; margin-left:auto; }
+    .btn-sm { padding:6px 14px; border-radius:var(--radius-sm); font-weight:500; font-size:12px; }
+    .btn-sm.outline { border:1px solid var(--border); background:transparent; }
+    .btn-sm.solid { background:var(--primary); color:#fff; }
+    .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px; }
+    .kpi-card { background:var(--bg2); padding:16px 18px; border-radius:var(--radius); box-shadow:var(--shadow); }
+    .kpi-card .kpi-label { font-size:12px; color:var(--text-2); font-weight:500; }
+    .kpi-card .kpi-value { font-size:24px; font-weight:700; margin:4px 0 2px; }
+    .kpi-card .kpi-change { font-size:12px; color:#16a34a; }
+    .charts-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+    .chart-card { background:var(--bg2); padding:16px 18px; border-radius:var(--radius); box-shadow:var(--shadow); }
+    .cc-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .cc-title { font-weight:600; font-size:15px; }
+    .cc-sub { font-size:12px; color:var(--text-2); }
+    .chart-wrap { position:relative; }
+    .sec-head { display:flex; justify-content:space-between; align-items:center; margin:20px 0 12px; }
+    .sec-title { font-weight:600; font-size:18px; }
+    .sec-sub { font-size:13px; color:var(--text-2); }
+    .count-pill { background:var(--bg); padding:4px 14px; border-radius:20px; font-size:13px; }
+    .partner-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; }
+    .partner-card { background:var(--bg2); padding:16px; border-radius:var(--radius); box-shadow:var(--shadow); cursor:pointer; transition:0.2s; border-left:4px solid var(--primary); }
+    .partner-card:hover { transform:translateY(-2px); }
+    .partner-card .p-name { font-weight:600; font-size:15px; }
+    .partner-card .p-meta { font-size:12px; color:var(--text-2); margin:4px 0; }
+    .partner-card .p-sales { font-weight:600; font-size:16px; }
+    .analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .ds-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+    .ds-card { background:var(--bg2); padding:18px; border-radius:var(--radius); box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px; }
+    .ds-icon { font-size:30px; }
+    .ds-title { font-weight:600; font-size:16px; }
+    .ds-desc { font-size:13px; color:var(--text-2); line-height:1.5; flex:1; }
+    .ds-status { font-size:12px; font-weight:500; }
+    .ds-status.on { color:#16a34a; } .ds-status.off { color:#94a3b8; }
+    .ds-input { padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); width:100%; }
+    .code-block { background:var(--bg); padding:8px 10px; border-radius:var(--radius-sm); font-family:monospace; font-size:11px; color:var(--text-2); }
+    .btn { padding:8px 16px; border-radius:var(--radius-sm); font-weight:500; font-size:13px; transition:0.2s; }
+    .btn.outline { border:1px solid var(--border); background:transparent; }
+    .btn.primary { background:var(--primary); color:#fff; }
+    .btn.primary:hover { background:var(--primary-hover); }
+    .upload-area { border:2px dashed var(--border); padding:32px 20px; border-radius:var(--radius); text-align:center; cursor:pointer; transition:0.2s; background:var(--bg); }
+    .upload-area:hover { border-color:var(--primary); background:var(--bg2); }
+    .upload-icon { font-size:40px; }
+    .upload-area p { font-weight:500; margin:8px 0 4px; }
+    .upload-area small { color:var(--text-2); font-size:12px; }
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; display:flex; align-items:center; justify-content:center; }
+    .modal-drawer { background:var(--bg2); border-radius:16px; width:700px; max-width:96%; max-height:90vh; overflow-y:auto; padding:20px 24px; }
+    .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .modal-close { font-size:24px; color:var(--text-2); }
+    .msec { margin-bottom:18px; }
+    .msec-title { font-weight:600; font-size:15px; margin-bottom:8px; }
+    .info-rows { display:grid; grid-template-columns:1fr 1fr; gap:4px 20px; }
+    .info-rows span { font-size:13px; }
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(80px,1fr)); gap:10px; }
+    .stat-grid.c2 { grid-template-columns:1fr 1fr; }
+    .stat-grid.c4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+    .stat-item { background:var(--bg); padding:8px 12px; border-radius:var(--radius-sm); }
+    .stat-item .sval { font-weight:700; font-size:17px; }
+    .stat-item .slab { font-size:11px; color:var(--text-2); }
+    .notes-box { background:var(--bg); padding:12px; border-radius:var(--radius-sm); font-size:13px; }
+    .chart-wrap-modal { height:160px; margin-top:8px; }
+    #toast-wrap { position:fixed; bottom:24px; right:24px; z-index:2000; display:flex; flex-direction:column; gap:8px; }
+    .toast { background:var(--bg2); padding:12px 18px; border-radius:var(--radius-sm); box-shadow:var(--shadow); border-left:4px solid var(--primary); font-size:13px; max-width:360px; }
+    .mapping-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin:12px 0; }
+    .mapping-grid select { padding:6px 8px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); width:100%; }
+    .mapping-grid label { font-weight:500; font-size:13px; display:flex; align-items:center; gap:6px; }
+    .mapping-grid .field-label { font-size:12px; color:var(--text-2); }
+    .status-chips { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+    .status-chip { background:var(--bg); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:500; }
+    .status-chip.done { background:#dbeafe; color:#1e40af; }
+    .status-chip.active { background:#fef3c7; color:#92400e; animation:pulse 1.5s infinite; }
+    .status-chip.error { background:#fee2e2; color:#991b1b; }
+    .status-chip.partner-only { background:#d1fae5; color:#065f46; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    @media (max-width:768px) {
+      #sidebar { position:fixed; left:-260px; width:220px; height:100vh; z-index:300; transition:0.2s; }
+      #sidebar.open { left:0; }
+      #sidebar-backdrop { display:block; }
+      .charts-row,.analytics-grid { grid-template-columns:1fr; }
+      .filters-bar { flex-direction:column; align-items:stretch; }
+      .filter-actions { margin-left:0; }
+      .mapping-grid { grid-template-columns:1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════════
-     LOGIN
-══════════════════════════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">📊</div>
     <h1>Channel Intelligence</h1>
     <p class="login-subtitle">All-India Partner Analytics Platform</p>
-
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" id="login-user" placeholder="Username" autocomplete="username">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password">
-    </div>
+    <div class="form-group"><label>Username</label><input type="text" id="login-user" placeholder="Username"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Password"></div>
     <button class="btn-primary" id="login-btn">Sign In →</button>
-
     <div class="login-divider">or try demo access</div>
     <div class="login-demo-btns">
       <button class="btn-demo" id="demo-admin-btn">🔐 Admin Demo</button>
       <button class="btn-demo" id="demo-viewer-btn">👁 View-Only Demo</button>
     </div>
-
     <div id="login-error" class="login-error hidden"></div>
     <p class="login-hint">Demo: admin / admin123 &nbsp;·&nbsp; demo / demo123</p>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     APP SHELL
-══════════════════════════════════════════════════════════════ -->
 <div id="app-shell" class="hidden">
-
-  <!-- SIDEBAR -->
   <aside id="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-icon">📊</div>
-      <div class="brand-text">
-        <strong>Channel Intel</strong>
-        <em>v1.0 — Demo</em>
-      </div>
-    </div>
-
+    <div class="sidebar-brand"><div class="brand-icon">📊</div><div class="brand-text"><strong>Channel Intel</strong><em>v1.0 — Demo</em></div></div>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Main</div>
-      <div class="nav-item active" data-page="dashboard">
-        <span class="nav-icon">🏠</span>
-        <span class="nav-label">Dashboard</span>
-      </div>
-      <div class="nav-item" data-page="partners">
-        <span class="nav-icon">🤝</span>
-        <span class="nav-label">All Partners</span>
-      </div>
-      <div class="nav-item" data-page="analytics">
-        <span class="nav-icon">📈</span>
-        <span class="nav-label">Analytics</span>
-      </div>
-
+      <div class="nav-item active" data-page="dashboard"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></div>
+      <div class="nav-item" data-page="partners"><span class="nav-icon">🤝</span><span class="nav-label">All Partners</span></div>
+      <div class="nav-item" data-page="analytics"><span class="nav-icon">📈</span><span class="nav-label">Analytics</span></div>
       <div class="nav-section-label">Data</div>
-      <div class="nav-item" data-page="data-sources">
-        <span class="nav-icon">🔗</span>
-        <span class="nav-label">Data Sources</span>
-      </div>
-      <div class="nav-item" data-page="excel-tools">
-        <span class="nav-icon">📥</span>
-        <span class="nav-label">Excel Tools</span>
-      </div>
+      <div class="nav-item" data-page="data-sources"><span class="nav-icon">🔗</span><span class="nav-label">Data Sources</span></div>
+      <div class="nav-item" data-page="excel-tools"><span class="nav-icon">📥</span><span class="nav-label">Excel Tools</span></div>
     </nav>
-
     <div class="sidebar-footer">
       <div class="user-avatar-lg" id="sidebar-avatar">A</div>
-      <div class="user-details">
-        <div class="uname" id="sidebar-uname">Admin User</div>
-        <div class="urole" id="sidebar-urole">Administrator</div>
-      </div>
+      <div class="user-details"><div class="uname" id="sidebar-uname">Admin User</div><div class="urole" id="sidebar-urole">Administrator</div></div>
     </div>
   </aside>
+  <div id="sidebar-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;"></div>
 
-  <!-- MAIN -->
   <div id="main-wrapper">
-
-    <!-- TOPBAR -->
     <header id="topbar">
       <button class="icon-btn" id="sidebar-toggle" title="Toggle sidebar">☰</button>
       <span class="topbar-title" id="page-title">Dashboard</span>
-
-      <div class="topbar-search">
-        <span class="search-icon">🔍</span>
-        <input type="search" id="global-search" placeholder="Search partners, codes, cities…">
-      </div>
-
+      <div class="topbar-search"><span class="search-icon">🔍</span><input type="search" id="global-search" placeholder="Search partners..."></div>
       <div class="topbar-right">
         <span class="source-badge demo" id="source-badge">DEMO</span>
         <button class="icon-btn" id="theme-toggle" title="Toggle theme">🌙</button>
-        <div class="user-pill">
-          <div class="avatar-sm" id="topbar-avatar">A</div>
-          <span class="uname-top" id="topbar-uname">Admin</span>
-        </div>
+        <div class="user-pill"><div class="avatar-sm" id="topbar-avatar">A</div><span class="uname-top" id="topbar-uname">Admin</span></div>
         <button class="icon-btn" id="logout-btn" title="Logout" style="font-size:14px;">🚪</button>
       </div>
     </header>
-
-    <!-- CONTENT -->
     <main id="main-content">
 
-      <!-- ─── DASHBOARD ─────────────────────────────────────────────── -->
       <section id="page-dashboard" class="page active">
-
-        <!-- Filters -->
         <div class="filters-bar" id="filters-bar">
-          <div class="fg">
-            <label>Year</label>
-            <select id="f-year"></select>
-          </div>
-          <div class="fg">
-            <label>Month</label>
-            <select id="f-month"></select>
-          </div>
-          <div class="fg">
-            <label>Zone</label>
-            <select id="f-zone"></select>
-          </div>
-          <div class="fg">
-            <label>Territory</label>
-            <select id="f-territory"></select>
-          </div>
-          <div class="fg">
-            <label>State</label>
-            <select id="f-state"></select>
-          </div>
-          <div class="fg">
-            <label>ASM</label>
-            <select id="f-asm"></select>
-          </div>
-          <div class="fg">
-            <label>RM</label>
-            <select id="f-rm"></select>
-          </div>
-          <div class="fg">
-            <label>Verification</label>
-            <select id="f-verification"></select>
-          </div>
-          <div class="fg">
-            <label>Tier</label>
-            <select id="f-tier"></select>
-          </div>
-          <div class="filter-actions">
-            <button class="btn-sm outline" id="reset-btn">Reset</button>
-            <button class="btn-sm solid"   id="apply-btn">Apply</button>
-          </div>
+          <div class="fg"><label>Year</label><select id="f-year"></select></div>
+          <div class="fg"><label>Month</label><select id="f-month"></select></div>
+          <div class="fg"><label>Zone</label><select id="f-zone"></select></div>
+          <div class="fg"><label>Territory</label><select id="f-territory"></select></div>
+          <div class="fg"><label>State</label><select id="f-state"></select></div>
+          <div class="fg"><label>ASM</label><select id="f-asm"></select></div>
+          <div class="fg"><label>RM</label><select id="f-rm"></select></div>
+          <div class="fg"><label>Verification</label><select id="f-verification"></select></div>
+          <div class="fg"><label>Tier</label><select id="f-tier"></select></div>
+          <div class="filter-actions"><button class="btn-sm outline" id="reset-btn">Reset</button><button class="btn-sm solid" id="apply-btn">Apply</button></div>
         </div>
-
-        <!-- KPI Cards -->
         <div class="kpi-grid" id="kpi-grid"></div>
-
-        <!-- Charts -->
         <div class="charts-row">
-          <div class="chart-card">
-            <div class="cc-head">
-              <div>
-                <div class="cc-title">Monthly Sales Trend</div>
-                <div class="cc-sub" id="trend-sub">All partners — 2025 vs 2026</div>
-              </div>
-            </div>
-            <div class="chart-wrap" style="height:200px"><canvas id="trend-chart"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <div class="cc-head">
-              <div>
-                <div class="cc-title">Zone Performance</div>
-                <div class="cc-sub">CY Sales Distribution</div>
-              </div>
-            </div>
-            <div class="chart-wrap" style="height:200px"><canvas id="zone-chart"></canvas></div>
-          </div>
+          <div class="chart-card"><div class="cc-head"><div><div class="cc-title">Monthly Sales Trend</div><div class="cc-sub" id="trend-sub">All partners — 2025 vs 2026</div></div></div><div class="chart-wrap" style="height:200px"><canvas id="trend-chart"></canvas></div></div>
+          <div class="chart-card"><div class="cc-head"><div><div class="cc-title">Zone Performance</div><div class="cc-sub">CY Sales Distribution</div></div></div><div class="chart-wrap" style="height:200px"><canvas id="zone-chart"></canvas></div></div>
         </div>
-
-        <!-- Partner Grid -->
-        <div class="sec-head">
-          <div>
-            <div class="sec-title">Channel Partners</div>
-            <div class="sec-sub">Click a card to view detailed analytics</div>
-          </div>
-          <span class="count-pill" id="partner-count">16 partners</span>
-        </div>
+        <div class="sec-head"><div><div class="sec-title">Channel Partners</div><div class="sec-sub">Click a card to view detailed analytics</div></div><span class="count-pill" id="partner-count">16 partners</span></div>
         <div class="partner-grid" id="partner-grid"></div>
-
       </section>
 
-      <!-- ─── ALL PARTNERS ───────────────────────────────────────────── -->
       <section id="page-partners" class="page">
-        <div class="sec-head" style="margin-bottom:14px">
-          <div>
-            <div class="sec-title">All Channel Partners</div>
-            <div class="sec-sub">Complete partner registry</div>
-          </div>
-          <span class="count-pill" id="all-count">16 partners</span>
-        </div>
+        <div class="sec-head"><div><div class="sec-title">All Channel Partners</div><div class="sec-sub">Complete partner registry</div></div><span class="count-pill" id="all-count">16 partners</span></div>
         <div class="partner-grid" id="all-partner-grid"></div>
       </section>
 
-      <!-- ─── ANALYTICS ─────────────────────────────────────────────── -->
       <section id="page-analytics" class="page">
-        <div class="sec-head" style="margin-bottom:14px">
-          <div class="sec-title">Analytics Overview</div>
-          <div class="sec-sub">Aggregated performance across all partners</div>
-        </div>
-
+        <div class="sec-head"><div class="sec-title">Analytics Overview</div><div class="sec-sub">Aggregated performance across all partners</div></div>
         <div class="analytics-grid">
-          <div class="chart-card">
-            <div class="cc-head"><div class="cc-title">Zone Sales — 2025 Full Year vs 2026 YTD</div></div>
-            <div class="chart-wrap" style="height:240px"><canvas id="a-zone-chart"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <div class="cc-head"><div class="cc-title">Tier Distribution</div></div>
-            <div class="chart-wrap" style="height:240px"><canvas id="a-tier-chart"></canvas></div>
-          </div>
+          <div class="chart-card"><div class="cc-head"><div class="cc-title">Zone Sales — 2025 Full Year vs 2026 YTD</div></div><div class="chart-wrap" style="height:240px"><canvas id="a-zone-chart"></canvas></div></div>
+          <div class="chart-card"><div class="cc-head"><div class="cc-title">Tier Distribution</div></div><div class="chart-wrap" style="height:240px"><canvas id="a-tier-chart"></canvas></div></div>
         </div>
-
-        <div class="chart-card" style="margin-bottom:12px">
-          <div class="cc-head">
-            <div class="cc-title">Leads Pipeline — 2026 YTD by Partner</div>
-            <div class="cc-sub">AIS Provided · Worked · CRM Added</div>
-          </div>
-          <div class="chart-wrap" style="height:260px"><canvas id="a-leads-chart"></canvas></div>
-        </div>
-
-        <div class="chart-card">
-          <div class="cc-head"><div class="cc-title">Top 10 Partners by CY Sales (2026 YTD)</div></div>
-          <div class="chart-wrap" style="height:280px"><canvas id="a-top-chart"></canvas></div>
-        </div>
+        <div class="chart-card"><div class="cc-head"><div class="cc-title">Leads Pipeline — 2026 YTD by Partner</div><div class="cc-sub">AIS Provided · Worked · CRM Added</div></div><div class="chart-wrap" style="height:260px"><canvas id="a-leads-chart"></canvas></div></div>
+        <div class="chart-card"><div class="cc-head"><div class="cc-title">Top 10 Partners by CY Sales (2026 YTD)</div></div><div class="chart-wrap" style="height:280px"><canvas id="a-top-chart"></canvas></div></div>
       </section>
 
-      <!-- ─── DATA SOURCES ──────────────────────────────────────────── -->
       <section id="page-data-sources" class="page">
-        <div class="sec-head" style="margin-bottom:16px">
-          <div class="sec-title">Data Sources</div>
-          <div class="sec-sub">Connect and manage data integrations</div>
-        </div>
+        <div class="sec-head"><div class="sec-title">Data Sources</div><div class="sec-sub">Connect and manage data integrations</div></div>
         <div class="ds-cards">
-
-          <!-- Demo -->
-          <div class="ds-card">
-            <div class="ds-icon">🧪</div>
-            <div class="ds-title">Demo Mode</div>
-            <div class="ds-desc">16 synthetic partners across all zones, 18 months of sales data. No credentials required.</div>
-            <span class="ds-status on">● Active</span>
-            <button class="btn outline" id="use-demo-btn">Load Demo Data</button>
-          </div>
-
-          <!-- Google Sheets -->
-          <div class="ds-card">
-            <div class="ds-icon">📋</div>
-            <div class="ds-title">Google Sheets</div>
-            <div class="ds-desc">Fetch from a published Google Sheet with Partner_Details and Sales_Data tabs.</div>
-            <span class="ds-status off" id="sheets-status">○ Not Connected</span>
-            <input class="ds-input" type="text" id="sheets-url" placeholder="Paste published Sheet URL…">
-            <button class="btn outline" id="connect-sheets-btn">Connect Sheet</button>
-          </div>
-
-          <!-- Firebase -->
-          <div class="ds-card">
-            <div class="ds-icon">🔥</div>
-            <div class="ds-title">Firebase / Firestore</div>
-            <div class="ds-desc">Real-time sync from Firestore collections. Add credentials in app.js to activate.</div>
-            <span class="ds-status off">○ Not Connected</span>
-            <div class="code-block">// app.js → APP_CONFIG.FIREBASE<br>// Collections: /partners<br>// /sales_data /users</div>
-            <button class="btn outline" id="connect-firebase-btn">Configure →</button>
-          </div>
-
-          <!-- Excel -->
-          <div class="ds-card">
-            <div class="ds-icon">📊</div>
-            <div class="ds-title">Excel Upload</div>
-            <div class="ds-desc">Upload a workbook with Partner_Details + Sales_Data sheets. Validates headers automatically.</div>
-            <span class="ds-status off" id="excel-ds-status">○ No File Uploaded</span>
-            <label class="btn primary" style="text-align:center;cursor:pointer;justify-content:center;">
-              📂 Upload Workbook
-              <input type="file" id="excel-upload-ds" accept=".xlsx,.xls" style="display:none">
-            </label>
-          </div>
-
+          <div class="ds-card"><div class="ds-icon">🧪</div><div class="ds-title">Demo Mode</div><div class="ds-desc">16 synthetic partners across all zones, 18 months of sales data. No credentials required.</div><span class="ds-status on">● Active</span><button class="btn outline" id="use-demo-btn">Load Demo Data</button></div>
+          <div class="ds-card"><div class="ds-icon">📋</div><div class="ds-title">Google Sheets</div><div class="ds-desc">Fetch from a published Google Sheet with Partner_Details and Sales_Data tabs.</div><span class="ds-status off" id="sheets-status">○ Not Connected</span><input class="ds-input" type="text" id="sheets-url" placeholder="Paste published Sheet URL…"><button class="btn outline" id="connect-sheets-btn">Connect Sheet</button></div>
+          <div class="ds-card"><div class="ds-icon">🔥</div><div class="ds-title">Firebase / Firestore</div><div class="ds-desc">Real-time sync from Firestore collections. Add credentials in app.js to activate.</div><span class="ds-status off">○ Not Connected</span><div class="code-block">// app.js → APP_CONFIG.FIREBASE<br>// Collections: /partners<br>// /sales_data /users</div><button class="btn outline" id="connect-firebase-btn">Configure →</button></div>
+          <div class="ds-card"><div class="ds-icon">📊</div><div class="ds-title">Excel Upload — Smart Ingestion</div><div class="ds-desc">Upload any workbook. Auto-detects sheets, maps headers, normalizes data. Supports Partner_Details, Sales, Billing, MIS, and more.</div><span class="ds-status off" id="excel-ds-status">○ No File Uploaded</span><label class="btn primary" style="text-align:center;cursor:pointer;display:flex;justify-content:center;">📂 Upload Workbook<input type="file" id="excel-upload-ds" accept=".xlsx,.xls" style="display:none"></label></div>
         </div>
+        <div id="import-status" class="hidden" style="margin-top:12px;background:var(--bg2);padding:12px 16px;border-radius:var(--radius);box-shadow:var(--shadow);"></div>
+        <div id="import-diagnostics" class="hidden" style="margin-top:16px;background:var(--bg2);padding:16px;border-radius:var(--radius);box-shadow:var(--shadow);"></div>
       </section>
 
-      <!-- ─── EXCEL TOOLS ────────────────────────────────────────────── -->
       <section id="page-excel-tools" class="page">
-        <div class="sec-head" style="margin-bottom:16px">
-          <div class="sec-title">Excel Tools</div>
-          <div class="sec-sub">Download templates · Upload data · View schema</div>
-        </div>
-
+        <div class="sec-head"><div class="sec-title">Excel Tools</div><div class="sec-sub">Download templates · Upload data · View schema</div></div>
         <div class="chart-card" style="margin-bottom:14px">
           <div class="cc-head"><div class="cc-title">Sample Workbook Download</div></div>
-          <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;line-height:1.6">
-            Pre-filled with 16 partners and 288 rows of sales data across 2025–2026.
-            Use as a template for real data — preserves exact schema required for upload.
-          </p>
+          <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;line-height:1.6">Pre-filled with 16 partners and 288 rows of sales data across 2025–2026. Use as a template or upload any similar structure.</p>
           <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
             <button class="btn primary" id="download-excel-btn">⬇ Download Sample Excel</button>
             <button class="btn outline" id="schema-toggle-btn">📐 View Schema</button>
           </div>
-          <div class="schema-info hidden" id="schema-info">
-            <strong>Sheet 1: Partner_Details</strong><br>
-            Serial Number | Partner Code | ASM | RM | Territory | Zone | City | State | Tier |<br>
-            Channel Partner Firm Name | Channel Partner Name | Verification Status | Verification Notes<br><br>
-            <strong>Sheet 2: Sales_Data</strong><br>
-            Serial Number | Partner Code | Year | Month | Sales | OBK | UEOB |<br>
-            AIS Leads Provided | Leads Worked | Leads Generated | Leads Added To CRM
+          <div class="schema-info hidden" id="schema-info" style="margin-top:10px;font-size:13px;color:var(--text-2);background:var(--bg);padding:12px;border-radius:var(--radius-sm);">
+            <strong>Canonical fields accepted:</strong> partner_name, partner_id, zone, state, city, tier, rm_name, sales, leads, ais_provided, worked, crm_added, year, month.
           </div>
         </div>
-
         <div class="chart-card">
           <div class="cc-head"><div class="cc-title">Upload Partner Workbook</div></div>
-          <div class="upload-area" id="upload-area">
-            <div class="upload-icon">📂</div>
-            <p>Click to browse or drag &amp; drop an Excel file</p>
-            <small>Accepts .xlsx files with Partner_Details and Sales_Data sheets</small>
-          </div>
+          <div class="upload-area" id="upload-area"><div class="upload-icon">📂</div><p>Click to browse or drag &amp; drop an Excel file</p><small>Accepts .xlsx — auto-detects structure</small></div>
           <input type="file" id="excel-upload-main" accept=".xlsx,.xls" style="display:none">
           <div id="upload-result" class="hidden"></div>
           <div id="excel-preview" class="hidden" style="margin-top:16px"></div>
@@ -342,79 +283,1507 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     PARTNER DETAIL MODAL
-══════════════════════════════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="partner-modal">
   <div class="modal-drawer">
-    <div class="modal-head">
-      <div class="modal-head-info">
-        <div class="modal-head-title" id="m-name">Partner Name</div>
-        <div class="modal-head-sub"   id="m-meta">Code · Zone · Territory</div>
-      </div>
-      <span class="source-badge demo" id="m-source">DEMO</span>
-      <button class="modal-close" id="modal-close">✕</button>
-    </div>
-
+    <div class="modal-head"><div class="modal-head-info"><div class="modal-head-title" id="m-name">Partner Name</div><div class="modal-head-sub" id="m-meta">Code · Zone · Territory</div></div><span class="source-badge demo" id="m-source">DEMO</span><button class="modal-close" id="modal-close">✕</button></div>
     <div class="modal-body">
-
-      <!-- Partner Info -->
-      <div class="msec">
-        <div class="msec-title">Partner Information</div>
-        <div class="info-rows" id="m-info"></div>
-      </div>
-
-      <!-- Sales Performance -->
-      <div class="msec">
-        <div class="msec-title">Sales Performance</div>
-        <div class="stat-grid" id="m-sales"></div>
-      </div>
-
-      <!-- OBK / UEOB -->
-      <div class="msec">
-        <div class="msec-title">OBK &amp; UEOB</div>
-        <div class="stat-grid c2" id="m-obk"></div>
-      </div>
-
-      <!-- Leads -->
-      <div class="msec">
-        <div class="msec-title">Leads &amp; CRM Pipeline — CY YTD</div>
-        <div class="stat-grid c4" id="m-leads"></div>
-      </div>
-
-      <!-- Sales Chart -->
-      <div class="msec">
-        <div class="msec-title">Monthly Sales — 2025 vs 2026</div>
-        <div class="chart-wrap-modal"><canvas id="m-trend-chart"></canvas></div>
-      </div>
-
-      <!-- Leads Chart -->
-      <div class="msec">
-        <div class="msec-title">Monthly Leads Pipeline — 2026 YTD</div>
-        <div class="chart-wrap-modal"><canvas id="m-leads-chart"></canvas></div>
-      </div>
-
-      <!-- Verification -->
-      <div class="msec">
-        <div class="msec-title">Verification Notes</div>
-        <div class="notes-box" id="m-notes">—</div>
-      </div>
-
+      <div class="msec"><div class="msec-title">Partner Information</div><div class="info-rows" id="m-info"></div></div>
+      <div class="msec"><div class="msec-title">Sales Performance</div><div class="stat-grid" id="m-sales"></div></div>
+      <div class="msec"><div class="msec-title">OBK &amp; UEOB</div><div class="stat-grid c2" id="m-obk"></div></div>
+      <div class="msec"><div class="msec-title">Leads &amp; CRM Pipeline — CY YTD</div><div class="stat-grid c4" id="m-leads"></div></div>
+      <div class="msec"><div class="msec-title">Monthly Sales — 2025 vs 2026</div><div class="chart-wrap-modal"><canvas id="m-trend-chart"></canvas></div></div>
+      <div class="msec"><div class="msec-title">Monthly Leads Pipeline — 2026 YTD</div><div class="chart-wrap-modal"><canvas id="m-leads-chart"></canvas></div></div>
+      <div class="msec"><div class="msec-title">Verification Notes</div><div class="notes-box" id="m-notes">—</div></div>
     </div>
   </div>
 </div>
 
-<!-- Sidebar backdrop (mobile) -->
-<div id="sidebar-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:250;"></div>
+<div class="modal-overlay hidden" id="mapping-modal">
+  <div class="modal-drawer" style="max-width:600px;">
+    <div class="modal-head"><div class="modal-head-info"><div class="modal-head-title">📋 Manual Column Mapping</div><div class="modal-head-sub" id="mapping-sheet-name">Sheet: </div></div><button class="modal-close" id="mapping-close">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:12px;">Some required fields could not be auto-mapped. Please assign workbook columns to canonical fields.</p>
+      <div id="mapping-fields" class="mapping-grid"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+        <button class="btn outline" id="mapping-cancel">Cancel</button>
+        <button class="btn primary" id="mapping-confirm">Confirm Import</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-<!-- Toast container -->
 <div id="toast-wrap"></div>
 
-<!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="sampleData.js"></script>
-<script src="app.js"></script>
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CHANNEL INTELLIGENCE — SMART EXCEL INGESTION + APP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+const $ = id => document.getElementById(id);
+const qs = (sel, ctx=document) => ctx.querySelector(sel);
+const qsa = (sel, ctx=document) => [...ctx.querySelectorAll(sel)];
+
+function toast(msg, type='info') {
+  const wrap = $('toast-wrap');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.borderLeftColor = type==='error'?'#dc2626':type==='success'?'#16a34a':'#2563eb';
+  t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(()=>t.remove(), 4000);
+}
+
+function formatCurrency(n) { if (n===undefined||n===null||isNaN(n)) return '—'; return '₹' + Math.round(n).toLocaleString('en-IN'); }
+
+function normalizeEntityName(s) {
+  if(!s) return '';
+  return String(s).trim().toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ');
+}
+
+let APP = {
+  partners: [],
+  salesData: [],
+  filteredPartners: [],
+  filteredSales: [],
+  charts: {},
+  currentPartner: null,
+  role: 'admin',
+  source: 'demo'
+};
+
+let _workbookRef = null;
+
+// ─── LOGIN ────────────────────────────────────────────────────
+const loginScreen = $('login-screen');
+const appShell = $('app-shell');
+const loginError = $('login-error');
+
+function doLogin(user, pass) {
+  loginError.classList.add('hidden');
+  if ((user==='admin' && pass==='admin123') || (user==='demo' && pass==='demo123')) {
+    APP.role = user==='admin' ? 'admin' : 'viewer';
+    loginScreen.style.display = 'none';
+    appShell.classList.remove('hidden');
+    initApp();
+    toast('Welcome, ' + user);
+    return true;
+  }
+  loginError.textContent = 'Invalid credentials. Try admin/admin123 or demo/demo123';
+  loginError.classList.remove('hidden');
+  return false;
+}
+$('login-btn').addEventListener('click', ()=>doLogin($('login-user').value, $('login-pass').value));
+$('demo-admin-btn').addEventListener('click', ()=>doLogin('admin','admin123'));
+$('demo-viewer-btn').addEventListener('click', ()=>doLogin('demo','demo123'));
+$('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin($('login-user').value, $('login-pass').value); });
+
+$('logout-btn').addEventListener('click', ()=>{ if(confirm('Logout?')){ location.reload(); } });
+
+let dark=false;
+$('theme-toggle').addEventListener('click', ()=>{
+  dark=!dark; document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+  $('theme-toggle').textContent = dark?'☀️':'🌙';
+});
+
+qsa('.nav-item').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    qsa('.nav-item').forEach(e=>e.classList.remove('active'));
+    el.classList.add('active');
+    const page = el.dataset.page;
+    qsa('.page').forEach(p=>p.classList.remove('active'));
+    const target = $('page-'+page);
+    if(target) target.classList.add('active');
+    $('page-title').textContent = el.querySelector('.nav-label').textContent;
+    if(window.innerWidth<768) { $('sidebar').classList.remove('open'); $('sidebar-backdrop').style.display='none'; }
+    if(page==='partners') renderAllPartners();
+    if(page==='analytics') renderAnalyticsCharts();
+    if(page==='data-sources') { renderDiagnostics(); renderImportStatus(); }
+  });
+});
+$('sidebar-toggle').addEventListener('click', ()=>{
+  const sb = $('sidebar');
+  sb.classList.toggle('open');
+  $('sidebar-backdrop').style.display = sb.classList.contains('open') ? 'block' : 'none';
+});
+$('sidebar-backdrop').addEventListener('click', ()=>{
+  $('sidebar').classList.remove('open');
+  $('sidebar-backdrop').style.display = 'none';
+});
+
+$('global-search').addEventListener('input', ()=>{
+  const q = $('global-search').value.toLowerCase().trim();
+  renderPartnerGrid(q);
+});
+
+$('modal-close').addEventListener('click', ()=>$('partner-modal').classList.add('hidden'));
+$('partner-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) $('partner-modal').classList.add('hidden'); });
+$('mapping-close').addEventListener('click', ()=>$('mapping-modal').classList.add('hidden'));
+$('mapping-cancel').addEventListener('click', ()=>$('mapping-modal').classList.add('hidden'));
+
+// ─── SAMPLE DATA ─────────────────────────────────────────────
+function generateSampleData() {
+  const zones = ['North','South','East','West','Central'];
+  const states = ['Maharashtra','Karnataka','Tamil Nadu','UP','Delhi','Gujarat','Rajasthan','West Bengal','Telangana','Punjab'];
+  const cities = ['Mumbai','Bengaluru','Chennai','Delhi','Ahmedabad','Hyderabad','Kolkata','Pune','Jaipur','Lucknow'];
+  const tiers = ['Platinum','Gold','Silver','Bronze'];
+  const names = ['Sharma Enterprises','Verma Agencies','Patel Distributors','Singh & Sons','Kumar Traders','Gupta Corp','Reddy Associates','Joshi Enterprises','Nair Agencies','Menon Distributors','Desai Trading','Bhatia Corp','Malhotra & Co','Kapoor Enterprises','Mehta Agencies','Sethi Distributors'];
+  const partners = [];
+  for(let i=0;i<16;i++){
+    const z = zones[i%zones.length];
+    const st = states[i%states.length];
+    const ct = cities[i%cities.length];
+    partners.push({
+      partner_id: 'P' + String(1001+i),
+      partner_name: names[i],
+      zone: z,
+      state: st,
+      city: ct,
+      tier: tiers[i%tiers.length],
+      rm_name: 'RM' + String(i+1),
+      asm: 'ASM' + String((i%4)+1),
+      territory: 'T' + String((i%3)+1),
+      verification_status: i%3===0 ? 'Verified' : i%3===1 ? 'Pending' : 'In Progress',
+      verification_notes: i%3===0 ? 'All docs verified' : 'Awaiting KYC' + (i%2===0?'':', address proof')
+    });
+  }
+  const sales = [];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  for(let p of partners){
+    for(let y=2025; y<=2026; y++){
+      for(let m=0; m<12; m++){
+        if(y===2026 && m>5) break;
+        const base = 50000 + Math.random()*200000;
+        const seasonal = 1 + 0.3*Math.sin(m/12*2*Math.PI);
+        const salesVal = Math.round(base * seasonal * (0.8 + 0.4*Math.random()));
+        const leads = Math.round(10 + Math.random()*40);
+        sales.push({
+          partner_id: p.partner_id,
+          partner_name: p.partner_name,
+          year: y,
+          month: months[m],
+          monthIdx: m,
+          sales: salesVal,
+          obk: Math.round(salesVal * 0.2 * Math.random()),
+          ueob: Math.round(salesVal * 0.1 * Math.random()),
+          ais_provided: Math.round(leads * (0.3 + 0.3*Math.random())),
+          worked: Math.round(leads * (0.2 + 0.3*Math.random())),
+          crm_added: Math.round(leads * (0.1 + 0.2*Math.random())),
+          zone: p.zone,
+          state: p.state,
+          city: p.city,
+          tier: p.tier,
+          rm_name: p.rm_name,
+          asm: p.asm,
+          territory: p.territory,
+          verification_status: p.verification_status,
+          verification_notes: p.verification_notes
+        });
+      }
+    }
+  }
+  APP.partners = partners;
+  APP.salesData = sales;
+  APP.source = 'demo';
+  $('source-badge').textContent = 'DEMO';
+  $('source-badge').className = 'source-badge demo';
+  applyFilters();
+  renderImportStatus(null);
+}
+
+// ─── SMART INGESTION ENGINE ──────────────────────────────────
+const HEADER_SYNONYMS = {
+  partner_name: ['partner name','dealer name','channel partner','cp name','partner','dealer','showroom name','firm name','company name','business name'],
+  partner_id: ['partner id','dealer code','cp code','code','id','showroom code','partner code','dealer id','sr no','serial no'],
+  zone: ['zone','region','territory zone','area','sales zone'],
+  state: ['state','province','region'],
+  city: ['city','town','district','location'],
+  tier: ['tier','category','class','segment','type'],
+  rm_name: ['rm','manager','owner','relationship manager','asm','territory manager','sales manager'],
+  sales: ['sales','billing','retail','offtake','invoice value','revenue','volume','turnover','gross sales'],
+  leads: ['leads','enquiries','inquiries','prospects'],
+  ais_provided: ['ais provided','ais','display provided','ais given'],
+  worked: ['worked','activated','productive','working','work done'],
+  crm_added: ['crm added','crm','added in crm','crm entry'],
+  month: ['month','month name','period','mnth','mon','date','period'],
+  year: ['year','fy year','calendar year','financial year','yr','date'],
+  obk: ['obk','opening balance','opening'],
+  ueob: ['ueob','closing balance','closing'],
+  territory: ['territory','area','region','zone'],
+  asm: ['asm','area sales manager','sales manager'],
+  verification_status: ['verification status','status','verified','kyc status'],
+  verification_notes: ['verification notes','notes','remark','comments']
+};
+
+function normalizeHeader(h) {
+  return String(h).trim().toLowerCase().replace(/[_\-\s]+/g,' ').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+}
+
+function scoreHeader(header, target) {
+  const nh = normalizeHeader(header);
+  if(nh === target) return 1.0;
+  const syns = HEADER_SYNONYMS[target] || [];
+  for(let s of syns) {
+    const ns = normalizeHeader(s);
+    if(nh === ns) return 0.95;
+    if(nh.includes(ns) || ns.includes(nh)) return 0.7;
+  }
+  const parts = nh.split(' ');
+  for(let p of parts) {
+    if(p.length<3) continue;
+    if(target.includes(p) || p.includes(target)) return 0.5;
+  }
+  return 0;
+}
+
+function classifySheet(sheetData, sheetName) {
+  const rows = sheetData;
+  if(!rows || rows.length<2) return { type:'unknown', score:0 };
+  const headers = Object.keys(rows[0]);
+  const sample = rows.slice(0, Math.min(10, rows.length));
+  let textCols=0, numCols=0;
+  for(let h of headers) {
+    const vals = sample.map(r=>String(r[h]||'')).filter(v=>v.trim().length>0);
+    if(vals.length===0) continue;
+    const numeric = vals.every(v=>!isNaN(parseNumber(v)));
+    if(numeric) numCols++; else textCols++;
+  }
+  let partnerScore=0, salesScore=0;
+  const pFields = ['partner_name','partner_id','zone','state','city','tier','rm_name'];
+  const sFields = ['sales','leads','ais_provided','worked','crm_added','year','month','obk','ueob'];
+  for(let h of headers) {
+    const nh = normalizeHeader(h);
+    for(let f of pFields) { if(scoreHeader(h,f)>0.6) partnerScore += 0.2; }
+    for(let f of sFields) { if(scoreHeader(h,f)>0.6) salesScore += 0.2; }
+  }
+  const sn = sheetName.toLowerCase();
+  if(sn.includes('partner')||sn.includes('dealer')||sn.includes('master')) partnerScore += 0.5;
+  if(sn.includes('sales')||sn.includes('billing')||sn.includes('transaction')||sn.includes('mis')||sn.includes('performance')) salesScore += 0.5;
+  if(textCols > numCols && rows.length < 50) partnerScore += 0.3;
+  if(numCols > textCols && rows.length > 10) salesScore += 0.3;
+  if(partnerScore >= salesScore && partnerScore > 0.5) return { type:'partner', score:partnerScore };
+  if(salesScore > partnerScore && salesScore > 0.5) return { type:'sales', score:salesScore };
+  return { type:'unknown', score:Math.max(partnerScore,salesScore) };
+}
+
+function mapColumns(headers, targetFields) {
+  const result = {};
+  for(let f of targetFields) {
+    let best = null, bestScore = 0.3, reason='no match';
+    for(let h of headers) {
+      const s = scoreHeader(h, f);
+      if(s > bestScore) { bestScore = s; best = h; reason = s>=0.85?'high':s>=0.6?'medium':'low'; }
+    }
+    if(best) result[f] = { column: best, confidence: bestScore, reason };
+  }
+  return result;
+}
+
+function parseNumber(v) {
+  if(v===null||v===undefined||v==='') return NaN;
+  if(typeof v==='number') return v;
+  const s = String(v).replace(/[₹$,]/g,'').trim();
+  const n = parseFloat(s);
+  return isNaN(n) ? NaN : n;
+}
+
+function parseDateFlexible(v) {
+  if(v===null||v===undefined) return null;
+  if(typeof v==='number' && v>1000 && v<50000) {
+    const d = new Date((v - 25569) * 86400 * 1000);
+    if(!isNaN(d)) return { year: d.getFullYear(), month: d.getMonth() };
+  }
+  const s = String(v).trim();
+  const patterns = [
+    /(\d{4})\s*[-/]\s*(\d{1,2})/,
+    /(\d{1,2})\s*[-/]\s*(\d{4})/,
+    /([A-Za-z]{3,})\s*[-/]?\s*(\d{2,4})/,
+    /(\d{1,2})\s*[-/]\s*([A-Za-z]{3,})/,
+  ];
+  for(let p of patterns) {
+    const m = s.match(p);
+    if(m) {
+      let y, mo;
+      if(m[1].length===4 && !isNaN(m[1])) { y=parseInt(m[1]); mo=parseInt(m[2])-1; }
+      else if(m[2].length===4 && !isNaN(m[2])) { y=parseInt(m[2]); mo=parseInt(m[1])-1; }
+      else {
+        const monthMap = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+        const mstr = m[1].toLowerCase().slice(0,3);
+        if(mstr in monthMap) { mo = monthMap[mstr]; y = parseInt(m[2]); if(y<100) y += 2000; }
+        else { const mstr2 = m[2].toLowerCase().slice(0,3); if(mstr2 in monthMap) { mo = monthMap[mstr2]; y = parseInt(m[1]); if(y<100) y += 2000; } }
+      }
+      if(!isNaN(y) && !isNaN(mo) && mo>=0 && mo<12) return { year: y, month: mo };
+    }
+  }
+  const d = new Date(s);
+  if(!isNaN(d) && d.getFullYear()>1900) return { year: d.getFullYear(), month: d.getMonth() };
+  return null;
+}
+
+function parseMonth(v) {
+  if(v===null||v===undefined) return null;
+  const s = String(v).trim();
+  const map = {'jan':0,'feb':1,'mar':2,'apr':3,'may':4,'jun':5,'jul':6,'aug':7,'sep':8,'oct':9,'nov':10,'dec':11};
+  const low = s.toLowerCase();
+  if(low in map) return map[low];
+  const num = parseInt(s);
+  if(!isNaN(num) && num>=1 && num<=12) return num-1;
+  return null;
+}
+
+function parseYear(v) {
+  if(v===null||v===undefined) return null;
+  const s = String(v).trim();
+  const n = parseInt(s);
+  if(!isNaN(n) && n>1900 && n<2100) return n;
+  return null;
+}
+
+function normalizePartnerRows(sheetData, mapping, diagnostics) {
+  const rows = [];
+  const dupes = new Map();
+  let skipped = 0;
+  for(let row of sheetData) {
+    let pname = String(row[mapping.partner_name?.column]||'').trim();
+    if(!pname) { skipped++; continue; }
+    const pid = String(row[mapping.partner_id?.column]||pname).trim();
+    const key = normalizeEntityName(pid || pname);
+    if(dupes.has(key)) {
+      const existing = dupes.get(key);
+      const filled = (r) => Object.values(r).filter(v=>v && v!=='').length;
+      if(filled(row) > filled(existing)) {
+        const idx = rows.findIndex(p=>normalizeEntityName(p.partner_id||p.partner_name)===key);
+        if(idx>-1) {
+          const normalized = {
+            partner_id: pid || existing.partner_id,
+            partner_name: pname || existing.partner_name,
+            zone: String(row[mapping.zone?.column]||existing.zone||'').trim() || 'Unknown',
+            state: String(row[mapping.state?.column]||existing.state||'').trim() || 'Unknown',
+            city: String(row[mapping.city?.column]||existing.city||'').trim() || 'Unknown',
+            tier: String(row[mapping.tier?.column]||existing.tier||'').trim() || 'Standard',
+            rm_name: String(row[mapping.rm_name?.column]||existing.rm_name||'').trim() || 'Unknown',
+            asm: String(row[mapping.asm?.column]||existing.asm||row[mapping.rm_name?.column]||'').trim() || 'Unknown',
+            territory: String(row[mapping.territory?.column]||existing.territory||'').trim() || 'T1',
+            verification_status: String(row[mapping.verification_status?.column]||existing.verification_status||'').trim() || 'Pending',
+            verification_notes: String(row[mapping.verification_notes?.column]||existing.verification_notes||'').trim() || ''
+          };
+          rows[idx] = normalized;
+          dupes.set(key, normalized);
+          diagnostics.duplicatePartnersMerged = (diagnostics.duplicatePartnersMerged||0)+1;
+        }
+      }
+      continue;
+    }
+    const p = {
+      partner_id: pid,
+      partner_name: pname,
+      zone: String(row[mapping.zone?.column]||'').trim() || 'Unknown',
+      state: String(row[mapping.state?.column]||'').trim() || 'Unknown',
+      city: String(row[mapping.city?.column]||'').trim() || 'Unknown',
+      tier: String(row[mapping.tier?.column]||'').trim() || 'Standard',
+      rm_name: String(row[mapping.rm_name?.column]||'').trim() || 'Unknown',
+      asm: String(row[mapping.asm?.column]||row[mapping.rm_name?.column]||'').trim() || 'Unknown',
+      territory: String(row[mapping.territory?.column]||'').trim() || 'T1',
+      verification_status: String(row[mapping.verification_status?.column]||'').trim() || 'Pending',
+      verification_notes: String(row[mapping.verification_notes?.column]||'').trim() || ''
+    };
+    rows.push(p);
+    dupes.set(key, p);
+  }
+  diagnostics.skippedRows = (diagnostics.skippedRows||0) + skipped;
+  return rows;
+}
+
+function normalizeSalesRows(sheetData, mapping, diagnostics, partnerMap) {
+  const rows = [];
+  let skipped = 0;
+  const merged = new Map();
+  for(let row of sheetData) {
+    let pname = String(row[mapping.partner_name?.column]||'').trim();
+    if(!pname) { skipped++; continue; }
+    const pid = String(row[mapping.partner_id?.column]||pname).trim();
+    let partner = null;
+    if(partnerMap) {
+      partner = partnerMap.get(pid) || partnerMap.get(normalizeEntityName(pname));
+    }
+    let year=null, month=null;
+    if(mapping.date?.column) {
+      const dateVal = row[mapping.date.column];
+      const parsed = parseDateFlexible(dateVal);
+      if(parsed) { year = parsed.year; month = parsed.month; }
+    }
+    if(year===null) year = parseYear(row[mapping.year?.column]);
+    if(month===null) month = parseMonth(row[mapping.month?.column]);
+    if(year===null || month===null) { skipped++; continue; }
+    const sales = parseNumber(row[mapping.sales?.column]);
+    const leads = parseNumber(row[mapping.leads?.column]) || 0;
+    const ais = parseNumber(row[mapping.ais_provided?.column]) || 0;
+    const worked = parseNumber(row[mapping.worked?.column]) || 0;
+    const crm = parseNumber(row[mapping.crm_added?.column]) || 0;
+    const obk = parseNumber(row[mapping.obk?.column]) || 0;
+    const ueob = parseNumber(row[mapping.ueob?.column]) || 0;
+    const hasMetric = !isNaN(sales) || leads>0 || ais>0 || worked>0 || crm>0 || obk>0 || ueob>0;
+    if(!hasMetric) { skipped++; continue; }
+    const key = pid + '|' + year + '|' + month;
+    const entry = {
+      partner_id: pid,
+      partner_name: pname,
+      year: year,
+      month: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month],
+      monthIdx: month,
+      sales: isNaN(sales)?0:sales,
+      obk: obk,
+      ueob: ueob,
+      ais_provided: ais,
+      worked: worked,
+      crm_added: crm,
+      zone: partner?.zone || 'Unknown',
+      state: partner?.state || 'Unknown',
+      city: partner?.city || 'Unknown',
+      tier: partner?.tier || 'Standard',
+      rm_name: partner?.rm_name || 'Unknown',
+      asm: partner?.asm || 'Unknown',
+      territory: partner?.territory || 'T1',
+      verification_status: partner?.verification_status || 'Pending',
+      verification_notes: partner?.verification_notes || ''
+    };
+    if(merged.has(key)) {
+      const existing = merged.get(key);
+      existing.sales += entry.sales;
+      existing.obk += entry.obk;
+      existing.ueob += entry.ueob;
+      existing.ais_provided += entry.ais_provided;
+      existing.worked += entry.worked;
+      existing.crm_added += entry.crm_added;
+      diagnostics.duplicateSalesMerged = (diagnostics.duplicateSalesMerged||0)+1;
+    } else {
+      merged.set(key, entry);
+    }
+  }
+  diagnostics.skippedRows = (diagnostics.skippedRows||0) + skipped;
+  return Array.from(merged.values());
+}
+
+function buildFreshDiagnostics(base, overrides) {
+  return {
+    sheets: base.sheets || [],
+    warnings: [],
+    errors: [],
+    mapped: base.mapped || {},
+    skippedRows: 0,
+    duplicatePartnersMerged: 0,
+    duplicateSalesMerged: 0,
+    fileName: base.fileName || 'unknown',
+    timestamp: base.timestamp || new Date().toISOString(),
+    exactTemplate: base.exactTemplate || false,
+    partnerSheetConfidence: base.partnerSheetConfidence || 0,
+    salesSheetConfidence: base.salesSheetConfidence || 0,
+    mappingTable: [],
+    missingOptional: [],
+    inferredFields: [],
+    status: base.status || [],
+    mappingNeeded: null,
+    partnerOnlyMode: base.partnerOnlyMode || false,
+    ...overrides
+  };
+}
+
+function smartImport(workbook, fileName) {
+  const diagnostics = {
+    sheets: [], warnings: [], errors: [],
+    mapped: {},
+    skippedRows: 0,
+    duplicatePartnersMerged: 0,
+    duplicateSalesMerged: 0,
+    fileName: fileName||'unknown',
+    timestamp: new Date().toISOString(),
+    exactTemplate: false,
+    partnerSheetConfidence:0,
+    salesSheetConfidence:0,
+    mappingTable: [],
+    missingOptional: [],
+    inferredFields: [],
+    status: [],
+    mappingNeeded: null,
+    partnerOnlyMode: false
+  };
+  const sheetNames = workbook.SheetNames;
+  const sheetsData = {};
+  for(let name of sheetNames) {
+    const ws = workbook.Sheets[name];
+    const data = XLSX.utils.sheet_to_json(ws, {defval:''});
+    if(data.length) sheetsData[name] = data;
+    diagnostics.sheets.push({name, rows: data.length});
+  }
+  diagnostics.status.push('workbook loaded');
+
+  const hasPartner = sheetNames.some(n=>n==='Partner_Details');
+  const hasSales = sheetNames.some(n=>n==='Sales_Data');
+  if(hasPartner && hasSales) {
+    diagnostics.exactTemplate = true;
+    diagnostics.status.push('exact template detected');
+  }
+
+  const classified = {};
+  for(let [name,data] of Object.entries(sheetsData)) {
+    const result = classifySheet(data, name);
+    classified[name] = result;
+  }
+  diagnostics.status.push('sheets scanned');
+
+  let partnerSheet = null, salesSheet = null;
+  let bestPartnerScore = 0, bestSalesScore = 0;
+  for(let [name,info] of Object.entries(classified)) {
+    if(info.type==='partner' && info.score > bestPartnerScore) { bestPartnerScore = info.score; partnerSheet = name; }
+    if(info.type==='sales' && info.score > bestSalesScore) { bestSalesScore = info.score; salesSheet = name; }
+  }
+  if(!partnerSheet && Object.keys(sheetsData).length>0) {
+    const first = Object.keys(sheetsData)[0];
+    if(Object.keys(sheetsData).length===1) { partnerSheet = first; }
+    else { partnerSheet = Object.keys(sheetsData)[0]; salesSheet = Object.keys(sheetsData)[1] || null; }
+  }
+  if(!salesSheet && Object.keys(sheetsData).length>1) {
+    for(let name of Object.keys(sheetsData)) {
+      if(name!==partnerSheet) { salesSheet = name; break; }
+    }
+  }
+  diagnostics.partnerSheetConfidence = partnerSheet ? classified[partnerSheet]?.score || 0 : 0;
+  diagnostics.salesSheetConfidence = salesSheet ? classified[salesSheet]?.score || 0 : 0;
+  diagnostics.mapped.partnerSheet = partnerSheet;
+  diagnostics.mapped.salesSheet = salesSheet;
+  diagnostics.status.push('sheets classified');
+
+  let partners = [], sales = [];
+  let partnerMap = new Map();
+
+  if(partnerSheet) {
+    const data = sheetsData[partnerSheet];
+    const headers = Object.keys(data[0]||{});
+    const mapping = mapColumns(headers, ['partner_name','partner_id','zone','state','city','tier','rm_name','asm','territory','verification_status','verification_notes']);
+    diagnostics.mapped.partnerMapping = mapping;
+    const lowConf = Object.entries(mapping).filter(([k,v])=>v.confidence<0.6);
+    if(lowConf.some(([k])=>['partner_name','partner_id'].includes(k))) {
+      diagnostics.status.push('manual mapping required (partner)');
+      diagnostics.mappingNeeded = 'partner';
+    }
+    partners = normalizePartnerRows(data, mapping, diagnostics);
+    for(let p of partners) {
+      const key = p.partner_id || normalizeEntityName(p.partner_name);
+      partnerMap.set(key, p);
+      partnerMap.set(normalizeEntityName(p.partner_name), p);
+    }
+    diagnostics.mappingTable.push({sheet:'partner', mapping: Object.entries(mapping).map(([k,v])=>({field:k, column:v.column||'not found', confidence:v.confidence||0, reason:v.reason||'none'}))});
+    if(!partners.length) diagnostics.errors.push('Partner sheet contains no valid partner records.');
+  } else {
+    diagnostics.errors.push('No partner sheet detected. Partner data is required.');
+  }
+
+  if(salesSheet) {
+    const data = sheetsData[salesSheet];
+    const headers = Object.keys(data[0]||{});
+    const mapping = mapColumns(headers, ['partner_name','partner_id','year','month','date','sales','obk','ueob','ais_provided','worked','crm_added']);
+    diagnostics.mapped.salesMapping = mapping;
+    const lowConf = Object.entries(mapping).filter(([k,v])=>v.confidence<0.6);
+    if(lowConf.some(([k])=>['partner_name','sales','year','month','date'].includes(k))) {
+      diagnostics.status.push('manual mapping required (sales)');
+      diagnostics.mappingNeeded = 'sales';
+    }
+    sales = normalizeSalesRows(data, mapping, diagnostics, partnerMap);
+    diagnostics.mappingTable.push({sheet:'sales', mapping: Object.entries(mapping).map(([k,v])=>({field:k, column:v.column||'not found', confidence:v.confidence||0, reason:v.reason||'none'}))});
+  } else {
+    diagnostics.partnerOnlyMode = true;
+    diagnostics.status.push('partner-only import mode');
+    diagnostics.warnings.push('No sales sheet detected. Dashboard will show partner registry only.');
+  }
+
+  // Optional field reporting
+  const optionalFields = ['zone','state','city','tier','rm_name','asm','territory','verification_status'];
+  if(partnerSheet) {
+    const mapping = diagnostics.mapped.partnerMapping || {};
+    for(let f of optionalFields) {
+      if(!mapping[f]?.column) diagnostics.missingOptional.push(f);
+    }
+  }
+  // Inferred fields
+  if(salesSheet) {
+    const mapping = diagnostics.mapped.salesMapping || {};
+    if(mapping.date?.column && (!mapping.year?.column || !mapping.month?.column)) {
+      diagnostics.inferredFields.push('year, month from date field');
+    }
+    if(!mapping.sales?.column && mapping.leads?.column) {
+      diagnostics.inferredFields.push('leads used as primary metric');
+    }
+  }
+
+  // Validation
+  const hasPartnerName = partners.some(p=>p.partner_name && p.partner_name!=='');
+  if(!hasPartnerName) {
+    diagnostics.errors.push('No valid partner_name found. Partner name is required.');
+  }
+  if(salesSheet && sales.length===0) {
+    diagnostics.errors.push('Sales sheet exists but no valid sales rows could be parsed. Check time dimension and metrics.');
+  }
+  if(salesSheet && sales.length>0) {
+    const hasMetric = sales.some(s=>s.sales>0 || s.ais_provided>0 || s.worked>0 || s.crm_added>0 || s.obk>0 || s.ueob>0);
+    if(!hasMetric) diagnostics.errors.push('Sales records missing numeric metrics (sales/leads/etc).');
+  }
+
+  diagnostics.partnersImported = partners.length;
+  diagnostics.salesRowsImported = sales.length;
+  diagnostics.status.push('data normalized');
+
+  // Auto mapping success - add columns mapped status
+  if(!diagnostics.mappingNeeded) {
+    diagnostics.status.push('columns mapped');
+  }
+
+  return { partners, sales, diagnostics };
+}
+
+// ─── MAPPING MODAL ──────────────────────────────────────────
+function showMappingModal(diagnostics, workbook, callback) {
+  const modal = $('mapping-modal');
+  const container = $('mapping-fields');
+  container.innerHTML = '';
+  const sheetName = diagnostics.mappingNeeded === 'partner' ? diagnostics.mapped.partnerSheet : diagnostics.mapped.salesSheet;
+  const mapping = diagnostics.mappingNeeded === 'partner' ? diagnostics.mapped.partnerMapping : diagnostics.mapped.salesMapping;
+  
+  let headers = [];
+  if(sheetName && workbook && workbook.Sheets[sheetName]) {
+    const ws = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(ws, {defval:''});
+    if(data.length) headers = Object.keys(data[0]);
+  }
+  if(!headers.length) {
+    for(let m of Object.values(mapping)) {
+      if(m?.column && !headers.includes(m.column)) headers.push(m.column);
+    }
+  }
+  const fields = Object.keys(mapping);
+  for(let f of fields) {
+    const div = document.createElement('div');
+    div.style.display = 'contents';
+    const label = document.createElement('label');
+    label.textContent = f;
+    label.className = 'field-label';
+    const sel = document.createElement('select');
+    sel.id = 'map-'+f;
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '— auto —';
+    sel.appendChild(opt);
+    for(let h of headers) {
+      const o = document.createElement('option');
+      o.value = h;
+      o.textContent = h;
+      if(mapping[f]?.column === h) o.selected = true;
+      sel.appendChild(o);
+    }
+    div.appendChild(label);
+    div.appendChild(sel);
+    container.appendChild(div);
+  }
+  $('mapping-sheet-name').textContent = 'Sheet: ' + (sheetName||'unknown');
+  modal.classList.remove('hidden');
+
+  $('mapping-confirm').onclick = function() {
+    const updates = {};
+    for(let f of fields) {
+      const sel = document.getElementById('map-'+f);
+      if(sel && sel.value) updates[f] = sel.value;
+    }
+    modal.classList.add('hidden');
+    callback(updates);
+  };
+}
+
+// ─── RENDER IMPORT STATUS ──────────────────────────────────
+function renderImportStatus(diagnostics) {
+  const container = $('import-status');
+  const diag = diagnostics || window._lastDiagnostics;
+  if(!diag || !diag.status || !diag.status.length) {
+    container.classList.add('hidden');
+    return;
+  }
+  container.classList.remove('hidden');
+  
+  const stepOrder = [
+    'workbook loaded',
+    'exact template detected',
+    'sheets scanned',
+    'sheets classified',
+    'columns mapped',
+    'manual mapping required',
+    'manual mapping applied',
+    'data normalized',
+    'dashboard rendered'
+  ];
+  
+  const statusSet = new Set(diag.status.map(s => s.toLowerCase()));
+  const reachedIndices = stepOrder.map((s, i) => statusSet.has(s.toLowerCase()) ? i : -1);
+  const latestReached = Math.max(...reachedIndices);
+  const allDone = diag.status.some(s => s.toLowerCase().includes('dashboard rendered'));
+  const hasError = diag.errors && diag.errors.length > 0;
+  const isPartnerOnly = diag.partnerOnlyMode || false;
+  const manualApplied = diag.status.some(s => s.toLowerCase().includes('manual mapping applied'));
+  const manualRequired = diag.mappingNeeded ? true : false;
+
+  let html = '<div style="font-size:13px;font-weight:500;margin-bottom:6px;">📌 Import Status</div><div class="status-chips">';
+  
+  for(let i = 0; i < stepOrder.length; i++) {
+    const s = stepOrder[i];
+    const isReached = statusSet.has(s.toLowerCase());
+    let isActive = false;
+    let cls = '';
+    
+    // Deterministic active logic
+    if (s === 'manual mapping required' && manualRequired && !manualApplied) {
+      isActive = true;
+      cls = 'active';
+    } else if (s === 'manual mapping required' && !manualRequired) {
+      cls = 'done';
+    } else if (s === 'columns mapped' && !manualRequired && statusSet.has('data normalized')) {
+      cls = 'done';
+    } else if (isReached && (i < latestReached || allDone)) {
+      cls = 'done';
+    } else if (i === latestReached && !allDone && !hasError && !manualRequired) {
+      isActive = true;
+      cls = 'active';
+    }
+    
+    // Error chip for dashboard rendered if not all done
+    if (hasError && s === 'dashboard rendered' && !allDone) {
+      cls = 'error';
+    }
+    if (isPartnerOnly && s === 'dashboard rendered' && allDone) {
+      cls = 'partner-only';
+    }
+    if (s === 'dashboard rendered' && allDone && !hasError) {
+      cls = 'done';
+    }
+    
+    html += `<span class="status-chip ${cls}">${s}</span>`;
+  }
+  html += '</div>';
+  
+  if (manualRequired && !manualApplied) {
+    html += `<div style="font-size:12px;color:#d97706;margin-top:4px;">⚠️ Manual mapping required for ${diag.mappingNeeded} sheet</div>`;
+  }
+  if (isPartnerOnly) {
+    html += `<div style="font-size:12px;color:#065f46;margin-top:4px;">📋 Partner-only import mode — no sales data</div>`;
+  }
+  if (hasError) {
+    html += `<div style="font-size:12px;color:#991b1b;margin-top:4px;">❌ Import errors — see diagnostics</div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ─── RENDER DIAGNOSTICS ──────────────────────────────────────
+function renderDiagnostics(diag) {
+  const container = $('import-diagnostics');
+  const di = diag || window._lastDiagnostics;
+  if(!di) { container.classList.add('hidden'); return; }
+  container.classList.remove('hidden');
+  let html = '<div style="font-weight:600;margin-bottom:8px;">📋 Import Diagnostics</div>';
+  html += `<div style="font-size:12px;color:var(--text-2);">File: ${di.fileName} | ${new Date(di.timestamp).toLocaleString()}</div>`;
+  html += `<div style="font-size:13px;color:var(--text-2);">Sheets: ${di.sheets.map(s=>s.name+' ('+s.rows+' rows)').join(', ')}</div>`;
+  html += `<div style="font-size:13px;color:var(--text-2);">Partner Sheet: ${di.mapped.partnerSheet||'none'} (conf: ${(di.partnerSheetConfidence*100).toFixed(0)}%) | Sales Sheet: ${di.mapped.salesSheet||'none'} (conf: ${(di.salesSheetConfidence*100).toFixed(0)}%)</div>`;
+  if(di.exactTemplate) html += '<div style="font-size:13px;color:#16a34a;">✅ Exact template mode (Partner_Details + Sales_Data)</div>';
+  if(di.partnerOnlyMode) html += '<div style="font-size:13px;color:#065f46;">📋 Partner-only import mode — no sales data</div>';
+  if(di.mappingNeeded) html += `<div style="font-size:13px;color:#d97706;">⚠️ Manual mapping required for ${di.mappingNeeded} sheet</div>`;
+  if(di.mappingTable && di.mappingTable.length) {
+    html += '<div style="font-size:13px;font-weight:500;margin-top:6px;">Field Mapping:</div>';
+    for(let t of di.mappingTable) {
+      html += `<div style="font-size:12px;color:var(--text-2);">${t.sheet}: `;
+      html += t.mapping.map(m=>`${m.field} → ${m.column||'❌'} (${(m.confidence*100).toFixed(0)}% ${m.reason})`).join(' | ');
+      html += '</div>';
+    }
+  }
+  if(di.missingOptional && di.missingOptional.length) {
+    html += `<div style="font-size:13px;color:var(--text-2);">Missing optional: ${di.missingOptional.join(', ')}</div>`;
+  }
+  if(di.inferredFields && di.inferredFields.length) {
+    html += `<div style="font-size:13px;color:var(--text-2);">Inferred: ${di.inferredFields.join(', ')}</div>`;
+  }
+  if(di.warnings.length) html += '<div style="font-size:13px;color:#d97706;">⚠️ Warnings: '+di.warnings.join('; ')+'</div>';
+  if(di.errors.length) html += '<div style="font-size:13px;color:#dc2626;">❌ Errors: '+di.errors.join('; ')+'</div>';
+  html += `<div style="font-size:13px;color:var(--text-2);">Partners: ${di.partnersImported||0} | Sales rows: ${di.salesRowsImported||0} | Skipped: ${di.skippedRows||0}</div>`;
+  if(di.duplicatePartnersMerged) html += `<div style="font-size:13px;color:var(--text-2);">Duplicate partners merged: ${di.duplicatePartnersMerged}</div>`;
+  if(di.duplicateSalesMerged) html += `<div style="font-size:13px;color:var(--text-2);">Duplicate sales rows merged: ${di.duplicateSalesMerged}</div>`;
+  container.innerHTML = html;
+}
+
+// ─── APPLY DATA ──────────────────────────────────────────────
+function applyImportedDataset(partners, sales, diagnostics) {
+  APP.partners = partners;
+  APP.salesData = sales;
+  APP.source = 'upload';
+  $('source-badge').textContent = 'UPLOAD';
+  $('source-badge').className = 'source-badge demo';
+  window._lastDiagnostics = diagnostics;
+  diagnostics.status.push('dashboard rendered');
+  renderImportStatus(diagnostics);
+  renderDiagnostics(diagnostics);
+  applyFilters();
+  renderAllPartners();
+  renderAnalyticsCharts();
+  const msg = diagnostics.partnerOnlyMode ? 
+    `Partner-only import: ${partners.length} partners loaded` :
+    `Data imported: ${partners.length} partners, ${sales.length} sales rows`;
+  toast(msg, 'success');
+}
+
+// ─── EXCEL UPLOAD HANDLER ──────────────────────────────────
+function handleExcelUpload(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type:'array'});
+      _workbookRef = workbook;
+      let result = smartImport(workbook, file.name);
+      
+      if(result.diagnostics.errors.length && result.partners.length===0) {
+        toast('Import failed: '+result.diagnostics.errors.join('; '), 'error');
+        renderDiagnostics(result.diagnostics);
+        renderImportStatus(result.diagnostics);
+        return;
+      }
+
+      if(result.diagnostics.mappingNeeded) {
+        window._workbook = workbook;
+        showMappingModal(result.diagnostics, workbook, (updates) => {
+          const freshDiag = buildFreshDiagnostics(result.diagnostics, {
+            status: result.diagnostics.status.filter(s=>!s.includes('manual mapping required')),
+            mappingNeeded: null,
+            warnings: [],
+            errors: [],
+            skippedRows: 0,
+            duplicatePartnersMerged: 0,
+            duplicateSalesMerged: 0,
+            mappingTable: [],
+            missingOptional: [],
+            inferredFields: [],
+            partnerOnlyMode: result.diagnostics.partnerOnlyMode || false,
+            partnerSheetConfidence: result.diagnostics.partnerSheetConfidence || 0,
+            salesSheetConfidence: result.diagnostics.salesSheetConfidence || 0
+          });
+          
+          const sheetName = result.diagnostics.mappingNeeded === 'partner' ? 
+            result.diagnostics.mapped.partnerSheet : result.diagnostics.mapped.salesSheet;
+          if(sheetName && workbook.Sheets[sheetName]) {
+            const ws = workbook.Sheets[sheetName];
+            const data = XLSX.utils.sheet_to_json(ws, {defval:''});
+            const headers = Object.keys(data[0]||{});
+            const mapping = result.diagnostics.mappingNeeded === 'partner' ? 
+              result.diagnostics.mapped.partnerMapping : result.diagnostics.mapped.salesMapping;
+            for(let [k,v] of Object.entries(updates)) {
+              if(mapping[k]) {
+                mapping[k].column = v;
+                mapping[k].confidence = 0.9;
+                mapping[k].reason = 'manual';
+              }
+            }
+            let partners=[], sales=[];
+            if(result.diagnostics.mapped.partnerSheet) {
+              const pData = XLSX.utils.sheet_to_json(workbook.Sheets[result.diagnostics.mapped.partnerSheet], {defval:''});
+              partners = normalizePartnerRows(pData, result.diagnostics.mapped.partnerMapping, freshDiag);
+            }
+            if(result.diagnostics.mapped.salesSheet) {
+              const sData = XLSX.utils.sheet_to_json(workbook.Sheets[result.diagnostics.mapped.salesSheet], {defval:''});
+              const pMap = new Map();
+              for(let p of partners) {
+                pMap.set(p.partner_id || normalizeEntityName(p.partner_name), p);
+                pMap.set(normalizeEntityName(p.partner_name), p);
+              }
+              sales = normalizeSalesRows(sData, result.diagnostics.mapped.salesMapping, freshDiag, pMap);
+            }
+            // Rebuild mapping tables for both sheets
+            freshDiag.mappingTable = [];
+            if(result.diagnostics.mapped.partnerMapping) {
+              freshDiag.mappingTable.push({
+                sheet: 'partner',
+                mapping: Object.entries(result.diagnostics.mapped.partnerMapping).map(([k,v])=>({field:k, column:v.column||'not found', confidence:v.confidence||0, reason:v.reason||'none'}))
+              });
+            }
+            if(result.diagnostics.mapped.salesMapping) {
+              freshDiag.mappingTable.push({
+                sheet: 'sales',
+                mapping: Object.entries(result.diagnostics.mapped.salesMapping).map(([k,v])=>({field:k, column:v.column||'not found', confidence:v.confidence||0, reason:v.reason||'none'}))
+              });
+            }
+            // Recompute optional/inferred
+            const optionalFields = ['zone','state','city','tier','rm_name','asm','territory','verification_status'];
+            if(result.diagnostics.mapped.partnerSheet) {
+              const pm = result.diagnostics.mapped.partnerMapping || {};
+              for(let f of optionalFields) {
+                if(!pm[f]?.column && !freshDiag.missingOptional.includes(f)) freshDiag.missingOptional.push(f);
+              }
+            }
+            if(result.diagnostics.mapped.salesSheet) {
+              const sm = result.diagnostics.mapped.salesMapping || {};
+              if(sm.date?.column && (!sm.year?.column || !sm.month?.column)) {
+                freshDiag.inferredFields.push('year, month from date field');
+              }
+              if(!sm.sales?.column && sm.leads?.column) {
+                freshDiag.inferredFields.push('leads used as primary metric');
+              }
+            }
+            // Validate
+            const hasPartnerName = partners.some(p=>p.partner_name && p.partner_name!=='');
+            if(!hasPartnerName) {
+              freshDiag.errors.push('Partner name still missing after manual mapping.');
+            }
+            if(result.diagnostics.mapped.salesSheet && sales.length===0) {
+              freshDiag.errors.push('Sales sheet exists but no valid sales rows after mapping.');
+            }
+            if(result.diagnostics.mapped.salesSheet && sales.length>0) {
+              const hasMetric = sales.some(s=>s.sales>0 || s.ais_provided>0 || s.worked>0 || s.crm_added>0 || s.obk>0 || s.ueob>0);
+              if(!hasMetric) freshDiag.errors.push('No numeric metrics in sales data after mapping.');
+            }
+            freshDiag.partnersImported = partners.length;
+            freshDiag.salesRowsImported = sales.length;
+            freshDiag.status.push('columns mapped');
+            freshDiag.status.push('manual mapping applied');
+            freshDiag.status.push('data normalized');
+            if(freshDiag.errors.length) {
+              toast('Import failed: '+freshDiag.errors.join('; '), 'error');
+              renderDiagnostics(freshDiag);
+              renderImportStatus(freshDiag);
+              return;
+            }
+            applyImportedDataset(partners, sales, freshDiag);
+          } else {
+            toast('Mapping failed: sheet not found.', 'error');
+          }
+        });
+        return;
+      }
+
+      applyImportedDataset(result.partners, result.sales, result.diagnostics);
+    } catch(err) {
+      toast('Error parsing file: '+err.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─── FILTERS ──────────────────────────────────────────────────
+function populateFilter(sel, values, allLabel='All') {
+  const s = $(sel);
+  const current = s.value;
+  s.innerHTML = '<option value="">'+allLabel+'</option>';
+  const unique = [...new Set(values)].filter(v=>v).sort();
+  for(let v of unique) {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    s.appendChild(opt);
+  }
+  if(current && [...s.options].some(o=>o.value===current)) s.value = current;
+}
+
+function applyFilters() {
+  const fYear = $('f-year').value;
+  const fMonth = $('f-month').value;
+  const fZone = $('f-zone').value;
+  const fTerritory = $('f-territory').value;
+  const fState = $('f-state').value;
+  const fAsm = $('f-asm').value;
+  const fRm = $('f-rm').value;
+  const fVerif = $('f-verification').value;
+  const fTier = $('f-tier').value;
+
+  // Start with copies of raw data
+  let sales = APP.salesData.slice();
+  let partners = APP.partners.slice();
+
+  // Apply sales filters first if sales data exists
+  if(sales.length > 0) {
+    if(fYear) sales = sales.filter(d=>String(d.year)===fYear);
+    if(fMonth) sales = sales.filter(d=>d.month===fMonth);
+    if(fZone) sales = sales.filter(d=>d.zone===fZone);
+    if(fTerritory) sales = sales.filter(d=>d.territory===fTerritory);
+    if(fState) sales = sales.filter(d=>d.state===fState);
+    if(fAsm) sales = sales.filter(d=>d.asm===fAsm);
+    if(fRm) sales = sales.filter(d=>d.rm_name===fRm);
+    if(fVerif) sales = sales.filter(d=>d.verification_status===fVerif);
+    if(fTier) sales = sales.filter(d=>d.tier===fTier);
+  }
+
+  // Derive partners from filtered sales
+  const salesPids = new Set(sales.map(d=>d.partner_id));
+  if(sales.length > 0) {
+    partners = APP.partners.filter(p=>salesPids.has(p.partner_id));
+  } else {
+    // If no sales data, apply filters directly to partners (partner-only mode or zero-sales scenario)
+    if(fZone) partners = partners.filter(p=>p.zone===fZone);
+    if(fTerritory) partners = partners.filter(p=>p.territory===fTerritory);
+    if(fState) partners = partners.filter(p=>p.state===fState);
+    if(fAsm) partners = partners.filter(p=>p.asm===fAsm);
+    if(fRm) partners = partners.filter(p=>p.rm_name===fRm);
+    if(fVerif) partners = partners.filter(p=>p.verification_status===fVerif);
+    if(fTier) partners = partners.filter(p=>p.tier===fTier);
+    // Keep sales as is (empty or original data for partner-only mode)
+  }
+
+  // If we have sales but no partners matched, keep zero matches
+  // If partners list is empty and sales not empty, it's a legitimate zero-match state
+  APP.filteredPartners = partners;
+  APP.filteredSales = sales;
+  renderDashboard();
+}
+
+function renderDashboard() {
+  const partners = APP.filteredPartners;
+  const sales = APP.filteredSales;
+  
+  // Always show KPI cards even with zero data
+  const totalSales = sales.reduce((sum,d)=>sum+(d.sales||0),0);
+  const totalLeads = sales.reduce((sum,d)=>sum+(d.ais_provided||0),0);
+  const totalWorked = sales.reduce((sum,d)=>sum+(d.worked||0),0);
+  const totalCrm = sales.reduce((sum,d)=>sum+(d.crm_added||0),0);
+  const avgSales = partners.length ? totalSales / partners.length : 0;
+  $('kpi-grid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Total Sales</div><div class="kpi-value">${formatCurrency(totalSales)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Avg per Partner</div><div class="kpi-value">${formatCurrency(avgSales)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Leads (AIS)</div><div class="kpi-value">${totalLeads.toFixed(0)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Worked</div><div class="kpi-value">${totalWorked.toFixed(0)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">CRM Added</div><div class="kpi-value">${totalCrm.toFixed(0)}</div></div>
+  `;
+
+  renderPartnerGrid('');
+  if(sales.length) {
+    renderTrendChart(sales);
+    renderZoneChart(sales);
+  } else {
+    const ctx1 = document.getElementById('trend-chart').getContext('2d');
+    if(window._trendChart) window._trendChart.destroy();
+    window._trendChart = new Chart(ctx1, { type:'bar', data:{ labels:[], datasets:[] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }});
+    const ctx2 = document.getElementById('zone-chart').getContext('2d');
+    if(window._zoneChart) window._zoneChart.destroy();
+    window._zoneChart = new Chart(ctx2, { type:'doughnut', data:{ labels:[], datasets:[] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }});
+  }
+  $('partner-count').textContent = partners.length + ' partners';
+}
+
+function renderPartnerGrid(search) {
+  const grid = $('partner-grid');
+  let list = APP.filteredPartners;
+  if(search) {
+    const q = search.toLowerCase();
+    list = list.filter(p => p.partner_name.toLowerCase().includes(q) || p.partner_id.toLowerCase().includes(q) || p.zone.toLowerCase().includes(q));
+  }
+  if(!list.length) { grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">No partners match filters</div>'; return; }
+  grid.innerHTML = list.map(p => {
+    const sales = APP.filteredSales.filter(d=>d.partner_id===p.partner_id);
+    const total = sales.reduce((s,d)=>s+(d.sales||0),0);
+    return `<div class="partner-card" data-pid="${p.partner_id}">
+      <div class="p-name">${p.partner_name}</div>
+      <div class="p-meta">${p.partner_id} · ${p.zone} · ${p.city}</div>
+      <div class="p-sales">${formatCurrency(total)}</div>
+      <div style="font-size:12px;color:var(--text-2);">${p.tier} · ${p.verification_status}</div>
+    </div>`;
+  }).join('');
+  qsa('.partner-card').forEach(el => {
+    el.addEventListener('click', ()=>{
+      const pid = el.dataset.pid;
+      const partner = APP.partners.find(p=>p.partner_id===pid);
+      if(partner) openPartnerModal(partner);
+    });
+  });
+}
+
+function renderAllPartners() {
+  const grid = $('all-partner-grid');
+  const list = APP.partners;
+  $('all-count').textContent = list.length + ' partners';
+  grid.innerHTML = list.map(p => {
+    const sales = APP.salesData.filter(d=>d.partner_id===p.partner_id);
+    const total = sales.reduce((s,d)=>s+(d.sales||0),0);
+    return `<div class="partner-card" data-pid="${p.partner_id}">
+      <div class="p-name">${p.partner_name}</div>
+      <div class="p-meta">${p.partner_id} · ${p.zone} · ${p.city}</div>
+      <div class="p-sales">${formatCurrency(total)}</div>
+      <div style="font-size:12px;color:var(--text-2);">${p.tier} · ${p.verification_status}</div>
+    </div>`;
+  }).join('');
+  qsa('#all-partner-grid .partner-card').forEach(el => {
+    el.addEventListener('click', ()=>{
+      const pid = el.dataset.pid;
+      const partner = APP.partners.find(p=>p.partner_id===pid);
+      if(partner) openPartnerModal(partner);
+    });
+  });
+}
+
+function renderTrendChart(sales) {
+  const ctx = document.getElementById('trend-chart').getContext('2d');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const data2025 = months.map(m => sales.filter(d=>d.year===2025 && d.month===m).reduce((s,d)=>s+(d.sales||0),0));
+  const data2026 = months.map(m => sales.filter(d=>d.year===2026 && d.month===m).reduce((s,d)=>s+(d.sales||0),0));
+  if(window._trendChart) window._trendChart.destroy();
+  window._trendChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:months, datasets:[
+      { label:'2025', data:data2025, backgroundColor:'rgba(37,99,235,0.5)', borderColor:'#2563eb', borderWidth:1 },
+      { label:'2026', data:data2026, backgroundColor:'rgba(22,163,74,0.5)', borderColor:'#16a34a', borderWidth:1 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{boxWidth:10}}}, scales:{y:{beginAtZero:true}}}
+  });
+}
+
+function renderZoneChart(sales) {
+  const ctx = document.getElementById('zone-chart').getContext('2d');
+  const zones = [...new Set(sales.map(d=>d.zone))].filter(z=>z);
+  const data = zones.map(z => sales.filter(d=>d.zone===z).reduce((s,d)=>s+(d.sales||0),0));
+  const colors = ['#2563eb','#16a34a','#d97706','#dc2626','#8b5cf6'];
+  if(window._zoneChart) window._zoneChart.destroy();
+  window._zoneChart = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:zones, datasets:[{ data, backgroundColor:colors.slice(0,zones.length) }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right',labels:{boxWidth:10}}}}
+  });
+}
+
+function renderAnalyticsCharts() {
+  const sales = APP.salesData;
+  if(!sales.length) {
+    const ctx1 = document.getElementById('a-zone-chart').getContext('2d');
+    if(window._aZoneChart) window._aZoneChart.destroy();
+    window._aZoneChart = new Chart(ctx1, { type:'bar', data:{ labels:[], datasets:[] }, options:{ responsive:true, maintainAspectRatio:false }});
+    const ctx2 = document.getElementById('a-tier-chart').getContext('2d');
+    if(window._aTierChart) window._aTierChart.destroy();
+    window._aTierChart = new Chart(ctx2, { type:'pie', data:{ labels:[], datasets:[] }, options:{ responsive:true, maintainAspectRatio:false }});
+    const ctx3 = document.getElementById('a-leads-chart').getContext('2d');
+    if(window._aLeadsChart) window._aLeadsChart.destroy();
+    window._aLeadsChart = new Chart(ctx3, { type:'bar', data:{ labels:[], datasets:[] }, options:{ responsive:true, maintainAspectRatio:false }});
+    const ctx4 = document.getElementById('a-top-chart').getContext('2d');
+    if(window._aTopChart) window._aTopChart.destroy();
+    window._aTopChart = new Chart(ctx4, { type:'bar', data:{ labels:[], datasets:[] }, options:{ responsive:true, maintainAspectRatio:false }});
+    return;
+  }
+  const ctx1 = document.getElementById('a-zone-chart').getContext('2d');
+  const zones = [...new Set(sales.map(d=>d.zone))].filter(z=>z);
+  const data2025 = zones.map(z => sales.filter(d=>d.zone===z && d.year===2025).reduce((s,d)=>s+(d.sales||0),0));
+  const data2026 = zones.map(z => sales.filter(d=>d.zone===z && d.year===2026).reduce((s,d)=>s+(d.sales||0),0));
+  if(window._aZoneChart) window._aZoneChart.destroy();
+  window._aZoneChart = new Chart(ctx1, {
+    type:'bar',
+    data:{ labels:zones, datasets:[
+      { label:'2025', data:data2025, backgroundColor:'rgba(37,99,235,0.5)' },
+      { label:'2026', data:data2026, backgroundColor:'rgba(22,163,74,0.5)' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{boxWidth:10}}}, scales:{y:{beginAtZero:true}}}
+  });
+
+  const ctx2 = document.getElementById('a-tier-chart').getContext('2d');
+  const tiers = [...new Set(sales.map(d=>d.tier))].filter(t=>t);
+  const tierData = tiers.map(t => sales.filter(d=>d.tier===t).reduce((s,d)=>s+(d.sales||0),0));
+  if(window._aTierChart) window._aTierChart.destroy();
+  window._aTierChart = new Chart(ctx2, {
+    type:'pie',
+    data:{ labels:tiers, datasets:[{ data:tierData, backgroundColor:['#2563eb','#16a34a','#d97706','#8b5cf6'] }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right',labels:{boxWidth:10}}}}
+  });
+
+  const ctx3 = document.getElementById('a-leads-chart').getContext('2d');
+  const topPartners = sales.reduce((acc,d)=>{
+    if(!acc[d.partner_id]) acc[d.partner_id]={name:d.partner_name, ais:0, worked:0, crm:0};
+    acc[d.partner_id].ais += d.ais_provided||0;
+    acc[d.partner_id].worked += d.worked||0;
+    acc[d.partner_id].crm += d.crm_added||0;
+    return acc;
+  }, {});
+  const sorted = Object.values(topPartners).sort((a,b)=>b.ais-a.ais).slice(0,10);
+  if(window._aLeadsChart) window._aLeadsChart.destroy();
+  window._aLeadsChart = new Chart(ctx3, {
+    type:'bar',
+    data:{ labels:sorted.map(d=>d.name), datasets:[
+      { label:'AIS Provided', data:sorted.map(d=>d.ais), backgroundColor:'rgba(37,99,235,0.6)' },
+      { label:'Worked', data:sorted.map(d=>d.worked), backgroundColor:'rgba(22,163,74,0.6)' },
+      { label:'CRM Added', data:sorted.map(d=>d.crm), backgroundColor:'rgba(217,119,6,0.6)' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{boxWidth:10}}}, scales:{x:{ticks:{font:{size:9}}}, y:{beginAtZero:true}}}
+  });
+
+  const ctx4 = document.getElementById('a-top-chart').getContext('2d');
+  const topSales = Object.values(sales.reduce((acc,d)=>{
+    if(!acc[d.partner_id]) acc[d.partner_id]={name:d.partner_name, sales:0};
+    acc[d.partner_id].sales += d.sales||0;
+    return acc;
+  }, {})).sort((a,b)=>b.sales-a.sales).slice(0,10);
+  if(window._aTopChart) window._aTopChart.destroy();
+  window._aTopChart = new Chart(ctx4, {
+    type:'bar',
+    data:{ labels:topSales.map(d=>d.name), datasets:[{ label:'CY Sales', data:topSales.map(d=>d.sales), backgroundColor:'rgba(37,99,235,0.7)' }]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true}}}
+  });
+}
+
+function openPartnerModal(partner) {
+  APP.currentPartner = partner;
+  const sales = APP.salesData.filter(d=>d.partner_id===partner.partner_id);
+  const totalSales = sales.reduce((s,d)=>s+(d.sales||0),0);
+  const totalLeads = sales.reduce((s,d)=>s+(d.ais_provided||0),0);
+  const totalWorked = sales.reduce((s,d)=>s+(d.worked||0),0);
+  const totalCrm = sales.reduce((s,d)=>s+(d.crm_added||0),0);
+
+  $('m-name').textContent = partner.partner_name;
+  $('m-meta').textContent = partner.partner_id + ' · ' + partner.zone + ' · ' + partner.city;
+  $('m-source').textContent = APP.source.toUpperCase();
+
+  $('m-info').innerHTML = `
+    <span><strong>State:</strong> ${partner.state}</span>
+    <span><strong>Tier:</strong> ${partner.tier}</span>
+    <span><strong>RM:</strong> ${partner.rm_name}</span>
+    <span><strong>ASM:</strong> ${partner.asm||'—'}</span>
+    <span><strong>Territory:</strong> ${partner.territory||'—'}</span>
+    <span><strong>Status:</strong> ${partner.verification_status}</span>
+  `;
+
+  $('m-sales').innerHTML = `
+    <div class="stat-item"><div class="sval">${formatCurrency(totalSales)}</div><div class="slab">Total Sales</div></div>
+    <div class="stat-item"><div class="sval">${sales.length}</div><div class="slab">Transactions</div></div>
+    <div class="stat-item"><div class="sval">${formatCurrency(totalSales/(sales.length||1))}</div><div class="slab">Avg per Month</div></div>
+  `;
+
+  $('m-obk').innerHTML = `
+    <div class="stat-item"><div class="sval">${formatCurrency(sales.reduce((s,d)=>s+(d.obk||0),0))}</div><div class="slab">OBK</div></div>
+    <div class="stat-item"><div class="sval">${formatCurrency(sales.reduce((s,d)=>s+(d.ueob||0),0))}</div><div class="slab">UEOB</div></div>
+  `;
+
+  $('m-leads').innerHTML = `
+    <div class="stat-item"><div class="sval">${totalLeads.toFixed(0)}</div><div class="slab">AIS Provided</div></div>
+    <div class="stat-item"><div class="sval">${totalWorked.toFixed(0)}</div><div class="slab">Worked</div></div>
+    <div class="stat-item"><div class="sval">${totalCrm.toFixed(0)}</div><div class="slab">CRM Added</div></div>
+    <div class="stat-item"><div class="sval">${(totalWorked/(totalLeads||1)*100).toFixed(0)}%</div><div class="slab">Conversion</div></div>
+  `;
+
+  $('m-notes').textContent = partner.verification_notes || '—';
+
+  const ctx = document.getElementById('m-trend-chart').getContext('2d');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const d2025 = months.map(m => sales.filter(d=>d.year===2025 && d.month===m).reduce((s,d)=>s+(d.sales||0),0));
+  const d2026 = months.map(m => sales.filter(d=>d.year===2026 && d.month===m).reduce((s,d)=>s+(d.sales||0),0));
+  if(window._mTrendChart) window._mTrendChart.destroy();
+  window._mTrendChart = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:months, datasets:[
+      { label:'2025', data:d2025, backgroundColor:'rgba(37,99,235,0.5)' },
+      { label:'2026', data:d2026, backgroundColor:'rgba(22,163,74,0.5)' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{boxWidth:10}}}, scales:{y:{beginAtZero:true}}}
+  });
+
+  const ctx2 = document.getElementById('m-leads-chart').getContext('2d');
+  const months2026 = months.filter((_,i)=>sales.some(d=>d.year===2026 && d.monthIdx===i));
+  const aisData = months2026.map(m => sales.filter(d=>d.year===2026 && d.month===m).reduce((s,d)=>s+(d.ais_provided||0),0));
+  const workedData = months2026.map(m => sales.filter(d=>d.year===2026 && d.month===m).reduce((s,d)=>s+(d.worked||0),0));
+  const crmData = months2026.map(m => sales.filter(d=>d.year===2026 && d.month===m).reduce((s,d)=>s+(d.crm_added||0),0));
+  if(window._mLeadsChart) window._mLeadsChart.destroy();
+  window._mLeadsChart = new Chart(ctx2, {
+    type:'line',
+    data:{ labels:months2026, datasets:[
+      { label:'AIS', data:aisData, borderColor:'#2563eb', fill:false },
+      { label:'Worked', data:workedData, borderColor:'#16a34a', fill:false },
+      { label:'CRM', data:crmData, borderColor:'#d97706', fill:false }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{boxWidth:10}}}, scales:{y:{beginAtZero:true}}}
+  });
+
+  $('partner-modal').classList.remove('hidden');
+}
+
+function setupFilters() {
+  const years = [...new Set(APP.salesData.map(d=>d.year))].filter(y=>y).sort();
+  populateFilter('f-year', years);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  populateFilter('f-month', months);
+  populateFilter('f-zone', APP.partners.map(p=>p.zone));
+  populateFilter('f-territory', APP.partners.map(p=>p.territory));
+  populateFilter('f-state', APP.partners.map(p=>p.state));
+  populateFilter('f-asm', APP.partners.map(p=>p.asm));
+  populateFilter('f-rm', APP.partners.map(p=>p.rm_name));
+  populateFilter('f-verification', APP.partners.map(p=>p.verification_status));
+  populateFilter('f-tier', APP.partners.map(p=>p.tier));
+  $('apply-btn').addEventListener('click', applyFilters);
+  $('reset-btn').addEventListener('click', ()=>{
+    qsa('#filters-bar select').forEach(s=>s.value='');
+    applyFilters();
+  });
+  qsa('#filters-bar select').forEach(s=>s.addEventListener('change', applyFilters));
+}
+
+window.runSmartImportTest = function() {
+  console.log('🧪 Running Smart Import Self-Test...');
+  let passed = 0, total = 0;
+  
+  // Test 1: Exact template
+  total++;
+  const headers1 = ['Partner Name','Zone','State','City','Tier','RM','Sales','Leads','Year','Month'];
+  const map1 = mapColumns(headers1, ['partner_name','zone','state','city','tier','rm_name','sales','leads','year','month']);
+  const ok1 = map1.partner_name?.confidence>0.6 && map1.sales?.confidence>0.6 && map1.year?.confidence>0.6;
+  console.log(`${ok1?'✅':'❌'} Exact template: ${ok1}`);
+  if(ok1) passed++;
+  
+  // Test 2: Renamed sheets
+  total++;
+  const headers2 = ['Dealer Name','Region','Province','District','Category','Manager','Billing','Enquiries','FY','Period'];
+  const map2 = mapColumns(headers2, ['partner_name','zone','state','city','tier','rm_name','sales','leads','year','month']);
+  const ok2 = map2.partner_name?.confidence>0.6 && map2.sales?.confidence>0.6 && map2.year?.confidence>0.6;
+  console.log(`${ok2?'✅':'❌'} Renamed sheets: ${ok2}`);
+  if(ok2) passed++;
+  
+  // Test 3: Reordered headers
+  total++;
+  const headers3 = ['Sales','Leads','Year','Month','Partner Name','Zone','State','City','Tier','RM'];
+  const map3 = mapColumns(headers3, ['partner_name','zone','state','city','tier','rm_name','sales','leads','year','month']);
+  const ok3 = map3.partner_name?.confidence>0.6 && map3.sales?.confidence>0.6 && map3.year?.confidence>0.6;
+  console.log(`${ok3?'✅':'❌'} Reordered headers: ${ok3}`);
+  if(ok3) passed++;
+  
+  // Test 4: Date field only
+  total++;
+  const headers4 = ['Partner Name','Zone','Sales','Date','Leads'];
+  const map4 = mapColumns(headers4, ['partner_name','zone','sales','date','leads']);
+  const ok4 = map4.partner_name?.confidence>0.6 && map4.date?.confidence>0.6 && map4.sales?.confidence>0.6;
+  console.log(`${ok4?'✅':'❌'} Date field only: ${ok4}`);
+  if(ok4) passed++;
+  
+  // Test 5: Duplicate partner merge (simulated)
+  total++;
+  const diag = { duplicatePartnersMerged: 0 };
+  const rows = [{ 'Partner Name': 'A Corp' }, { 'Partner Name': 'A Corp' }];
+  const mapping = { partner_name: { column: 'Partner Name' } };
+  const result = normalizePartnerRows(rows, mapping, diag);
+  const ok5 = result.length===1 && diag.duplicatePartnersMerged===1;
+  console.log(`${ok5?'✅':'❌'} Duplicate partner merge: ${ok5}`);
+  if(ok5) passed++;
+  
+  // Test 6: Duplicate sales merge
+  total++;
+  const sdiag = { duplicateSalesMerged: 0 };
+  const srows = [{ 'Partner': 'A', 'Year': 2025, 'Month': 'Jan', 'Sales': 100 }, { 'Partner': 'A', 'Year': 2025, 'Month': 'Jan', 'Sales': 200 }];
+  const smap = { partner_name: { column: 'Partner' }, year: { column: 'Year' }, month: { column: 'Month' }, sales: { column: 'Sales' } };
+  const sres = normalizeSalesRows(srows, smap, sdiag, null);
+  const ok6 = sres.length===1 && sres[0].sales===300 && sdiag.duplicateSalesMerged===1;
+  console.log(`${ok6?'✅':'❌'} Duplicate sales merge: ${ok6}`);
+  if(ok6) passed++;
+  
+  // Test 7: Low-confidence mapping (real scenario with non-empty mapping)
+  total++;
+  const headers5 = ['X','Y','Z','W'];
+  const map5 = mapColumns(headers5, ['partner_name','sales','year','month']);
+  // Check that partner_name has low confidence (no match)
+  const ok7 = map5.partner_name?.confidence < 0.6 && map5.sales?.confidence < 0.6;
+  console.log(`${ok7?'✅':'❌'} Low-confidence mapping: ${ok7}`);
+  if(ok7) passed++;
+  
+  console.log(`✅ ${passed}/${total} tests passed.`);
+  toast(`Self-test: ${passed}/${total} passed. Check console.`, passed===total?'success':'error');
+};
+
+function initApp() {
+  generateSampleData();
+  setupFilters();
+  applyFilters();
+  renderAllPartners();
+  renderAnalyticsCharts();
+  const uname = APP.role==='admin' ? 'Admin User' : 'Demo User';
+  const role = APP.role==='admin' ? 'Administrator' : 'Viewer';
+  $('sidebar-uname').textContent = uname;
+  $('sidebar-urole').textContent = role;
+  $('topbar-uname').textContent = APP.role==='admin' ? 'Admin' : 'Demo';
+  $('sidebar-avatar').textContent = uname[0];
+  $('topbar-avatar').textContent = uname[0];
+
+  ['excel-upload-ds', 'excel-upload-main'].forEach(id => {
+    const input = $(id);
+    input.addEventListener('change', function(e) {
+      const file = this.files[0];
+      if(file) {
+        handleExcelUpload(file);
+        $('excel-ds-status').textContent = '● File loaded: '+file.name;
+        $('excel-ds-status').className = 'ds-status on';
+        $('upload-result').classList.remove('hidden');
+        $('upload-result').innerHTML = `<div style="color:#16a34a;font-weight:500;">✅ ${file.name} processed</div>`;
+      }
+    });
+  });
+
+  $('upload-area').addEventListener('click', ()=>$('excel-upload-main').click());
+  $('upload-area').addEventListener('dragover', e=>{ e.preventDefault(); });
+  $('upload-area').addEventListener('drop', e=>{
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if(file) {
+      $('excel-upload-main').files = e.dataTransfer.files;
+      $('excel-upload-main').dispatchEvent(new Event('change'));
+    }
+  });
+
+  $('download-excel-btn').addEventListener('click', ()=>{
+    const partners = APP.partners.map(p => ({
+      'Serial Number': p.partner_id,
+      'Partner Code': p.partner_id,
+      'ASM': p.asm,
+      'RM': p.rm_name,
+      'Territory': p.territory,
+      'Zone': p.zone,
+      'City': p.city,
+      'State': p.state,
+      'Tier': p.tier,
+      'Channel Partner Firm Name': p.partner_name,
+      'Channel Partner Name': p.partner_name,
+      'Verification Status': p.verification_status,
+      'Verification Notes': p.verification_notes
+    }));
+    const sales = APP.salesData.map(d => ({
+      'Serial Number': d.partner_id,
+      'Partner Code': d.partner_id,
+      'Year': d.year,
+      'Month': d.month,
+      'Sales': d.sales,
+      'OBK': d.obk,
+      'UEOB': d.ueob,
+      'AIS Leads Provided': d.ais_provided,
+      'Leads Worked': d.worked,
+      'Leads Generated': 0,
+      'Leads Added To CRM': d.crm_added
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(partners), 'Partner_Details');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sales), 'Sales_Data');
+    XLSX.writeFile(wb, 'ChannelIntel_Sample.xlsx');
+    toast('Sample workbook downloaded', 'success');
+  });
+
+  $('schema-toggle-btn').addEventListener('click', ()=>{
+    $('schema-info').classList.toggle('hidden');
+  });
+
+  $('use-demo-btn').addEventListener('click', ()=>{
+    if(confirm('Reload demo data?')) {
+      generateSampleData();
+      setupFilters();
+      applyFilters();
+      renderAllPartners();
+      renderAnalyticsCharts();
+      toast('Demo data reloaded', 'success');
+    }
+  });
+
+  $('connect-sheets-btn').addEventListener('click', ()=>{
+    toast('Google Sheets integration coming soon', 'info');
+  });
+  $('connect-firebase-btn').addEventListener('click', ()=>{
+    toast('Firebase integration coming soon', 'info');
+  });
+}
+
+console.log('🧠 Smart Import engine ready. Run window.runSmartImportTest() for validation.');
+</script>
 </body>
 </html>
