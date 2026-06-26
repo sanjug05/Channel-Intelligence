@@ -931,12 +931,12 @@ function smartImport(workbook, fileName) {
 
   diagnostics.partnersImported = partners.length;
   diagnostics.salesRowsImported = sales.length;
-  diagnostics.status.push('data normalized');
 
-  // Auto mapping success - add columns mapped status
+  // Status order: columns mapped before data normalized when auto mapping succeeds
   if(!diagnostics.mappingNeeded) {
     diagnostics.status.push('columns mapped');
   }
+  diagnostics.status.push('data normalized');
 
   return { partners, sales, diagnostics };
 }
@@ -1034,21 +1034,22 @@ function renderImportStatus(diagnostics) {
   for(let i = 0; i < stepOrder.length; i++) {
     const s = stepOrder[i];
     const isReached = statusSet.has(s.toLowerCase());
-    let isActive = false;
     let cls = '';
     
     // Deterministic active logic
     if (s === 'manual mapping required' && manualRequired && !manualApplied) {
-      isActive = true;
       cls = 'active';
     } else if (s === 'manual mapping required' && !manualRequired) {
       cls = 'done';
+    } else if (s === 'manual mapping required' && manualRequired && manualApplied) {
+      cls = 'done'; // once manual mapping applied, required is done
     } else if (s === 'columns mapped' && !manualRequired && statusSet.has('data normalized')) {
       cls = 'done';
     } else if (isReached && (i < latestReached || allDone)) {
       cls = 'done';
     } else if (i === latestReached && !allDone && !hasError && !manualRequired) {
-      isActive = true;
+      cls = 'active';
+    } else if (i === latestReached && !allDone && !hasError && manualRequired && s === 'manual mapping required') {
       cls = 'active';
     }
     
