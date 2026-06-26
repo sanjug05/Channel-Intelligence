@@ -2,11 +2,15 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Channel Intelligence — Internal Analytics</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNoYW5uZWwgSW50ZWxsaWdlbmNlIiwKICAic2hvcnRfbmFtZSI6ICJDaGFubmVsIEludGVsIiwKICAiZGVzY3JpcHRpb24iOiAiQWxsLUluZGlhIFBhcnRuZXIgQW5hbHl0aWNzIFBsYXRmb3JtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmNWY3ZmIiLAogICJ0aGVtZV9jb2xvciI6ICIjMjU2M2ViIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMic+PHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIHJ4PSc2MCcgZmlsbD0nJTI1MjMyNTZlYicvPjx0ZXh0IHg9JzI1NicgeT0nMzQwJyBmb250LXNpemU9JzI4MCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1mYW1pbHk9J3NhbnMtc2VyaWYnIGZpbGw9J3doaXRlJyBmb250LXdlaWdodD0nNzAwJz7igK08L3RleHQ+PC9zdmc+IiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJz48cmVjdCB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5Micgcng9JzI4JyBmaWxsPSclMjUyMzI1NmViJy8+PHRleHQgeD0nOTYnIHk9JzEyOCcgZm9udC1zaXplPScxMDAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdzYW5zLXNlcmlmJyBmaWxsPSd3aGl0ZScgZm9udC13ZWlnaHQ9JzcwMCc+4oCtPC90ZXh0Pjwvc3ZnPiIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTI4IDEyOCc+PHJlY3Qgd2lkdGg9JzEyOCcgaGVpZ2h0PScxMjgnIHJ4PScyMCcgZmlsbD0nJTI1MjMyNTZlYicvPjx0ZXh0IHg9JzY0JyB5PSc4NicgZm9udC1zaXplPSc2OCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1mYW1pbHk9J3NhbnMtc2VyaWYnIGZpbGw9J3doaXRlJyBmb250LXdlaWdodD0nNzAwJz7igK08L3RleHQ+PC9zdmc+IiwKICAgICAgInNpemVzIjogIjEyOHgxMjgiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
+  
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
@@ -144,6 +148,63 @@
     .status-chip.error { background:#fee2e2; color:#991b1b; }
     .status-chip.partner-only { background:#d1fae5; color:#065f46; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    
+    /* PWA Install Banner */
+    #pwa-install-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg2);
+      border-top: 2px solid var(--primary);
+      padding: 14px 20px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 3000;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+      flex-wrap: wrap;
+    }
+    #pwa-install-banner.visible { display: flex; }
+    #pwa-install-banner .pwa-text {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    #pwa-install-banner .pwa-text .pwa-icon {
+      font-size: 28px;
+    }
+    #pwa-install-banner .pwa-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #pwa-install-banner .pwa-actions .btn {
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13px;
+    }
+    #pwa-install-banner .pwa-actions .btn-install {
+      background: var(--primary);
+      color: #fff;
+    }
+    #pwa-install-banner .pwa-actions .btn-install:hover {
+      background: var(--primary-hover);
+    }
+    #pwa-install-banner .pwa-actions .btn-dismiss {
+      background: var(--bg);
+      color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+    #pwa-install-banner .pwa-actions .btn-dismiss:hover {
+      background: var(--border);
+    }
+    
     @media (max-width:768px) {
       #sidebar { position:fixed; left:-260px; width:220px; height:100vh; z-index:300; transition:0.2s; }
       #sidebar.open { left:0; }
@@ -152,10 +213,24 @@
       .filters-bar { flex-direction:column; align-items:stretch; }
       .filter-actions { margin-left:0; }
       .mapping-grid { grid-template-columns:1fr; }
+      #pwa-install-banner { flex-direction:column; align-items:stretch; text-align:center; }
+      #pwa-install-banner .pwa-actions { justify-content:center; }
     }
   </style>
 </head>
 <body>
+
+<!-- PWA Install Banner -->
+<div id="pwa-install-banner">
+  <div class="pwa-text">
+    <span class="pwa-icon">📊</span>
+    <span>Install <strong>Channel Intelligence</strong> for a better experience</span>
+  </div>
+  <div class="pwa-actions">
+    <button class="btn btn-install" id="pwa-install-btn">📲 Install App</button>
+    <button class="btn btn-dismiss" id="pwa-dismiss-btn">✕ Dismiss</button>
+  </div>
+</div>
 
 <div id="login-screen">
   <div class="login-card">
@@ -313,6 +388,15 @@
 </div>
 
 <div id="toast-wrap"></div>
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('Service Worker registered'))
+      .catch(err => console.log('SW registration failed:', err));
+  }
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1685,6 +1769,41 @@ window.runSmartImportTest = function() {
   console.log(`✅ ${passed}/${total} tests passed.`);
   toast(`Self-test: ${passed}/${total} passed. Check console.`, passed===total?'success':'error');
 };
+
+// ─── PWA INSTALL HANDLING ────────────────────────────────────
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const banner = document.getElementById('pwa-install-banner');
+  banner.classList.add('visible');
+  console.log('PWA install prompt available');
+});
+
+document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      toast('App installed successfully!', 'success');
+    } else {
+      toast('Installation declined', 'info');
+    }
+    deferredPrompt = null;
+    document.getElementById('pwa-install-banner').classList.remove('visible');
+  }
+});
+
+document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+  document.getElementById('pwa-install-banner').classList.remove('visible');
+  toast('You can install later from browser menu', 'info');
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwa-install-banner').classList.remove('visible');
+  toast('App installed successfully!', 'success');
+});
 
 function initApp() {
   generateSampleData();
