@@ -9,7 +9,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- PWA Manifest -->
-  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNoYW5uZWwgSW50ZWxsaWdlbmNlIiwKICAic2hvcnRfbmFtZSI6ICJDaGFubmVsIEludGVsIiwKICAiZGVzY3JpcHRpb24iOiAiQWxsLUluZGlhIFBhcnRuZXIgQW5hbHl0aWNzIFBsYXRmb3JtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmNWY3ZmIiLAogICJ0aGVtZV9jb2xvciI6ICIjMjU2M2ViIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMic+PHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIHJ4PSc2MCcgZmlsbD0nJTI1MjMyNTZlYicvPjx0ZXh0IHg9JzI1NicgeT0nMzQwJyBmb250LXNpemU9JzI4MCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1mYW1pbHk9J3NhbnMtc2VyaWYnIGZpbGw9J3doaXRlJyBmb250LXdlaWdodD0nNzAwJz7igK08L3RleHQ+PC9zdmc+IiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJz48cmVjdCB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5Micgcng9JzI4JyBmaWxsPSclMjUyMzI1NmViJy8+PHRleHQgeD0nOTYnIHk9JzEyOCcgZm9udC1zaXplPScxMDAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdzYW5zLXNlcmlmJyBmaWxsPSd3aGl0ZScgZm9udC13ZWlnaHQ9JzcwMCc+4oCtPC90ZXh0Pjwvc3ZnPiIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTI4IDEyOCc+PHJlY3Qgd2lkdGg9JzEyOCcgaGVpZ2h0PScxMjgnIHJ4PScyMCcgZmlsbD0nJTI1MjMyNTZlYicvPjx0ZXh0IHg9JzY0JyB5PSc4NicgZm9udC1zaXplPSc2OCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1mYW1pbHk9J3NhbnMtc2VyaWYnIGZpbGw9J3doaXRlJyBmb250LXdlaWdodD0nNzAwJz7igK08L3RleHQ+PC9zdmc+IiwKICAgICAgInNpemVzIjogIjEyOHgxMjgiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Channel Intel">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -392,9 +397,11 @@
 <!-- Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log('Service Worker registered'))
-      .catch(err => console.log('SW registration failed:', err));
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(() => console.log('Service Worker registered successfully'))
+        .catch(err => console.log('SW registration failed:', err));
+    });
   }
 </script>
 
@@ -1772,26 +1779,46 @@ window.runSmartImportTest = function() {
 
 // ─── PWA INSTALL HANDLING ────────────────────────────────────
 let deferredPrompt = null;
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+// If already installed, hide banner
+if (isStandalone) {
+  document.getElementById('pwa-install-banner').classList.remove('visible');
+}
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  const banner = document.getElementById('pwa-install-banner');
-  banner.classList.add('visible');
+  if (!isStandalone) {
+    const banner = document.getElementById('pwa-install-banner');
+    banner.classList.add('visible');
+  }
   console.log('PWA install prompt available');
 });
 
 document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+  if (isStandalone) {
+    toast('App is already installed', 'info');
+    document.getElementById('pwa-install-banner').classList.remove('visible');
+    return;
+  }
+  
   if (deferredPrompt) {
     deferredPrompt.prompt();
     const result = await deferredPrompt.userChoice;
     if (result.outcome === 'accepted') {
       toast('App installed successfully!', 'success');
+      document.getElementById('pwa-install-banner').classList.remove('visible');
     } else {
       toast('Installation declined', 'info');
     }
     deferredPrompt = null;
+  } else if (isIOS) {
+    toast('On iPhone: Tap Share → Add to Home Screen', 'info');
     document.getElementById('pwa-install-banner').classList.remove('visible');
+  } else {
+    toast('Install option will appear when supported by your browser', 'info');
   }
 });
 
