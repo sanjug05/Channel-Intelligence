@@ -228,6 +228,7 @@ input,select{font-family:inherit;font-size:inherit}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:1000;display:flex;align-items:flex-start;justify-content:flex-end;animation:fadeIn .18s}
 .modal-drawer{width:min(680px,100vw);height:100vh;background:var(--card);display:flex;flex-direction:column;overflow:hidden;box-shadow:-6px 0 32px rgba(0,0,0,.2);animation:slideIn .2s ease}
 @keyframes slideIn{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .modal-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;flex-shrink:0}
 .modal-head-info{flex:1;min-width:0}
 .mh-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -329,6 +330,25 @@ input,select{font-family:inherit;font-size:inherit}
 </head>
 <body>
 
+<!-- ═══ LOADING SCREEN (blocks all content while Firebase auth resolves) ═══ -->
+<div id="loading-screen" style="position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;align-items:center;justify-content:center;flex-direction:column">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:40px 48px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.14);min-width:280px">
+    <div style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--p);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 16px"></div>
+    <div style="font-size:16px;font-weight:700;color:var(--t);margin-bottom:6px">📊 Channel Intelligence</div>
+    <p id="loading-msg" style="font-size:13px;color:var(--t3);min-height:20px">Checking authentication…</p>
+  </div>
+</div>
+
+<!-- ═══ ACCESS DENIED SCREEN ═══ -->
+<div id="access-denied-screen" style="position:fixed;inset:0;background:var(--bg);z-index:8900;display:none;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:40px 48px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.14);max-width:420px;width:90%">
+    <div style="font-size:48px;margin-bottom:12px">🔒</div>
+    <div style="font-size:18px;font-weight:700;color:var(--err);margin-bottom:8px">Access Denied</div>
+    <p id="denied-msg" style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:20px">Your account is not authorised. Contact your administrator.</p>
+    <button class="btn primary" id="denied-signout-btn" style="width:100%;justify-content:center">Sign Out</button>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════════════════
      PWA INSTALL BANNER
 ═══════════════════════════════════════════════════ -->
@@ -348,16 +368,19 @@ input,select{font-family:inherit;font-size:inherit}
     <div class="login-logo">📊</div>
     <h1>Channel Intelligence</h1>
     <p class="login-sub">Dealer Sales Analytics Platform</p>
-    <div class="fg-login"><label>Username</label><input type="text" id="lu" placeholder="Username" autocomplete="username"></div>
+    <div class="fg-login"><label>Email</label><input type="email" id="lu" placeholder="your@email.com" autocomplete="email"></div>
     <div class="fg-login"><label>Password</label><input type="password" id="lp" placeholder="Password" autocomplete="current-password"></div>
     <button class="btn-login" id="login-btn">Sign In →</button>
-    <div class="login-div">or use demo access</div>
-    <div class="demo-btns">
-      <button class="btn-demo" id="demo-admin">🔐 Admin Demo</button>
-      <button class="btn-demo" id="demo-viewer">👁 View-Only Demo</button>
+    <!-- DEV_MODE demo section — hidden in production (controlled by JS DEV_MODE flag) -->
+    <div id="dev-demo-section" class="hidden">
+      <div class="login-div">development access</div>
+      <div class="demo-btns">
+        <button class="btn-demo" id="demo-admin">🔐 Admin Demo</button>
+        <button class="btn-demo" id="demo-viewer">👁 View-Only Demo</button>
+      </div>
     </div>
     <div id="login-err" class="login-err hidden"></div>
-    <p class="login-hint">Demo: admin / admin123 &nbsp;·&nbsp; demo / demo123</p>
+    <p class="login-hint" id="login-hint-text" style="display:none">Demo: admin / admin123 · demo / demo123</p>
   </div>
 </div>
 
@@ -399,6 +422,7 @@ input,select{font-family:inherit;font-size:inherit}
       <div class="tb-search"><span class="si">🔍</span><input type="search" id="g-search" placeholder="Search dealers…"></div>
       <div class="tb-right">
         <span class="src-badge demo" id="src-badge">NO DATA</span>
+        <span class="role-badge admin hidden" id="role-badge">admin</span>
         <button class="ib" id="theme-btn" title="Toggle theme">🌙</button>
         <div class="user-pill"><div class="av-sm" id="tb-av">A</div><span class="un-top" id="tb-un">Admin</span></div>
         <button class="ib" id="logout-btn" title="Logout" style="font-size:14px">🚪</button>
@@ -415,7 +439,7 @@ input,select{font-family:inherit;font-size:inherit}
           <div class="empty-ico">📂</div>
           <h2>No Dealer Data Loaded</h2>
           <p>Upload the dealer sales workbook to see analytics, KPIs, and performance charts. Expected: <strong>Dealer Target Fy27</strong>, <strong>FY27 Dump</strong>, <strong>FY26 Dump</strong> sheets.</p>
-          <label class="btn primary" style="cursor:pointer;margin:0 auto">
+          <label class="btn primary" data-admin-only style="cursor:pointer;margin:0 auto">
             📤 Upload Workbook
             <input type="file" id="quick-upload" accept=".xlsx,.xls" style="display:none">
           </label>
@@ -513,7 +537,7 @@ input,select{font-family:inherit;font-size:inherit}
             <div class="ds-title">Dealer Workbook Upload</div>
             <div class="ds-desc">Upload the 3-sheet workbook: <strong>Dealer Target Fy27</strong> (master + targets), <strong>FY27 Dump</strong> (FY27 transactions), <strong>FY26 Dump</strong> (FY26 transactions). Auto-parsed and joined on mobile number.</div>
             <span class="ds-status off" id="wb-status">○ No File Loaded</span>
-            <label class="btn primary" style="cursor:pointer;justify-content:center">
+            <label class="btn primary" data-admin-only style="cursor:pointer;justify-content:center">
               📤 Upload Workbook
               <input type="file" id="wb-upload" accept=".xlsx,.xls" style="display:none">
             </label>
@@ -534,13 +558,13 @@ input,select{font-family:inherit;font-size:inherit}
             <div class="ds-icon">📐</div>
             <div class="ds-title">Expected Workbook Schema</div>
             <div class="ds-desc">Sheet 1: <strong>Dealer Target Fy27</strong> — Phone No, Dealer Name, Location, ASM Name, Region, Zone, FY27 Sales AOP, monthly actuals (cols 17-28), FY26 Actuals (cols 32-43).<br><br>Sheet 2: <strong>FY27 Dump</strong> — Mobile No, Dealer Name, Month, Final basic Value, Territory, ASM Name, Dealer/Direct.<br><br>Sheet 3: <strong>FY26 Dump</strong> — Dealer Phone, Dealer Name, Month, Final basic Value, Territory, ASM Name.</div>
-            <button class="btn outline" id="dl-sample-btn">⬇ Download Sample Template</button>
+            <button class="btn outline" id="dl-sample-btn" data-admin-only>⬇ Download Sample Template</button>
           </div>
         </div>
 
         <div class="chart-card" style="margin-top:16px">
           <div class="cc-head"><div class="cc-title">Upload Workbook</div></div>
-          <div class="upload-area" id="upload-area">
+          <div class="upload-area" id="upload-area" data-admin-only>
             <div class="upload-ico">📂</div>
             <p>Click to browse or drag &amp; drop your Excel workbook</p>
             <small>Accepts .xlsx — auto-detects and parses all 3 sheets</small>
@@ -598,6 +622,11 @@ input,select{font-family:inherit;font-size:inherit}
 <div id="toast-wrap"></div>
 
 <!-- CDN LIBRARIES -->
+<!-- Firebase SDK (compat layer — no bundler required) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
@@ -607,14 +636,13 @@ input,select{font-family:inherit;font-size:inherit}
    SECTION 1 — FIREBASE CONFIGURATION (fill before deploy)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const FIREBASE_CONFIG = {
-  apiKey:            'YOUR_API_KEY',
-  authDomain:        'YOUR_PROJECT.firebaseapp.com',
-  projectId:         'YOUR_PROJECT_ID',
-  storageBucket:     'YOUR_PROJECT.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId:             'YOUR_APP_ID',
+  apiKey:"AIzaSyDav3rI7fTr8KrXYxvnz5LB82CgjRq4v20",
+  authDomain:"ais-showroom-dashboard.firebaseapp.com",
+  projectId:"ais-showroom-dashboard",
+  storageBucket:"ais-showroom-dashboard.firebasestorage.app",
+  messagingSenderId:"175667492150",
+  appId:"1:175667492150:web:cb124eb267b4689e6a2f97"
 };
-
 /* ── FIREBASE COLLECTION DESIGN ──────────────────────────
  /users/{uid}
    role: 'admin' | 'asm' | 'viewer'
@@ -1672,58 +1700,520 @@ function navigateTo(page) {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SECTION 14 — AUTH SHELL (Firebase-ready)
+   SECTION 14 — FIREBASE AUTH + FIRESTORE INTEGRATION
+
+   DEV_MODE: set to true during local development only.
+   When true, demo login buttons appear and Firebase is
+   skipped. Set to false before any production deployment.
+
+   FIRESTORE SECURITY RULES (paste in Firebase Console):
+   ─────────────────────────────────────────────────────
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{db}/documents {
+       function isSignedIn()   { return request.auth != null; }
+       function uid()          { return request.auth.uid; }
+       function userRole()     { return get(/databases/$(db)/documents/users/$(uid())).data.role; }
+       function isAdmin()      { return isSignedIn() && userRole() == 'admin'; }
+       function isAtLeastASM() { return isSignedIn() && userRole() in ['admin','asm']; }
+       function isAnyUser()    { return isSignedIn() && userRole() in ['admin','asm','viewer']; }
+
+       match /users/{uid} {
+         allow read:  if isSignedIn() && request.auth.uid == uid;
+         allow write: if isAdmin();
+       }
+       match /appState/currentImport {
+         allow read:  if isAnyUser();
+         allow write: if isAdmin();
+       }
+       match /imports/{importId} {
+         allow read:  if isAnyUser();
+         allow write: if isAdmin();
+         match /dealers/{dealerId} {
+           allow read:  if isAnyUser();
+           allow write: if isAdmin();
+         }
+         match /meta/summary {
+           allow read:  if isAnyUser();
+           allow write: if isAdmin();
+         }
+       }
+     }
+   }
+
+   FIRESTORE COLLECTION DESIGN:
+   /users/{uid}
+     name, email, role ('admin'|'asm'|'viewer'),
+     asm_code, allowed_zones[], allowed_territories[],
+     created_at, last_login
+
+   /appState/currentImport        ← single doc, pointer to active import
+     import_id, uploaded_by_uid, uploaded_by_name,
+     uploaded_at, file_name, available_months[],
+     dealer_count, fy27_sales_lakhs, fy26_sales_lakhs
+
+   /imports/{importId}            ← one doc per upload (audit history)
+     (same fields as appState/currentImport)
+     + status: 'active'|'archived'
+
+   /imports/{importId}/meta/summary
+     diagnostics object (full diag JSON)
+
+   /imports/{importId}/dealers/{mobile}
+     full dealer object (split to avoid 1MB doc limit)
+     mobile is the document key (normalized 10-digit)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-const AUTH = {
-  user: null,
-  // ── Simple credential check (replace with Firebase below) ──
-  loginLocal(username, password) {
-    const creds = {
-      'admin': { pass:'admin123', role:'admin',  name:'Admin User' },
-      'demo':  { pass:'demo123',  role:'viewer', name:'Demo User'  },
-    };
-    const c = creds[username];
-    return (c && c.pass === password)
-      ? { ok:true,  user:{ username, role:c.role, name:c.name } }
-      : { ok:false, error:'Invalid credentials. Try admin/admin123 or demo/demo123' };
-  },
-  /*
-  ── Firebase Auth replacement ────────────────────────────
-  async loginFirebase(email, password) {
-    try {
-      const cred = await firebase.auth().signInWithEmailAndPassword(email, password);
-      const doc  = await firebase.firestore().collection('users').doc(cred.user.uid).get();
-      const role = doc.exists ? doc.data().role : 'viewer';
-      return { ok:true, user:{ username:email, role, name:doc.data()?.name||email } };
-    } catch(e) {
-      return { ok:false, error:e.message };
+
+const DEV_MODE = false; // ← SET TO FALSE IN PRODUCTION
+
+// Firebase service references (populated in initFirebase)
+let FBAPP = null, FBAUTH = null, FBDB = null;
+const ALLOWED_ROLES = ['admin'];
+
+/* ── 14a: Init Firebase ─────────────────────────────── */
+function initFirebase() {
+  if(!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
+    if(DEV_MODE) {
+      setLoading(false);
+      showLoginScreen();
+      return;
     }
-  },
-  initFirebase() {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    firebase.auth().onAuthStateChanged(user => {
-      if(user) { showApp(); } else { showLogin(); }
-    });
-  },
-  */
+    showCriticalError('Firebase is not configured. Fill FIREBASE_CONFIG in the source file.');
+    return;
+  }
+  try {
+    FBAPP   = firebase.initializeApp(FIREBASE_CONFIG);
+    FBAUTH  = firebase.auth();
+    FBDB    = firebase.firestore();
+    // Persistence: keep auth session across browser reloads
+    FBAUTH.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+    // Auth state listener — single source of truth for boot/logout
+    FBAUTH.onAuthStateChanged(onAuthStateChange);
+  } catch(err) {
+    showCriticalError('Firebase init failed: ' + err.message);
+  }
+}
+
+/* ── 14b: Auth state observer ──────────────────────── */
+async function onAuthStateChange(firebaseUser) {
+  if(!firebaseUser) {
+    // Not signed in
+    setLoading(false);
+    hideApp();
+    showLoginScreen();
+    return;
+  }
+  // Signed in — load Firestore profile
+  setLoading(true, 'Loading your profile…');
+  try {
+    const profile = await loadUserProfile(firebaseUser.uid, firebaseUser.email);
+    if(!profile) return; // loadUserProfile shows access-denied internally
+    await boot(firebaseUser, profile);
+  } catch(err) {
+    setLoading(false);
+    showCriticalError('Profile load failed: ' + err.message);
+  }
+}
+
+/* ── 14c: Load Firestore user profile ──────────────── */
+async function loadUserProfile(uid, email) {
+  let doc;
+  try {
+    doc = await FBDB.collection('users').doc(uid).get();
+  } catch(err) {
+    showAccessDenied('Could not read your user profile from Firestore. Check your network or contact admin. (' + err.code + ')');
+    return null;
+  }
+  if(!doc.exists) {
+    showAccessDenied(`Your account (${email}) is not registered in this application. Contact your administrator to be added.`);
+    return null;
+  }
+  const data = doc.data();
+  if(!ALLOWED_ROLES.includes(data.role)) {
+    showAccessDenied(`Your role "${data.role}" is not permitted. Contact your administrator.`);
+    return null;
+  }
+  // Update last_login without blocking
+  FBDB.collection('users').doc(uid).update({ last_login: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
+  return data;
+}
+
+/* ── 14d: Login with email + password ──────────────── */
+async function loginWithEmailPassword(email, password) {
+  setLoginBusy(true);
+  try {
+    await FBAUTH.signInWithEmailAndPassword(email, password);
+    // onAuthStateChange fires next — it handles the rest
+  } catch(err) {
+    setLoginBusy(false);
+    const msgs = {
+      'auth/user-not-found':      'No account found for this email.',
+      'auth/wrong-password':      'Incorrect password.',
+      'auth/invalid-email':       'Enter a valid email address.',
+      'auth/too-many-requests':   'Too many failed attempts. Try again later.',
+      'auth/user-disabled':       'Your account has been disabled.',
+      'auth/invalid-credential':  'Invalid email or password.',
+      'auth/network-request-failed': 'Network error. Check your connection.',
+    };
+    showLoginError(msgs[err.code] || err.message);
+  }
+}
+
+/* ── 14e: Logout ────────────────────────────────────── */
+async function logout() {
+  try {
+    await FBAUTH.signOut();
+    // onAuthStateChange fires → shows login screen
+    // Clear STATE so data is not visible after logout
+    STATE.dealers       = [];
+    STATE.filtered      = [];
+    STATE.dataLoaded    = false;
+    STATE.diag          = null;
+  } catch(err) {
+    toast('Logout failed: ' + err.message, 'err');
+  }
+}
+
+/* ── 14f: Boot app after successful auth + profile ─── */
+async function boot(firebaseUser, profile) {
+  setLoading(true, 'Loading dataset…');
+  STATE.role        = profile.role;
+  STATE.userProfile = profile;
+  STATE.uid         = firebaseUser.uid;
+
+  // Set up UI
+  const name  = profile.name || firebaseUser.email;
+  const init  = name.split(/[\s@]/).map(w=>w[0]).filter(Boolean).join('').toUpperCase().slice(0,2) || '?';
+  $('sb-av').textContent = init;
+  $('tb-av').textContent = init;
+  $('sb-un').textContent = name;
+  $('tb-un').textContent = name.split(/[\s@]/)[0];
+  const roleLabels = { admin:'Administrator', asm:'ASM', viewer:'View Only' };
+  $('sb-ur').textContent = roleLabels[profile.role] || profile.role;
+
+  // Role badge in topbar
+  const rb = $('role-badge');
+  rb.textContent  = profile.role;
+  rb.className    = `role-badge ${profile.role}`;
+  rb.classList.remove('hidden');
+
+  // Apply role-based UI restrictions
+  applyRoleScope(profile);
+
+  // Load latest active dataset from Firestore
+  await loadActiveImport();
+
+  setLoading(false);
+  hideLoginScreen();
+  showApp();
+  renderDashboard();
+}
+
+/* ── 14g: Apply role-based UI scope ─────────────────── */
+function applyRoleScope(profile) {
+  const isAdmin = profile.role === 'admin';
+
+  // Show/hide admin-only elements
+  qsa('[data-admin-only]').forEach(el => {
+    el.classList.toggle('role-hidden', !isAdmin);
+  });
+
+  // Pre-filter dropdowns if ASM has a scope restriction
+  if(profile.role === 'asm' && profile.asm_code) {
+    STATE.asmScope = {
+      asm_code:             profile.asm_code,
+      allowed_zones:        profile.allowed_zones        || [],
+      allowed_territories:  profile.allowed_territories  || [],
+    };
+  } else {
+    STATE.asmScope = null;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION 14H — FIRESTORE DATASET PERSISTENCE
+   Structure used:
+     /appState/currentImport  → pointer doc (lightweight)
+     /imports/{id}/meta/summary → full diagnostics
+     /imports/{id}/dealers/{mobile} → one doc per dealer
+        (avoids Firestore 1MB per-document limit)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Load active import on login ──────────────────── */
+async function loadActiveImport() {
+  if(!FBDB) return;
+  try {
+    const ptr = await FBDB.collection('appState').doc('currentImport').get();
+    if(!ptr.exists) {
+      setLoading(false, '');
+      return; // No data uploaded yet — show empty dashboard
+    }
+    const meta = ptr.data();
+    setLoading(true, `Restoring dataset: ${meta.file_name || 'last upload'}…`);
+
+    // Load all dealers from the subcollection
+    const importId = meta.import_id;
+    if(!importId) return;
+
+    const snap = await FBDB.collection('imports').doc(importId)
+                            .collection('dealers').get();
+    if(snap.empty) return;
+
+    const dealers = snap.docs.map(d => d.data());
+
+    // Load full diagnostics from meta/summary
+    let diag = { fileName: meta.file_name, timestamp: meta.uploaded_at?.toDate?.()?.toISOString() || '' };
+    try {
+      const sumDoc = await FBDB.collection('imports').doc(importId)
+                                .collection('meta').doc('summary').get();
+      if(sumDoc.exists) diag = { ...diag, ...sumDoc.data().diagnostics };
+    } catch(e) { /* non-critical */ }
+
+    // Recompute derived metrics (not stored to save space)
+    computeMetrics(dealers);
+
+    STATE.dealers       = dealers;
+    STATE.filteredPartners = [...dealers];
+    STATE.diag          = diag;
+    STATE.dataLoaded    = true;
+    STATE.activeImportId = importId;
+    STATE.importMeta    = meta;
+
+    // FIX #3: Rebuild filters from restored data
+    populateFilters(dealers);
+    applyFilters();
+
+    // Update source badge
+    $('src-badge').textContent = 'FIRESTORE';
+    $('src-badge').className   = 'src-badge upload';
+
+    // Update data sources page status
+    const ws = $('wb-status');
+    if(ws) {
+      ws.textContent = `✔ ${meta.file_name} — ${dealers.length} dealers — uploaded by ${meta.uploaded_by_name || '?'} on ${meta.uploaded_at?.toDate?.()?.toLocaleDateString() || '?'}`;
+      ws.className   = 'ds-status on';
+    }
+
+    renderDiagnostics(diag);
+  } catch(err) {
+    console.error('loadActiveImport error:', err);
+    toast('Could not restore dataset: ' + err.message, 'err');
+  }
+}
+
+/* ── Save import to Firestore ──────────────────────── */
+async function saveImportToFirestore(dealers, diag, meta) {
+  if(!FBDB || STATE.role !== 'admin') return;
+  setLoading(true, 'Saving dataset to Firestore…');
+  try {
+    const importId  = 'import_' + Date.now();
+    const importRef = FBDB.collection('imports').doc(importId);
+    const now       = firebase.firestore.FieldValue.serverTimestamp();
+
+    const ptrData = {
+      import_id:          importId,
+      uploaded_by_uid:    STATE.uid,
+      uploaded_by_name:   STATE.userProfile?.name || '',
+      uploaded_at:        now,
+      file_name:          diag.fileName || 'unknown',
+      available_months:   diag.fy27_months_available || [],
+      dealer_count:       dealers.length,
+      fy27_sales_lakhs:   diag.fy27_sales_lakhs || 0,
+      fy26_sales_lakhs:   diag.fy26_sales_lakhs || 0,
+      status:             'active',
+    };
+
+    // 1. Archive previous active import (non-blocking)
+    if(STATE.activeImportId) {
+      FBDB.collection('imports').doc(STATE.activeImportId)
+          .update({ status: 'archived' }).catch(() => {});
+    }
+
+    // 2. Write import header doc
+    await importRef.set(ptrData);
+
+    // 3. Write diagnostics to meta/summary subcollection
+    await importRef.collection('meta').doc('summary').set({ diagnostics: diag });
+
+    // 4. Write dealers in parallel batches (Firestore batch max = 500 ops)
+    const BATCH_SIZE = 400;
+    for(let i = 0; i < dealers.length; i += BATCH_SIZE) {
+      const batch = FBDB.batch();
+      const chunk = dealers.slice(i, i + BATCH_SIZE);
+      chunk.forEach(d => {
+        const key     = d.mobile || normName(d.name).replace(/\s/g, '_').slice(0, 50);
+        const docRef  = importRef.collection('dealers').doc(key);
+        // Omit computed heavy fields that can be recalculated on load
+        const toStore = { ...d };
+        batch.set(docRef, toStore);
+      });
+      await batch.commit();
+      setLoading(true, `Saving dealers… ${Math.min(i + BATCH_SIZE, dealers.length)}/${dealers.length}`);
+    }
+
+    // 5. Update appState/currentImport pointer
+    await FBDB.collection('appState').doc('currentImport').set(ptrData);
+
+    STATE.activeImportId = importId;
+    STATE.importMeta     = ptrData;
+
+    setLoading(false);
+    toast(`Saved to Firestore: ${dealers.length} dealers`, 'ok');
+    return importId;
+  } catch(err) {
+    setLoading(false);
+    toast('Firestore save failed: ' + err.message, 'err');
+    console.error('saveImportToFirestore:', err);
+    return null;
+  }
+}
+
+/* ── 14i: Extended handleFile to persist to Firestore ─ */
+async function handleFileProduction(file) {
+  if(!file) return;
+  if(!file.name.match(/\.xlsx?$/i)) { toast('Please upload an .xlsx file', 'err'); return; }
+
+  const srcBadge = $('src-badge');
+  srcBadge.textContent = 'PARSING…';
+  srcBadge.className   = 'src-badge demo';
+  setLoading(true, `Parsing ${file.name}…`);
+
+  const arrayBuf = await file.arrayBuffer();
+  let dealers, diag, availableMonths;
+  try {
+    const wb = XLSX.read(new Uint8Array(arrayBuf), { type:'array', cellDates:false });
+    ({ dealers, diag, availableMonths } = importWorkbook(wb, file.name));
+  } catch(err) {
+    setLoading(false);
+    toast('Parse error: ' + err.message, 'err');
+    return;
+  }
+
+  if(diag.errors.length && !dealers.length) {
+    setLoading(false);
+    toast('Import failed: ' + diag.errors[0], 'err');
+    renderDiagnostics(diag);
+    srcBadge.textContent = 'ERROR';
+    return;
+  }
+
+  // Update in-memory state immediately
+  STATE.dealers    = dealers;
+  STATE.diag       = diag;
+  STATE.dataLoaded = true;
+  STATE.filters    = { zone:'', terr:'', asm:'', type:'', tod:'', search:'' };
+  populateFilters(dealers);
+  applyFilters();
+  applyRoleScope(STATE.userProfile);
+
+  srcBadge.className   = 'src-badge upload';
+  srcBadge.textContent = 'UPLOAD';
+
+  const wb2 = $('wb-status');
+  if(wb2) {
+    wb2.textContent = `✔ ${file.name} — ${dealers.length} dealers`;
+    wb2.className   = 'ds-status on';
+  }
+  const ur = $('upload-result');
+  if(ur) {
+    ur.className   = 'upload-result ok';
+    ur.textContent = `✅ ${dealers.length} dealers · FY27: ${fL(diag.fy27_sales_lakhs||0)} · FY26: ${fL(diag.fy26_sales_lakhs||0)}`;
+    ur.classList.remove('hidden');
+  }
+
+  renderDiagnostics(diag);
+  renderDashboard();
+  renderAllDealersPage();
+
+  // Persist to Firestore (admin only, non-blocking for UI)
+  if(FBDB && STATE.role === 'admin') {
+    await saveImportToFirestore(dealers, diag, {});
+    srcBadge.textContent = 'FIRESTORE';
+  } else {
+    setLoading(false);
+  }
+
+  // Navigate to dashboard
+  if(STATE.page === 'data-sources') navigateTo('dashboard');
+  toast(`Loaded ${dealers.length} dealers — FY27 YTD ${fL(diag.fy27_sales_lakhs||0)}`, 'ok');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION 14J — DEV MODE (local-only fallback)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const DEV_CREDS = {
+  'admin@dev.local': { pass:'admin123', role:'admin', name:'Dev Admin', asm_code:'' },
+  'asm@dev.local':   { pass:'asm123',   role:'asm',   name:'Dev ASM',   asm_code:'EMP001' },
+  'viewer@dev.local':{ pass:'view123',  role:'viewer', name:'Dev Viewer', asm_code:'' },
 };
 
-function boot(user) {
-  AUTH.user   = user;
-  STATE.role  = user.role;
-  $('login-screen').style.display = 'none';
-  $('app-shell').classList.remove('hidden');
-  const init  = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  $('sb-av').textContent    = init;
-  $('tb-av').textContent    = init;
-  $('sb-un').textContent    = user.name;
-  $('tb-un').textContent    = user.name.split(' ')[0];
-  $('sb-ur').textContent    = user.role === 'admin' ? 'Administrator' : 'View-Only';
+function devBoot(email, pass) {
+  const c = DEV_CREDS[email];
+  if(!c || c.pass !== pass) { showLoginError('Invalid dev credentials.'); return; }
+  setLoading(false);
+  hideLoginScreen();
+  // Simulate boot without Firebase
+  STATE.role        = c.role;
+  STATE.userProfile = c;
+  STATE.uid         = 'dev-uid';
+  const name = c.name;
+  const init = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  $('sb-av').textContent = init; $('tb-av').textContent = init;
+  $('sb-un').textContent = name; $('tb-un').textContent = name.split(' ')[0];
+  const roleLabels = { admin:'Administrator', asm:'ASM', viewer:'View Only' };
+  $('sb-ur').textContent = roleLabels[c.role] || c.role;
+  const rb = $('role-badge');
+  rb.textContent = c.role; rb.className = `role-badge ${c.role}`; rb.classList.remove('hidden');
+  applyRoleScope(c);
+  showApp();
   renderDashboard();
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SECTION 15 — PWA
+   SECTION 15 — UI STATE HELPERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function setLoading(show, msg='') {
+  $('loading-screen').style.display = show ? 'flex' : 'none';
+  if(msg) $('loading-msg').textContent = msg;
+}
+function showLoginScreen() {
+  $('login-screen').style.display = 'flex';
+  if(DEV_MODE) {
+    $('dev-demo-section').classList.remove('hidden');
+    $('login-hint-text').style.display = 'block';
+  }
+}
+function hideLoginScreen() { $('login-screen').style.display = 'none'; }
+function showApp() {
+  $('app-shell').classList.remove('hidden');
+  $('loading-screen').style.display = 'none';
+}
+function hideApp() {
+  $('app-shell').classList.add('hidden');
+}
+function showAccessDenied(msg) {
+  setLoading(false);
+  hideLoginScreen();
+  hideApp();
+  $('denied-msg').textContent = msg;
+  $('access-denied-screen').style.display = 'flex';
+}
+function showCriticalError(msg) {
+  $('loading-msg').textContent = '❌ ' + msg;
+  // Leave loading screen up to block content
+}
+function showLoginError(msg) {
+  $('login-err').textContent = msg;
+  $('login-err').classList.remove('hidden');
+}
+function setLoginBusy(busy) {
+  const btn = $('login-btn');
+  btn.disabled   = busy;
+  btn.textContent = busy ? 'Signing in…' : 'Sign In →';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION 16 — PWA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 let deferredInstallPrompt = null;
 const isStandalone = window.matchMedia('(display-mode:standalone)').matches || navigator.standalone;
@@ -1750,36 +2240,59 @@ $('pwa-install-btn').addEventListener('click', async () => {
 $('pwa-dismiss-btn').addEventListener('click', () => $('pwa-banner').classList.remove('show'));
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SECTION 16 — INIT & EVENT LISTENERS
+   SECTION 17 — INIT & EVENT LISTENERS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Login ─────────────────────────────────────────────
-  function attemptLogin() {
-    const u = $('lu').value.trim();
-    const p = $('lp').value;
-    const r = AUTH.loginLocal(u, p);
-    if(r.ok) {
-      $('login-err').classList.add('hidden');
-      boot(r.user);
+  // ── Bootstrap: start with loading screen, init Firebase ──
+  setLoading(true, 'Initialising…');
+  initFirebase();
+
+  // ── Login form ────────────────────────────────────────
+  async function attemptLogin() {
+    const email = $('lu').value.trim();
+    const pass  = $('lp').value;
+    if(!email || !pass) { showLoginError('Enter your email and password.'); return; }
+    $('login-err').classList.add('hidden');
+
+    if(DEV_MODE) {
+      devBoot(email, pass);
     } else {
-      $('login-err').textContent = r.error;
-      $('login-err').classList.remove('hidden');
+      await loginWithEmailPassword(email, pass);
     }
   }
   $('login-btn').addEventListener('click', attemptLogin);
-  $('lp').addEventListener('keydown', e => { if(e.key==='Enter') attemptLogin(); });
-  $('demo-admin').addEventListener('click', () => boot({ username:'admin', role:'admin', name:'Admin User' }));
-  $('demo-viewer').addEventListener('click', () => boot({ username:'demo', role:'viewer', name:'Demo User' }));
-  $('logout-btn').addEventListener('click', () => { if(confirm('Log out?')) location.reload(); });
+  $('lp').addEventListener('keydown', e => { if(e.key === 'Enter') attemptLogin(); });
+
+  // Dev-mode demo buttons (only visible when DEV_MODE = true)
+  const da = $('demo-admin'),  dv = $('demo-viewer');
+  if(da) da.addEventListener('click', () => devBoot('admin@dev.local', 'admin123'));
+  if(dv) dv.addEventListener('click', () => devBoot('viewer@dev.local', 'view123'));
+
+  // ── Logout ────────────────────────────────────────────
+  $('logout-btn').addEventListener('click', async () => {
+    if(!confirm('Sign out?')) return;
+    if(DEV_MODE || !FBAUTH) {
+      STATE.dealers = []; STATE.dataLoaded = false;
+      hideApp(); showLoginScreen();
+    } else {
+      await logout();
+    }
+  });
+
+  // ── Access denied sign-out button ─────────────────────
+  $('denied-signout-btn').addEventListener('click', async () => {
+    $('access-denied-screen').style.display = 'none';
+    if(FBAUTH) await FBAUTH.signOut().catch(() => {});
+    showLoginScreen();
+  });
 
   // ── Sidebar ───────────────────────────────────────────
   $('sb-toggle').addEventListener('click', () => {
     const shell = $('app-shell');
     shell.classList.toggle('sc');
-    if(window.innerWidth <= 768) {
+    if(window.innerWidth <= 768)
       $('sb-backdrop').style.display = shell.classList.contains('sc') ? 'none' : 'block';
-    }
   });
   $('sb-backdrop').addEventListener('click', () => {
     $('app-shell').classList.add('sc');
@@ -1787,17 +2300,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ── Navigation ────────────────────────────────────────
-  qsa('.nav-item[data-page]').forEach(el => {
-    el.addEventListener('click', () => navigateTo(el.dataset.page));
-  });
+  qsa('.nav-item[data-page]').forEach(el =>
+    el.addEventListener('click', () => navigateTo(el.dataset.page))
+  );
 
   // ── Filters ───────────────────────────────────────────
   $('apply-filters').addEventListener('click', () => {
-    STATE.filters.zone  = $('f-zone').value;
-    STATE.filters.terr  = $('f-terr').value;
-    STATE.filters.asm   = $('f-asm').value;
-    STATE.filters.type  = $('f-type').value;
-    STATE.filters.tod   = $('f-tod').value;
+    STATE.filters.zone = $('f-zone').value;
+    STATE.filters.terr = $('f-terr').value;
+    STATE.filters.asm  = $('f-asm').value;
+    STATE.filters.type = $('f-type').value;
+    STATE.filters.tod  = $('f-tod').value;
     renderDashboard();
   });
   $('reset-filters').addEventListener('click', () => {
@@ -1813,19 +2326,26 @@ document.addEventListener('DOMContentLoaded', () => {
     $('dealer-count').textContent = `${STATE.filtered.length} dealers`;
   });
 
-  // ── File Upload Handlers ───────────────────────────────
-  const setupUpload = (inputId, areaId=null) => {
+  // ── File Upload (routes through handleFileProduction) ──
+  const setupUpload = (inputId, areaId = null) => {
     const input = $(inputId);
     if(!input) return;
-    input.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); e.target.value=''; });
+    input.addEventListener('change', async e => {
+      if(e.target.files[0]) await handleFileProduction(e.target.files[0]);
+      e.target.value = '';
+    });
     if(areaId) {
       const area = $(areaId);
-      area.addEventListener('click', () => input.click());
+      area.addEventListener('click', () => {
+        if(STATE.role !== 'admin') { toast('Only admins can upload data', 'err'); return; }
+        input.click();
+      });
       area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag'); });
       area.addEventListener('dragleave', () => area.classList.remove('drag'));
-      area.addEventListener('drop', e => {
+      area.addEventListener('drop', async e => {
         e.preventDefault(); area.classList.remove('drag');
-        if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+        if(STATE.role !== 'admin') { toast('Only admins can upload data', 'err'); return; }
+        if(e.dataTransfer.files[0]) await handleFileProduction(e.dataTransfer.files[0]);
       });
     }
   };
@@ -1835,7 +2355,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Modal ─────────────────────────────────────────────
   $('modal-close').addEventListener('click', closeModal);
-  $('dealer-modal').addEventListener('click', e => { if(e.target===$('dealer-modal')) closeModal(); });
+  $('dealer-modal').addEventListener('click', e => { if(e.target === $('dealer-modal')) closeModal(); });
 
   // ── Theme ─────────────────────────────────────────────
   $('theme-btn').addEventListener('click', () => {
@@ -1849,31 +2369,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 120);
   });
 
-  // ── Sample download ────────────────────────────────────
+  // ── Sample template download ───────────────────────────
   $('dl-sample-btn').addEventListener('click', () => {
     if(typeof XLSX === 'undefined') { toast('XLSX library not loaded', 'err'); return; }
-    // Generate a minimal sample workbook with the required schema
     const wb = XLSX.utils.book_new();
-    const pHeaders = ['','','S.No','Existing/New','Email ID','Phone No','Dealer Name','Location','CRM Activate Date','ASM EMP Code','ASM Name','Region','Zone','UEOB FY26','FY27 OBK AOP','FY27 ORP AOP','FY27 Sales AOP','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26','Jan-27','Feb-27','Mar-27','FY27 Actual - Sales','% of FY27 Actual','FY26 Target - Sales','Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26','FY26 Actual - Sales','% of FY26 Actual','Growth Vs FY26 Actual vs FY27 Sales','Comments','TOD Letter Sent Status','Target as on 27 Apr 26','Changes from Last Target'];
-    const pRow1 = ['','','1','Existing','dealer@email.com','9876543210','Sample Hardware Pvt Ltd','Delhi','01-Jan-25','EMP001','Rajesh Kumar','N3','Delhi NCR',320,650,620,480,18,28,0,0,0,0,0,0,0,0,0,0,46,0.096,250,8,22,14,0,0,0,0,0,0,0,0,0,175,0.7,1.52,'','TOD Letter Sent',480,''];
-    const pRow2 = ['','','2','New','new@email.com','9988776655','New Dealer Agency','Mumbai','05-Mar-25','EMP002','Priya Singh','W1','West',0,200,190,150,5,8,0,0,0,0,0,0,0,0,0,0,13,0.087,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',150,''];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([pHeaders, pRow1, pRow2]), 'Dealer Target Fy27');
+    const pH = ['','','S.No','Existing/New','Email ID','Phone No','Dealer Name','Location','CRM Activate Date','ASM EMP Code','ASM Name','Region','Zone','UEOB FY26','FY27 OBK AOP','FY27 ORP AOP','FY27 Sales AOP','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26','Jan-27','Feb-27','Mar-27','FY27 Actual - Sales','% of FY27 Actual','FY26 Target - Sales','Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26','FY26 Actual - Sales','% of FY26 Actual','Growth Vs FY26 Actual vs FY27 Sales','Comments','TOD Letter Sent Status','Target as on 27 Apr 26','Changes from Last Target'];
+    const pR1 = ['','','1','Existing','dealer@email.com','9876543210','Sample Hardware Pvt Ltd','Delhi','01-Jan-25','EMP001','Rajesh Kumar','N3','Delhi NCR',320,650,620,480,18,28,0,0,0,0,0,0,0,0,0,0,46,0.096,250,8,22,14,0,0,0,0,0,0,0,0,0,175,0.7,1.52,'','TOD Letter Sent',480,''];
+    const pR2 = ['','','2','New','new@email.com','9988776655','New Dealer Agency','Mumbai','05-Mar-25','EMP002','Priya Singh','W1','West',0,200,190,150,5,8,0,0,0,0,0,0,0,0,0,0,13,0.087,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',150,''];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([pH,pR1,pR2]), 'Dealer Target Fy27');
     const s27H = ['Month','Invoice Date','Dealer Name','Mobile No','Final basic Value ( without Inst)','Territory','ASM Name','ASM EMP CODE','City','State','Dealer/Direct','Segment'];
-    const s27R1 = ['Apr-26','01-Apr-26','Sample Hardware Pvt Ltd','9876543210',1800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window'];
-    const s27R2 = ['May-26','10-May-26','Sample Hardware Pvt Ltd','9876543210',2800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window'];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s27H, s27R1, s27R2]), 'FY27 Dump');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s27H,['Apr-26','01-Apr-26','Sample Hardware Pvt Ltd','9876543210',1800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window'],['May-26','10-May-26','Sample Hardware Pvt Ltd','9876543210',2800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window']]), 'FY27 Dump');
     const s26H = ['Month','Dealer Phone','Dealer Name','Final basic Value ( without Inst)','Territory','ASM Name','ASM EMP CODE','City','State','Dealer/Direct'];
-    const s26Rows = [['Apr-25','9876543210','Sample Hardware Pvt Ltd',800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer'],
-                     ['May-25','9876543210','Sample Hardware Pvt Ltd',2200000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer'],
-                     ['Jun-25','9876543210','Sample Hardware Pvt Ltd',1400000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer']];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s26H, ...s26Rows]), 'FY26 Dump');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s26H,['Apr-25','9876543210','Sample Hardware Pvt Ltd',800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer'],['May-25','9876543210','Sample Hardware Pvt Ltd',2200000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer']]), 'FY26 Dump');
     XLSX.writeFile(wb, 'ChannelIntel_Workbook_Template.xlsx');
-    toast('Sample template downloaded!', 'ok');
+    toast('Template downloaded!', 'ok');
   });
 
 });
 
-console.log('📊 Channel Intelligence loaded. Upload your workbook to begin.');
+console.log(`📊 Channel Intelligence | DEV_MODE=${DEV_MODE} | Firebase=${FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY' ? 'Configured' : 'Not Configured'}`);
 </script>
 </body>
 </html>
