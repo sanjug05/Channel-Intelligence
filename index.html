@@ -2671,71 +2671,173 @@ function validateROIHeaders(ws) {
 }
 
 // ── 18b: Parse + validate ROI sheet ─────────────────────
-function parseROISheet(ws, dealerByName, dealerByPartnerCode, masterDiag) {
+// Supports two layouts safely:
+//  (A) Flat single-header schema (Partner Code, Channel Partner Name, Month,
+//      Year, Revenue, Gross Margin %, OPEX Monthly, Windows CAPEX, ...)
+//  (B) Real-world annual P&L schema as found in the actual uploaded workbook
+//      (Dealer Class.. Phone No.. Dealer name.. Age in months..
+//      TOD Eligible Sales - DP.. Margin.. Showroom Making Cost..
+//      Display Material Cost.. Security Deposit.. Manpower/Overheads
+//      Monthly blocks). The header row is located dynamically since it is
+//      not row 0 in the real file.
+function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, masterDiag) {
   const fdiag = {
     total_rows:0, valid_rows:0, missing_partner_code:0, invalid_month_year:0,
     invalid_numeric:0, missing_tax_rate:0, duplicate_rows:0, unmapped_partners:0,
-    matched_by_code:0, matched_by_name:0, warnings:[], errors:[],
+    matched_by_code:0, matched_by_mobile:0, matched_by_name:0, warnings:[], errors:[],
   };
 
-  const headerCheck = validateROIHeaders(ws);
-  if(!headerCheck.ok) {
-    fdiag.errors.push(`ROI sheet is missing required column(s): ${headerCheck.missing.join(', ')}. Partner Financial Health is unavailable until this is fixed.`);
-    return { rows: [], fdiag, enabled: false };
+  const raw = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:'' });
+  if(!raw.length) { fdiag.errors.push('ROI sheet is empty.'); return { rows:[], fdiag, enabled:false }; }
+
+  // Locate the real header row — scan first 6 rows for one containing
+  // "Phone No" or "Partner Code" (handles group-label rows above it).
+  let hdrIdx = -1, hdr = null;
+  for(let i = 0; i < Math.min(6, raw.length); i++) {
+    const cells = raw[i].map(c => String(c||'').trim().toLowerCase());
+    if(cells.includes('phone no') || cells.includes('partner code')) { hdrIdx = i; hdr = raw[i].map(c => String(c||'').trim()); break; }
+  }
+  if(hdrIdx === -1) {
+    fdiag.errors.push('Could not locate the ROI sheet header row (expected a row containing "Phone No" or "Partner Code"). Financial Health is unavailable.');
+    return { rows:[], fdiag, enabled:false };
   }
 
-  const rows = XLSX.utils.sheet_to_json(ws, { raw:true, defval:'' });
-  fdiag.total_rows = rows.length;
+  const findCol = (...names) => {
+    for(const n of names) {
+      const idx = hdr.findIndex(h => h.toLowerCase() === n.toLowerCase());
+      if(idx !== -1) return idx;
+    }
+    return -1;
+  };
+
+  const C = {
+    partnerCode: findCol('Partner Code', 'Dealer Code'),
+    phone:       findCol('Phone No', 'Mobile No'),
+    name:        findCol('Channel Partner Name', 'Dealer name'),
+    revenue:     findCol('Revenue', 'TOD Eligible Sales - DP'),
+    gmPct:       findCol('Gross Margin %', 'Margin'),
+    opexMonthly: findCol('OPEX Monthly'),
+    windowsCapex:  findCol('Windows CAPEX', 'Display Material Cost'),
+    showroomCapex: findCol('Showroom Build CAPEX', 'Showroom Making Cost'),
+    securityDep: findCol('Refundable Security Deposit', 'Security Deposit'),
+    taxRate:     findCol('Tax Rate %'),
+    startDate:   findCol('Partner Start Date', 'Appointment Date'),
+    ageMonths:   findCol('Partner Age Months', 'Age in months'),
+    scenario:    findCol('Scenario'),
+    month:       findCol('Month'),
+    year:        findCol('Year'),
+    particulars: findCol('Particulars'),
+    notes:       findCol('Notes'),
+    updBy:       findCol('Last Updated By'),
+    updOn:       findCol('Last Updated On'),
+  };
+
+  const missingCore = [];
+  if(C.phone === -1 && C.partnerCode === -1) missingCore.push('Partner Code or Phone No');
+  if(C.name === -1) missingCore.push('Channel Partner Name or Dealer name');
+  if(C.revenue === -1) missingCore.push('Revenue or TOD Eligible Sales - DP');
+  if(C.gmPct === -1) missingCore.push('Gross Margin % or Margin');
+  if(missingCore.length) {
+    fdiag.errors.push(`ROI sheet is missing required column(s): ${missingCore.join(', ')}.`);
+    return { rows:[], fdiag, enabled:false };
+  }
+
+  // Real-world schema has no single OPEX Monthly column — instead it has
+  // separate Manpower and Overheads "Monthly" blocks (run-rate, not YTM).
+  const isFlatSchema = C.opexMonthly !== -1;
+  let manpowerMonthlyCols = [], overheadMonthlyCols = [];
+  if(!isFlatSchema) {
+    const mStart = findCol('Manpower Salary');
+    const oStart = findCol('Rental');
+    if(mStart !== -1) manpowerMonthlyCols = [0,1,2,3,4].map(o => mStart+o);
+    if(oStart !== -1) overheadMonthlyCols = [0,1,2,3,4,5,6].map(o => oStart+o);
+  }
+
+  const dataRows = raw.slice(hdrIdx + 1);
+  fdiag.total_rows = dataRows.length;
   const seenKeys = new Set();
   const unmappedCodes = new Set();
+  let fyDefaultedCount = 0;
   const out = [];
 
-  for(const r of rows) {
-    const code = normPartnerCode(r['Partner Code']);
-    const name = String(r['Channel Partner Name']||'').trim();
-    if(!code) { fdiag.missing_partner_code++; continue; }
+  for(const r of dataRows) {
+    const codeRaw  = C.partnerCode !== -1 ? r[C.partnerCode] : '';
+    const phoneRaw = C.phone !== -1 ? r[C.phone] : '';
+    const name = C.name !== -1 ? String(r[C.name]||'').trim() : '';
+    const code = normPartnerCode(codeRaw);
+    const mobile = normMobile(phoneRaw);
+    if(!code && !mobile && !name) { fdiag.missing_partner_code++; continue; }
 
-    const monthRaw = r['Month'];
-    const month = excelSerialToLabel(monthRaw) || String(monthRaw||'').trim();
-    const yearNum = parseInt(String(r['Year']||'').replace(/[^\d]/g,''), 10);
+    let month, yearNum;
+    if(C.month !== -1 && C.year !== -1 && r[C.month] !== '' && r[C.year] !== '') {
+      month = excelSerialToLabel(r[C.month]) || String(r[C.month]||'').trim();
+      yearNum = parseInt(String(r[C.year]||'').replace(/[^\d]/g,''), 10);
+    } else {
+      // No explicit Month/Year — derive a stable snapshot period from the
+      // fiscal-year label (e.g. "FY26" -> Mar-26 / 2026, the FY's close).
+      const fyLabel = C.particulars !== -1 ? String(r[C.particulars]||'').trim() : '';
+      const fyMatch = fyLabel.match(/FY\s*(\d{2})/i);
+      const fyEndYY = fyMatch ? fyMatch[1] : '26';
+      if(!fyMatch) fyDefaultedCount++;
+      month = `Mar-${fyEndYY}`;
+      yearNum = 2000 + parseInt(fyEndYY, 10);
+    }
     const monthOk = /^[A-Za-z]{3}-\d{2}$/.test(month);
     const yearOk  = yearNum >= 2000 && yearNum <= 2100;
     if(!monthOk || !yearOk) { fdiag.invalid_month_year++; continue; }
 
-    const scenario = String(r['Scenario']||'Base').trim() || 'Base';
-    const dedupeKey = `${code}|${month}|${yearNum}|${scenario}`;
+    const scenario = C.scenario !== -1 ? (String(r[C.scenario]||'Base').trim() || 'Base') : 'Base';
+    const dedupeKey = `${code||mobile}|${month}|${yearNum}|${scenario}`;
     if(seenKeys.has(dedupeKey)) { fdiag.duplicate_rows++; continue; }
     seenKeys.add(dedupeKey);
 
-    [['Revenue',r['Revenue']], ['Gross Margin %',r['Gross Margin %']], ['OPEX Monthly',r['OPEX Monthly']]].forEach(([,raw]) => {
-      if(raw !== '' && isNaN(parseFloat(String(raw).replace(/[₹,%\s]/g,'')))) fdiag.invalid_numeric++;
+    [['Revenue', r[C.revenue]], ['Gross Margin', r[C.gmPct]]].forEach(([,rawV]) => {
+      if(rawV !== '' && isNaN(parseFloat(String(rawV).replace(/[₹,%\s]/g,'')))) fdiag.invalid_numeric++;
     });
 
-    let revenue = parseNum(r['Revenue'], null);
-    const gmPct  = parseNum(r['Gross Margin %'], 0);
-    const opex   = parseNum(r['OPEX Monthly'], 0);
-    const capexW = parseNum(r['Windows CAPEX'], 0);
-    const capexS = parseNum(r['Showroom Build CAPEX'], 0);
-    const secDep = parseNum(r['Refundable Security Deposit'], 0);
-    let taxRate  = r['Tax Rate %'] !== '' ? parseNum(r['Tax Rate %'], null) : null;
-    const ageMonths = r['Partner Age Months'] !== '' ? parseNum(r['Partner Age Months'], null) : null;
-    const startDate = String(r['Partner Start Date']||'').trim();
-    const notes = String(r['Notes']||'').trim();
-    const updBy = String(r['Last Updated By']||'').trim();
-    const updOn = String(r['Last Updated On']||'').trim();
+    let revenue = parseNum(r[C.revenue], null);
+    const gmRaw = parseNum(r[C.gmPct], 0);
+    const gmPct = gmRaw <= 1 ? gmRaw * 100 : gmRaw; // sheet may store Margin as 0..1 fraction
+
+    let opex;
+    if(isFlatSchema) {
+      opex = parseNum(r[C.opexMonthly], 0);
+    } else {
+      opex = manpowerMonthlyCols.reduce((s,ci) => s + parseNum(r[ci],0), 0) +
+             overheadMonthlyCols.reduce((s,ci) => s + parseNum(r[ci],0), 0);
+    }
+
+    const capexW = C.windowsCapex !== -1 ? parseNum(r[C.windowsCapex], 0) : 0;
+    const capexS = C.showroomCapex !== -1 ? parseNum(r[C.showroomCapex], 0) : 0;
+    const secDep = C.securityDep !== -1 ? parseNum(r[C.securityDep], 0) : 0;
+    let taxRate  = C.taxRate !== -1 && r[C.taxRate] !== '' ? parseNum(r[C.taxRate], null) : null;
+    const ageMonths = C.ageMonths !== -1 && r[C.ageMonths] !== '' ? parseNum(r[C.ageMonths], null) : null;
+    const startDateRaw = C.startDate !== -1 ? r[C.startDate] : '';
+    const startDate = excelSerialToLabel(startDateRaw) || String(startDateRaw||'').trim();
+    const notes = C.notes !== -1 ? String(r[C.notes]||'').trim() : '';
+    const updBy = C.updBy !== -1 ? String(r[C.updBy]||'').trim() : '';
+    const updOn = C.updOn !== -1 ? String(r[C.updOn]||'').trim() : '';
 
     let taxDefaulted = false;
     if(taxRate === null || isNaN(taxRate)) { taxRate = FINANCE_CONFIG.DEFAULT_TAX_RATE_PCT; taxDefaulted = true; fdiag.missing_tax_rate++; }
 
-    let dealer = dealerByPartnerCode.get(code) || null;
+    // Match cascade: Partner Code -> Mobile -> Name. Mobile is the most
+    // reliable identifier in the real workbook (always filled); Partner
+    // Code there is sparse (~53% filled) and the dealer master has no
+    // partner-code field at all, so mobile is checked before name.
+    let dealer = (code && dealerByPartnerCode.get(code)) || null;
     let matchType = dealer ? 'partner_code' : null;
+    if(!dealer && mobile) { dealer = dealerByMobile.get(mobile) || null; if(dealer) matchType = 'mobile'; }
     if(!dealer) {
       const nn = normName(name);
       dealer = dealerByName.get(nn) || null;
       if(dealer) matchType = 'name';
     }
-    if(dealer) { matchType === 'partner_code' ? fdiag.matched_by_code++ : fdiag.matched_by_name++; }
-    else { matchType = 'unmapped'; unmappedCodes.add(code); }
+    if(dealer) {
+      if(matchType === 'partner_code') fdiag.matched_by_code++;
+      else if(matchType === 'mobile') fdiag.matched_by_mobile++;
+      else fdiag.matched_by_name++;
+    } else { matchType = 'unmapped'; unmappedCodes.add(code || mobile || normName(name)); }
 
     if((revenue === null || revenue <= 0) && dealer) {
       revenue = dealer.fy27_monthly_dump[month] || dealer.fy26_monthly_dump[month] ||
@@ -2745,7 +2847,8 @@ function parseROISheet(ws, dealerByName, dealerByPartnerCode, masterDiag) {
 
     fdiag.valid_rows++;
     out.push({
-      partner_code: code, partner_name: name || (dealer ? dealer.name : code), month, year: yearNum, scenario,
+      partner_code: code || mobile || normPartnerCode(name),
+      partner_name: name || (dealer ? dealer.name : (code||mobile)), month, year: yearNum, scenario,
       revenue, gross_margin_pct: gmPct, opex_monthly: opex,
       windows_capex: capexW, showroom_capex: capexS, security_deposit: secDep,
       tax_rate_pct: taxRate, tax_rate_defaulted: taxDefaulted,
@@ -2760,12 +2863,14 @@ function parseROISheet(ws, dealerByName, dealerByPartnerCode, masterDiag) {
   }
 
   fdiag.unmapped_partners = unmappedCodes.size;
-  if(fdiag.missing_partner_code) fdiag.warnings.push(`${fdiag.missing_partner_code} ROI row(s) skipped — missing Partner Code.`);
+  if(fdiag.missing_partner_code) fdiag.warnings.push(`${fdiag.missing_partner_code} ROI row(s) skipped — no Partner Code, Phone, or Name to identify the dealer.`);
   if(fdiag.invalid_month_year) fdiag.warnings.push(`${fdiag.invalid_month_year} ROI row(s) skipped — invalid Month/Year.`);
-  if(fdiag.duplicate_rows) fdiag.warnings.push(`${fdiag.duplicate_rows} duplicate ROI row(s) skipped (same Partner Code + Month + Year + Scenario).`);
+  if(fdiag.duplicate_rows) fdiag.warnings.push(`${fdiag.duplicate_rows} duplicate ROI row(s) skipped (same Partner + Period + Scenario).`);
   if(fdiag.missing_tax_rate) fdiag.warnings.push(`${fdiag.missing_tax_rate} row(s) had no Tax Rate — defaulted to ${FINANCE_CONFIG.DEFAULT_TAX_RATE_PCT}%.`);
-  if(fdiag.unmapped_partners) fdiag.warnings.push(`${fdiag.unmapped_partners} partner code(s) could not be matched to the dealer master — shown under "Unmapped".`);
+  if(fdiag.unmapped_partners) fdiag.warnings.push(`${fdiag.unmapped_partners} partner(s) could not be matched to the dealer master — shown under "Unmapped".`);
   if(fdiag.invalid_numeric) fdiag.warnings.push(`${fdiag.invalid_numeric} numeric field(s) could not be parsed and were treated as 0.`);
+  if(fyDefaultedCount) fdiag.warnings.push(`${fyDefaultedCount} row(s) had no fiscal-year label — defaulted to FY26 (Mar-26).`);
+  if(!isFlatSchema) fdiag.warnings.push(`Detected the annual P&L-style ROI layout — OPEX Monthly computed from the genuine monthly run-rate columns (Manpower + Overheads); Month/Year synthesized from the fiscal-year label since this layout has no explicit Month/Year columns.`);
 
   return { rows: out, fdiag, enabled: out.length > 0 };
 }
