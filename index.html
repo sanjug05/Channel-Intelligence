@@ -306,6 +306,94 @@ input,select{font-family:inherit;font-size:inherit}
 [data-admin-only]{transition:opacity .2s}
 [data-admin-only].role-hidden{display:none!important}
 
+/* ── Finance: tab bar ── */
+.fin-tabbar{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;padding-bottom:8px;margin-bottom:12px;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fin-tabbar::-webkit-scrollbar{display:none}
+.fin-tab{flex-shrink:0;padding:7px 12px;border-radius:20px;font-size:11px;font-weight:600;color:var(--t2);background:var(--bg);border:1px solid var(--border);cursor:pointer;white-space:nowrap;transition:.15s}
+.fin-tab:hover{border-color:var(--p);color:var(--p)}
+.fin-tab.active{background:var(--p);color:#fff;border-color:var(--p)}
+.fin-subpage{display:none}
+.fin-subpage.active{display:block;animation:fadeIn .15s ease}
+
+/* ── Finance: rollup/scenario bar ── */
+.fin-rollup-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px}
+.scenario-pills{display:flex;gap:5px}
+.scenario-pill{padding:6px 12px;border-radius:var(--r-sm);font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--bg);color:var(--t2);cursor:pointer;transition:.15s}
+.scenario-pill:hover{border-color:var(--p)}
+.scenario-pill.active{background:var(--p);color:#fff;border-color:var(--p)}
+.scenario-pill.upside.active{background:var(--ok);border-color:var(--ok)}
+.scenario-pill.stress.active{background:var(--err);border-color:var(--err)}
+
+/* ── Finance: empty state ── */
+.fin-empty{text-align:center;padding:50px 16px;color:var(--t3)}
+.fin-empty .ico{font-size:42px;margin-bottom:10px;opacity:.4}
+.fin-empty h3{font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px}
+.fin-empty p{font-size:12px;line-height:1.6;max-width:380px;margin:0 auto 14px}
+
+/* ── RAG badges ── */
+.rag-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:20px}
+.rag-badge.healthy{background:var(--okt);color:var(--ok)}
+.rag-badge.watchlist{background:var(--warnt);color:var(--warn)}
+.rag-badge.critical{background:var(--errt);color:var(--err)}
+.rag-badge.early_stage{background:var(--infot);color:var(--info)}
+.rag-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rag-dot.healthy{background:var(--ok)}
+.rag-dot.watchlist{background:var(--warn)}
+.rag-dot.critical{background:var(--err)}
+.rag-dot.early_stage{background:var(--info)}
+
+/* ── Benchmark bullet card ── */
+.benchmark-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px}
+.benchmark-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:4px}
+.benchmark-val{font-size:20px;font-weight:700}
+.benchmark-fd{font-size:11px;color:var(--t3)}
+.benchmark-bar-wrap{position:relative;height:14px;background:var(--bg);border-radius:7px;overflow:visible;margin:14px 0 6px}
+.benchmark-bar{height:100%;border-radius:7px;transition:width .5s}
+.benchmark-marker{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--t);opacity:.55}
+.benchmark-marker-lbl{position:absolute;top:-19px;font-size:9px;font-weight:700;color:var(--t2);white-space:nowrap;transform:translateX(-50%)}
+.benchmark-scale{display:flex;justify-content:space-between;font-size:9px;color:var(--t3)}
+
+/* ── Rank list ── */
+.rank-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border)}
+.rank-row{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--card);font-size:11px}
+.rank-num{width:18px;height:18px;border-radius:50%;background:var(--bg);color:var(--t2);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rank-name{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-sub{font-size:9px;color:var(--t3)}
+.rank-val{font-weight:700;font-size:12px;flex-shrink:0}
+
+/* ── P&L card ── */
+.pl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.pl-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 13px}
+.pl-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:6px}
+.pl-card-name{font-size:12px;font-weight:700;line-height:1.3}
+.pl-card-sub{font-size:9px;color:var(--t3);margin-top:1px}
+.pl-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px}
+.pl-row.sub{padding-left:8px;color:var(--t2);font-size:10px}
+.pl-row.total{border-top:1px solid var(--border);margin-top:3px;padding-top:5px;font-weight:700}
+.pl-row .pl-v.neg{color:var(--err)}
+.pl-row .pl-v.pos{color:var(--ok)}
+
+/* ── Finance KPI / fin-grid ── */
+.fin-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fin-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.scenario-compare-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;text-align:center}
+.scenario-compare-card .scn-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:5px}
+.scenario-compare-card .scn-val{font-size:16px;font-weight:700;line-height:1;margin-bottom:2px}
+.scenario-compare-card .scn-sub{font-size:9px;color:var(--t3)}
+
+/* ── Audit log ── */
+.audit-row{display:flex;flex-direction:column;gap:2px;padding:9px 11px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:6px;font-size:11px}
+.audit-row .a-top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.audit-row .a-action{font-weight:700}
+.audit-row .a-time{font-size:9px;color:var(--t3)}
+.audit-row .a-detail{font-size:10px;color:var(--t2)}
+
+/* ── Finance override inputs ── */
+.fin-override-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0}
+.fin-override-row input{width:70px;padding:5px 7px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px;text-align:right}
+.fin-override-row .btn-xs{flex-shrink:0}
+.early-flag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;color:var(--info);background:var(--infot);padding:2px 7px;border-radius:20px}
+
 /* ── Responsive ── */
 @media(max-width:1280px){#main-content{padding:13px}}
 @media(max-width:1100px){.charts-row{grid-template-columns:1fr}}
@@ -325,6 +413,9 @@ input,select{font-family:inherit;font-size:inherit}
   .modal-drawer{width:100vw}
   .stat-grid.c3,.stat-grid.c4{grid-template-columns:repeat(2,1fr)}
   .insight-bar{display:none}
+  .fin-grid-2{grid-template-columns:1fr}
+  .fin-grid-3{grid-template-columns:1fr}
+  .pl-grid{grid-template-columns:1fr}
 }
 @media(max-width:480px){
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
@@ -421,6 +512,8 @@ input,select{font-family:inherit;font-size:inherit}
       <div class="nav-item active" data-page="dashboard"><span class="nav-ico">🏠</span><span class="nav-lbl-text">Dashboard</span></div>
       <div class="nav-item" data-page="dealers"><span class="nav-ico">🤝</span><span class="nav-lbl-text">All Dealers</span></div>
       <div class="nav-item" data-page="analytics"><span class="nav-ico">📈</span><span class="nav-lbl-text">Analytics</span></div>
+      <div class="nav-lbl">Finance</div>
+      <div class="nav-item" data-page="finance" data-admin-only><span class="nav-ico">💹</span><span class="nav-lbl-text">Partner Financial Health</span></div>
       <div class="nav-lbl">Data</div>
       <div class="nav-item" data-page="data-sources"><span class="nav-ico">📂</span><span class="nav-lbl-text">Data Sources</span></div>
     </nav>
@@ -549,6 +642,32 @@ input,select{font-family:inherit;font-size:inherit}
         </div>
       </section>
 
+      <!-- ═══ PARTNER FINANCIAL HEALTH PAGE ═══ -->
+      <section id="page-finance" class="page">
+        <div class="sec-head" style="margin-bottom:10px">
+          <div><div class="sec-title">Partner Financial Health</div><div class="sec-sub">ROI Intelligence · Profitability Control · Payback Recovery</div></div>
+        </div>
+        <div class="fin-tabbar" id="fin-tabbar">
+          <div class="fin-tab active" data-finsub="summary">Financial Summary</div>
+          <div class="fin-tab" data-finsub="roi">ROI &amp; Benchmark</div>
+          <div class="fin-tab" data-finsub="ebitda">EBITDA / EBIT</div>
+          <div class="fin-tab" data-finsub="pl">Partner P&amp;L</div>
+          <div class="fin-tab" data-finsub="payback">Payback &amp; Recovery</div>
+          <div class="fin-tab" data-finsub="scenario">Scenario Planner</div>
+          <div class="fin-tab" data-finsub="grades">Health Grades</div>
+          <div class="fin-tab" data-finsub="audit">Audit Log</div>
+        </div>
+
+        <div id="fin-summary" class="fin-subpage active"></div>
+        <div id="fin-roi" class="fin-subpage"></div>
+        <div id="fin-ebitda" class="fin-subpage"></div>
+        <div id="fin-pl" class="fin-subpage"></div>
+        <div id="fin-payback" class="fin-subpage"></div>
+        <div id="fin-scenario" class="fin-subpage"></div>
+        <div id="fin-grades" class="fin-subpage"></div>
+        <div id="fin-audit" class="fin-subpage"></div>
+      </section>
+
       <!-- ═══ DATA SOURCES PAGE ═══ -->
       <section id="page-data-sources" class="page">
         <div class="sec-head" style="margin-bottom:14px">
@@ -577,7 +696,7 @@ input,select{font-family:inherit;font-size:inherit}
           <div class="upload-area" id="upload-area" data-admin-only>
             <div class="upload-ico">📂</div>
             <p>Drag &amp; drop your Excel workbook here, or click to browse</p>
-            <small>Accepts .xlsx · Expects: Dealer Target Fy27 · FY27 Dump · FY26 Dump</small>
+            <small>Accepts .xlsx · Expects: Dealer Target Fy27 · FY27 Dump · FY26 Dump · ROI (optional, for Financial Health)</small>
           </div>
           <input type="file" id="main-upload" accept=".xlsx,.xls" style="display:none">
           <div id="upload-result" class="hidden"></div>
@@ -593,6 +712,7 @@ input,select{font-family:inherit;font-size:inherit}
             <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📋 Dealer Target Fy27</div>Phone No · Dealer Name · Location · ASM Name · Region · Zone · FY27 Sales AOP · Monthly actuals (Apr-26 → Mar-27) · FY26 Actuals</div>
             <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📊 FY27 Dump</div>Mobile No · Dealer Name · Month · Final basic Value · Territory · ASM Name · ASM EMP CODE · City · State · Dealer/Direct</div>
             <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📊 FY26 Dump</div>Dealer Phone · Dealer Name · Month · Final basic Value · Territory · ASM Name · ASM EMP CODE · City · State · Dealer/Direct</div>
+            <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">💹 ROI <span style="font-weight:400;color:var(--t3)">(optional)</span></div>Partner Code · Channel Partner Name · Month · Year · Revenue · Gross Margin % · OPEX Monthly · Windows CAPEX · Showroom Build CAPEX · Refundable Security Deposit · Tax Rate % · Partner Start Date · Partner Age Months · Scenario</div>
           </div>
         </div>
 
@@ -632,6 +752,10 @@ input,select{font-family:inherit;font-size:inherit}
       <div class="msec"><div class="msec-title">FY26 Sales Performance</div><div class="stat-grid c3" id="m-fy26"></div></div>
       <div class="msec"><div class="msec-title">YoY Comparison</div><div class="stat-grid c3" id="m-yoy"></div></div>
       <div class="msec"><div class="msec-title">OBK · ORP · UEOB Targets</div><div class="stat-grid c3" id="m-obk"></div></div>
+      <div class="msec" id="m-finance-section">
+        <div class="msec-title">Partner Financial Health</div>
+        <div id="m-finance-body">—</div>
+      </div>
       <div class="msec">
         <div class="msec-title">Monthly Sales Trend — FY27 vs FY26 (Lakhs)</div>
         <div class="modal-chart-wrap"><canvas id="m-trend-chart"></canvas></div>
@@ -740,6 +864,39 @@ const TC = {
 
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const CHART_COLORS = ['#2563eb','#16a34a','#d97706','#7c3aed','#dc2626','#0891b2','#65a30d','#db2777'];
+const FY_MONTH_ORDER = {};
+[...FY26_MONTHS, ...FY27_MONTHS].forEach((m,i) => { FY_MONTH_ORDER[m] = i; });
+
+/* ── Partner Financial Health — centralized assumptions ──
+   ROI Base = Depreciable CAPEX + (OPEX Monthly × WORKING_CAPITAL_OPEX_MONTHS)
+   This treats invested capital as fixed assets plus one month of
+   operating cash buffer. Adjust WORKING_CAPITAL_OPEX_MONTHS if the
+   business prefers a pure-CAPEX ROI base. */
+const FINANCE_CONFIG = {
+  ASSET_LIFE_YEARS: 5,
+  WORKING_CAPITAL_OPEX_MONTHS: 1,
+  FD_BENCHMARK_PCT: 7,
+  DEFAULT_TAX_RATE_PCT: 25,
+  GRACE_PERIOD_MONTHS: 12,
+  SEVERE_LOSS_NET_MARGIN_PCT: -30,
+  SCENARIOS: {
+    Base:   { label:'Base',   revenueMult:1.00, marginDeltaPts:0,  opexMult:1.00 },
+    Upside: { label:'Upside', revenueMult:1.15, marginDeltaPts:3,  opexMult:0.95 },
+    Stress: { label:'Stress', revenueMult:0.80, marginDeltaPts:-4, opexMult:1.10 },
+  },
+  ROLLUP_LEVELS: [
+    { key:'overall',   label:'Overall',              field:null },
+    { key:'geo_zone',  label:'Zone',                 field:'geo_zone' },
+    { key:'territory', label:'Branch / Territory',   field:'territory' },
+    { key:'asm_name',  label:'ASM',                  field:'asm_name' },
+    { key:'rm',        label:'RM (ASM proxy)',       field:'asm_name' },
+    { key:'location',  label:'Showroom / Location',  field:'location' },
+    { key:'city',      label:'City',                 field:'city' },
+    { key:'state',     label:'State',                field:'state' },
+    { key:'partner',   label:'Partner',              field:null },
+  ],
+};
+const ROI_REQUIRED_COLS = ['Partner Code','Channel Partner Name','Month','Year','Revenue','Gross Margin %','OPEX Monthly'];
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 3 — APP STATE
@@ -754,6 +911,18 @@ const STATE = {
   role: 'viewer',
   page: 'dashboard',
   filters: { zone:'', terr:'', asm:'', type:'', tod:'', search:'' },
+};
+
+// Partner Financial Health namespace — kept separate from core dealer STATE
+STATE.finance = {
+  enabled: false,        // true once ROI sheet parsed with ≥1 valid row
+  rows: [],              // raw validated+calculated ROI rows (one per partner/month/scenario)
+  diag: null,            // finance ingestion diagnostics
+  rollupLevel: 'overall',
+  scenario: 'Base',
+  subpage: 'summary',
+  auditLog: [],          // local mirror of finance_audit_logs (admin only)
+  overrides: {},         // { partnerCode: { gross_margin_pct, tax_rate_pct } } admin edits
 };
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -868,6 +1037,7 @@ function detectSheets(wb) {
     target: find('dealer target','target fy','master'),
     fy27:   find('fy27 dump','fy27dump','fy2027','dump fy27'),
     fy26:   find('fy26 dump','fy26dump','fy2026','dump fy26'),
+    roi:    find('roi'),
     isExact: names.includes('Dealer Target Fy27') && names.includes('FY27 Dump') && names.includes('FY26 Dump'),
   };
 }
@@ -1148,7 +1318,19 @@ function importWorkbook(wb, fileName) {
   diag.matched_name   = (diag.fy27_matched_name||0)   + (diag.fy26_matched_name||0);
   diag.target_only    = dealers.filter(d => d.match_type === 'target_only').length;
 
-  return { dealers, diag, availableMonths };
+  // Partner Financial Health: parse ROI sheet if present (does not block core app on failure)
+  let financeRows = [], financeDiag = null;
+  const byPartnerCode = new Map(); // currently empty — future-proofed primary join key
+  if(sheets.roi) {
+    const roiResult = parseROISheet(wb.Sheets[sheets.roi], byName, byPartnerCode, diag);
+    financeRows = roiResult.rows;
+    financeDiag = roiResult.fdiag;
+  } else {
+    financeDiag = { total_rows:0, valid_rows:0, warnings:['ROI sheet not found in workbook — Partner Financial Health module will be unavailable until a workbook with an "ROI" sheet is uploaded.'], errors:[] };
+  }
+  diag.finance = financeDiag;
+
+  return { dealers, diag, availableMonths, financeRows, financeDiag };
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1465,6 +1647,7 @@ function openDealerModal(d) {
 
   $('dealer-modal').classList.remove('hidden');
   setTimeout(() => renderModalChart(d), 80);
+  renderPartnerFinanceSection(d);
 }
 
 function closeModal() { $('dealer-modal').classList.add('hidden'); destroyChart('m-trend-chart'); }
@@ -1748,11 +1931,21 @@ function renderDiagnostics(diag) {
     <div>FY27 dump: <strong>${sheets.fy27||'Not found'}</strong></div>
     <div>FY26 dump: <strong>${sheets.fy26||'Not found'}</strong></div>
     <div style="margin-top:4px">Sheets in workbook: ${(diag.sheetNames||[]).join(', ')}</div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      <strong>Partner Financial Health (ROI sheet):</strong>
+      ${sheets.roi
+        ? (diag.finance?.valid_rows
+            ? `<span class="mok">✅ "${sheets.roi}" — ${diag.finance.valid_rows} valid record(s), ${diag.finance.matched_by_code+diag.finance.matched_by_name} matched, ${diag.finance.unmapped_partners||0} unmapped</span>`
+            : `<span class="mwarn">⚠️ "${sheets.roi}" found but produced 0 usable rows</span>`)
+        : `<span class="mwarn">○ No ROI sheet found — Financial Health module unavailable</span>`}
+    </div>
   `;
   const warns = $('diag-warns');
   warns.innerHTML = '';
   (diag.warnings||[]).forEach(w => { warns.innerHTML += `<div class="diag-warn">⚠️ ${w}</div>`; });
   (diag.errors||[]).forEach(e  => { warns.innerHTML += `<div class="diag-err">❌ ${e}</div>`; });
+  (diag.finance?.warnings||[]).forEach(w => { warns.innerHTML += `<div class="diag-warn">⚠️ [Finance] ${w}</div>`; });
+  (diag.finance?.errors||[]).forEach(e  => { warns.innerHTML += `<div class="diag-err">❌ [Finance] ${e}</div>`; });
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1832,9 +2025,11 @@ function renderAllDealersPage() {
 const PAGE_TITLES = {
   dashboard:'Dashboard', dealers:'All Dealers',
   analytics:'Analytics', 'data-sources':'Data Sources',
+  finance:'Partner Financial Health',
 };
 
 function navigateTo(page) {
+  if(page === 'finance' && STATE.role !== 'admin') { toast('Partner Financial Health is admin-only.', 'err'); return; }
   STATE.page = page;
   qsa('.page').forEach(p => p.classList.remove('active'));
   qsa('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1849,6 +2044,9 @@ function navigateTo(page) {
   }
   if(page === 'dealers' && STATE.dataLoaded) {
     renderAllDealersPage();
+  }
+  if(page === 'finance') {
+    setTimeout(renderFinanceDashboard, 60);
   }
   if(window.innerWidth <= 768) {
     $('app-shell').classList.add('sc');
@@ -2059,6 +2257,7 @@ async function boot(firebaseUser, profile) {
 
   // Load latest active dataset from Firestore
   await loadActiveImport();
+  await loadFinanceAuditLog();
 
   setLoading(false);
   hideLoginScreen();
@@ -2158,6 +2357,19 @@ async function loadActiveImport() {
     const dico = $('ds-active-card')?.querySelector('.ds-status-ico');
     if(dico) dico.textContent = '✅';
 
+    // Restore Partner Financial Health data (self-contained rows — no re-matching needed)
+    try {
+      const finSnap = await FBDB.collection('imports').doc(importId).collection('finance_roi').get();
+      if(!finSnap.empty) {
+        STATE.finance.rows = finSnap.docs.map(d => d.data());
+        STATE.finance.enabled = STATE.finance.rows.length > 0;
+        STATE.finance.diag = meta.finance_diag || null;
+        if(dssub) dssub.textContent += ` · Finance: ${STATE.finance.rows.length} ROI record(s)`;
+      } else {
+        STATE.finance.rows = []; STATE.finance.enabled = false;
+      }
+    } catch(e) { console.warn('Finance data restore skipped:', e.message); }
+
     renderDiagnostics(diag);
   } catch(err) {
     console.error('loadActiveImport error:', err);
@@ -2166,7 +2378,7 @@ async function loadActiveImport() {
 }
 
 /* ── Save import to Firestore ──────────────────────── */
-async function saveImportToFirestore(dealers, diag, meta) {
+async function saveImportToFirestore(dealers, diag, meta, financeRows = []) {
   if(!FBDB || STATE.role !== 'admin') return;
   setLoading(true, 'Saving dataset to Firestore…');
   try {
@@ -2185,6 +2397,9 @@ async function saveImportToFirestore(dealers, diag, meta) {
       fy27_sales_lakhs:   diag.fy27_sales_lakhs || 0,
       fy26_sales_lakhs:   diag.fy26_sales_lakhs || 0,
       status:             'active',
+      finance_enabled:    financeRows.length > 0,
+      finance_row_count:  financeRows.length,
+      finance_diag:       diag.finance || null,
     };
 
     // 1. Archive previous active import (non-blocking)
@@ -2215,6 +2430,20 @@ async function saveImportToFirestore(dealers, diag, meta) {
       setLoading(true, `Saving dealers… ${Math.min(i + BATCH_SIZE, dealers.length)}/${dealers.length}`);
     }
 
+    // 4b. Write Partner Financial Health (ROI) rows — self-contained, no re-matching needed on restore
+    if(financeRows.length) {
+      for(let i = 0; i < financeRows.length; i += BATCH_SIZE) {
+        const batch = FBDB.batch();
+        const chunk = financeRows.slice(i, i + BATCH_SIZE);
+        chunk.forEach(r => {
+          const key = `${r.partner_code}_${r.month}_${r.year}_${r.scenario}`.replace(/[^A-Za-z0-9_]/g,'').slice(0,140);
+          batch.set(importRef.collection('finance_roi').doc(key), r);
+        });
+        await batch.commit();
+        setLoading(true, `Saving finance records… ${Math.min(i + BATCH_SIZE, financeRows.length)}/${financeRows.length}`);
+      }
+    }
+
     // 5. Update appState/currentImport pointer
     await FBDB.collection('appState').doc('currentImport').set(ptrData);
 
@@ -2222,7 +2451,7 @@ async function saveImportToFirestore(dealers, diag, meta) {
     STATE.importMeta     = ptrData;
 
     setLoading(false);
-    toast(`Saved to Firestore: ${dealers.length} dealers`, 'ok');
+    toast(`Saved to Firestore: ${dealers.length} dealers${financeRows.length?` · ${financeRows.length} ROI records`:''}`, 'ok');
     return importId;
   } catch(err) {
     setLoading(false);
@@ -2243,10 +2472,10 @@ async function handleFileProduction(file) {
   setLoading(true, `Parsing ${file.name}…`);
 
   const arrayBuf = await file.arrayBuffer();
-  let dealers, diag, availableMonths;
+  let dealers, diag, availableMonths, financeRows;
   try {
     const wb = XLSX.read(new Uint8Array(arrayBuf), { type:'array', cellDates:false });
-    ({ dealers, diag, availableMonths } = importWorkbook(wb, file.name));
+    ({ dealers, diag, availableMonths, financeRows } = importWorkbook(wb, file.name));
   } catch(err) {
     setLoading(false);
     toast('Parse error: ' + err.message, 'err');
@@ -2270,6 +2499,19 @@ async function handleFileProduction(file) {
   applyFilters();
   applyRoleScope(STATE.userProfile);
 
+  // Partner Financial Health — reset overrides for the new dataset, ingest ROI rows
+  financeRows = financeRows || [];
+  STATE.finance.rows = financeRows;
+  STATE.finance.enabled = financeRows.length > 0;
+  STATE.finance.diag = diag.finance || null;
+  STATE.finance.overrides = {};
+  await writeFinanceAudit('ROI sheet uploaded', {
+    new_value: `${financeRows.length} record(s)`,
+    notes: diag.finance?.errors?.length ? diag.finance.errors.join(' | ') : (diag.finance?.warnings?.length ? `${diag.finance.warnings.length} warning(s)` : 'OK'),
+    source: 'upload',
+  });
+  if(diag.finance?.errors?.length) await writeFinanceAudit('Finance row validation failure', { new_value: diag.finance.errors.join(' | '), source:'upload' });
+
   srcBadge.className   = 'src-badge upload';
   srcBadge.textContent = 'UPLOAD';
 
@@ -2277,23 +2519,24 @@ async function handleFileProduction(file) {
   if(wb2) { wb2.textContent = '✔ Uploaded'; wb2.className = 'ds-status-badge on'; }
   const dt2 = $('ds-active-title'), ds2 = $('ds-active-sub');
   if(dt2) dt2.textContent = `${file.name} · ${dealers.length} dealers`;
-  if(ds2) ds2.textContent = `Just uploaded · FY27 YTD ${fL(diag.fy27_sales_lakhs||0)} · FY26 Full ${fL(diag.fy26_sales_lakhs||0)}`;
+  if(ds2) ds2.textContent = `Just uploaded · FY27 YTD ${fL(diag.fy27_sales_lakhs||0)} · FY26 Full ${fL(diag.fy26_sales_lakhs||0)}${financeRows.length?` · Finance: ${financeRows.length} ROI records`:' · Finance: ROI sheet not found'}`;
   const dico2 = $('ds-active-card')?.querySelector('.ds-status-ico');
   if(dico2) dico2.textContent = '✅';
   const ur = $('upload-result');
   if(ur) {
     ur.className   = 'upload-result ok';
-    ur.textContent = `✅ ${dealers.length} dealers · FY27: ${fL(diag.fy27_sales_lakhs||0)} · FY26: ${fL(diag.fy26_sales_lakhs||0)}`;
+    ur.textContent = `✅ ${dealers.length} dealers · FY27: ${fL(diag.fy27_sales_lakhs||0)} · FY26: ${fL(diag.fy26_sales_lakhs||0)}${financeRows.length?` · ROI: ${financeRows.length} records`:''}`;
     ur.classList.remove('hidden');
   }
 
   renderDiagnostics(diag);
   renderDashboard();
   renderAllDealersPage();
+  if(STATE.page === 'finance') renderFinanceDashboard();
 
   // Persist to Firestore (admin only, non-blocking for UI)
   if(FBDB && STATE.role === 'admin') {
-    await saveImportToFirestore(dealers, diag, {});
+    await saveImportToFirestore(dealers, diag, {}, financeRows);
     srcBadge.textContent = 'FIRESTORE';
   } else {
     setLoading(false);
@@ -2404,6 +2647,888 @@ $('pwa-install-btn').addEventListener('click', async () => {
   }
 });
 $('pwa-dismiss-btn').addEventListener('click', () => $('pwa-banner').classList.remove('show'));
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION 18 — PARTNER FINANCIAL HEALTH (ROI INTELLIGENCE)
+   Ingests an optional "ROI" worksheet from the same workbook.
+   Computes EBITDA/EBIT/Net Profit/ROI/Payback per partner,
+   grades RAG status, supports rollups and scenario planning.
+   Entirely additive — core dealer/dashboard logic is untouched
+   and the app works normally if no ROI sheet is present.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+// ── 18a: Identity helpers ───────────────────────────────
+function normPartnerCode(v) {
+  return String(v||'').trim().toUpperCase().replace(/\s+/g,'');
+}
+
+function validateROIHeaders(ws) {
+  const raw = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:'' });
+  if(!raw.length) return { ok:false, missing: ROI_REQUIRED_COLS, headers: [] };
+  const headers = raw[0].map(h => String(h||'').trim());
+  const missing = ROI_REQUIRED_COLS.filter(c => !headers.some(h => h.toLowerCase() === c.toLowerCase()));
+  return { ok: missing.length === 0, missing, headers };
+}
+
+// ── 18b: Parse + validate ROI sheet ─────────────────────
+function parseROISheet(ws, dealerByName, dealerByPartnerCode, masterDiag) {
+  const fdiag = {
+    total_rows:0, valid_rows:0, missing_partner_code:0, invalid_month_year:0,
+    invalid_numeric:0, missing_tax_rate:0, duplicate_rows:0, unmapped_partners:0,
+    matched_by_code:0, matched_by_name:0, warnings:[], errors:[],
+  };
+
+  const headerCheck = validateROIHeaders(ws);
+  if(!headerCheck.ok) {
+    fdiag.errors.push(`ROI sheet is missing required column(s): ${headerCheck.missing.join(', ')}. Partner Financial Health is unavailable until this is fixed.`);
+    return { rows: [], fdiag, enabled: false };
+  }
+
+  const rows = XLSX.utils.sheet_to_json(ws, { raw:true, defval:'' });
+  fdiag.total_rows = rows.length;
+  const seenKeys = new Set();
+  const unmappedCodes = new Set();
+  const out = [];
+
+  for(const r of rows) {
+    const code = normPartnerCode(r['Partner Code']);
+    const name = String(r['Channel Partner Name']||'').trim();
+    if(!code) { fdiag.missing_partner_code++; continue; }
+
+    const monthRaw = r['Month'];
+    const month = excelSerialToLabel(monthRaw) || String(monthRaw||'').trim();
+    const yearNum = parseInt(String(r['Year']||'').replace(/[^\d]/g,''), 10);
+    const monthOk = /^[A-Za-z]{3}-\d{2}$/.test(month);
+    const yearOk  = yearNum >= 2000 && yearNum <= 2100;
+    if(!monthOk || !yearOk) { fdiag.invalid_month_year++; continue; }
+
+    const scenario = String(r['Scenario']||'Base').trim() || 'Base';
+    const dedupeKey = `${code}|${month}|${yearNum}|${scenario}`;
+    if(seenKeys.has(dedupeKey)) { fdiag.duplicate_rows++; continue; }
+    seenKeys.add(dedupeKey);
+
+    [['Revenue',r['Revenue']], ['Gross Margin %',r['Gross Margin %']], ['OPEX Monthly',r['OPEX Monthly']]].forEach(([,raw]) => {
+      if(raw !== '' && isNaN(parseFloat(String(raw).replace(/[₹,%\s]/g,'')))) fdiag.invalid_numeric++;
+    });
+
+    let revenue = parseNum(r['Revenue'], null);
+    const gmPct  = parseNum(r['Gross Margin %'], 0);
+    const opex   = parseNum(r['OPEX Monthly'], 0);
+    const capexW = parseNum(r['Windows CAPEX'], 0);
+    const capexS = parseNum(r['Showroom Build CAPEX'], 0);
+    const secDep = parseNum(r['Refundable Security Deposit'], 0);
+    let taxRate  = r['Tax Rate %'] !== '' ? parseNum(r['Tax Rate %'], null) : null;
+    const ageMonths = r['Partner Age Months'] !== '' ? parseNum(r['Partner Age Months'], null) : null;
+    const startDate = String(r['Partner Start Date']||'').trim();
+    const notes = String(r['Notes']||'').trim();
+    const updBy = String(r['Last Updated By']||'').trim();
+    const updOn = String(r['Last Updated On']||'').trim();
+
+    let taxDefaulted = false;
+    if(taxRate === null || isNaN(taxRate)) { taxRate = FINANCE_CONFIG.DEFAULT_TAX_RATE_PCT; taxDefaulted = true; fdiag.missing_tax_rate++; }
+
+    let dealer = dealerByPartnerCode.get(code) || null;
+    let matchType = dealer ? 'partner_code' : null;
+    if(!dealer) {
+      const nn = normName(name);
+      dealer = dealerByName.get(nn) || null;
+      if(dealer) matchType = 'name';
+    }
+    if(dealer) { matchType === 'partner_code' ? fdiag.matched_by_code++ : fdiag.matched_by_name++; }
+    else { matchType = 'unmapped'; unmappedCodes.add(code); }
+
+    if((revenue === null || revenue <= 0) && dealer) {
+      revenue = dealer.fy27_monthly_dump[month] || dealer.fy26_monthly_dump[month] ||
+                dealer.fy27_monthly_sheet[month] || dealer.fy26_monthly_sheet[month] || 0;
+    }
+    if(revenue === null) revenue = 0;
+
+    fdiag.valid_rows++;
+    out.push({
+      partner_code: code, partner_name: name || (dealer ? dealer.name : code), month, year: yearNum, scenario,
+      revenue, gross_margin_pct: gmPct, opex_monthly: opex,
+      windows_capex: capexW, showroom_capex: capexS, security_deposit: secDep,
+      tax_rate_pct: taxRate, tax_rate_defaulted: taxDefaulted,
+      partner_start_date: startDate, partner_age_months: ageMonths,
+      notes, last_updated_by: updBy, last_updated_on: updOn,
+      match_type: matchType,
+      geo_zone: dealer?.geo_zone || 'Unmapped', territory: dealer?.territory || 'Unmapped',
+      asm_name: dealer?.asm_name || 'Unmapped', location: dealer?.location || 'Unmapped',
+      city: dealer?.city || 'Unmapped', state: dealer?.state || 'Unmapped',
+      gross_margin_override: null, tax_rate_override: null,
+    });
+  }
+
+  fdiag.unmapped_partners = unmappedCodes.size;
+  if(fdiag.missing_partner_code) fdiag.warnings.push(`${fdiag.missing_partner_code} ROI row(s) skipped — missing Partner Code.`);
+  if(fdiag.invalid_month_year) fdiag.warnings.push(`${fdiag.invalid_month_year} ROI row(s) skipped — invalid Month/Year.`);
+  if(fdiag.duplicate_rows) fdiag.warnings.push(`${fdiag.duplicate_rows} duplicate ROI row(s) skipped (same Partner Code + Month + Year + Scenario).`);
+  if(fdiag.missing_tax_rate) fdiag.warnings.push(`${fdiag.missing_tax_rate} row(s) had no Tax Rate — defaulted to ${FINANCE_CONFIG.DEFAULT_TAX_RATE_PCT}%.`);
+  if(fdiag.unmapped_partners) fdiag.warnings.push(`${fdiag.unmapped_partners} partner code(s) could not be matched to the dealer master — shown under "Unmapped".`);
+  if(fdiag.invalid_numeric) fdiag.warnings.push(`${fdiag.invalid_numeric} numeric field(s) could not be parsed and were treated as 0.`);
+
+  return { rows: out, fdiag, enabled: out.length > 0 };
+}
+
+// ── 18c: Core finance formula engine ────────────────────
+function calcFinanceRow(row) {
+  const revenue = row.revenue || 0;
+  const gmPct   = row.gross_margin_override != null ? row.gross_margin_override : row.gross_margin_pct;
+  const taxPct  = row.tax_rate_override != null ? row.tax_rate_override : row.tax_rate_pct;
+  const grossProfit = revenue * (gmPct / 100);
+  const cogs = revenue - grossProfit;
+  const depreciableCapex = (row.windows_capex || 0) + (row.showroom_capex || 0);
+  const annualDep  = depreciableCapex / FINANCE_CONFIG.ASSET_LIFE_YEARS;
+  const monthlyDep = annualDep / 12;
+  const ebitda = revenue - cogs - (row.opex_monthly || 0);
+  const ebit   = ebitda - monthlyDep;
+  const ebitAfterTax = ebit * (1 - (taxPct || 0) / 100);
+  const netProfit = ebitAfterTax;
+  const contributionProfit = grossProfit - (row.opex_monthly || 0);
+  const cashProfit = netProfit + monthlyDep;
+  const roiBase = depreciableCapex + (row.opex_monthly || 0) * FINANCE_CONFIG.WORKING_CAPITAL_OPEX_MONTHS;
+  const monthlyROI    = roiBase > 0 ? (netProfit / roiBase * 100) : null;
+  const annualizedROI = roiBase > 0 ? (netProfit * 12 / roiBase * 100) : null;
+  const ebitdaMargin = revenue > 0 ? (ebitda / revenue * 100) : null;
+  const ebitMargin   = revenue > 0 ? (ebit / revenue * 100) : null;
+  const netMargin    = revenue > 0 ? (netProfit / revenue * 100) : null;
+  const paybackMonths = cashProfit > 0 ? (roiBase / cashProfit) : null;
+  const roiSpread = annualizedROI != null ? (annualizedROI - FINANCE_CONFIG.FD_BENCHMARK_PCT) : null;
+  return {
+    ...row, gross_profit:grossProfit, cogs, depreciable_capex:depreciableCapex,
+    monthly_depreciation:monthlyDep, ebitda, ebit, net_profit:netProfit,
+    contribution_profit:contributionProfit, cash_profit:cashProfit, roi_base:roiBase,
+    monthly_roi:monthlyROI, annualized_roi:annualizedROI, ebitda_margin:ebitdaMargin,
+    ebit_margin:ebitMargin, net_margin:netMargin, payback_months:paybackMonths, roi_spread:roiSpread,
+  };
+}
+
+function applyScenario(row, scenarioKey) {
+  const cfg = FINANCE_CONFIG.SCENARIOS[scenarioKey];
+  if(!cfg || scenarioKey === 'Base') return calcFinanceRow(row);
+  const baseGM = row.gross_margin_override != null ? row.gross_margin_override : row.gross_margin_pct;
+  const simulated = {
+    ...row,
+    revenue: (row.revenue || 0) * cfg.revenueMult,
+    gross_margin_pct: Math.max(0, Math.min(100, baseGM + cfg.marginDeltaPts)),
+    gross_margin_override: null,
+    opex_monthly: (row.opex_monthly || 0) * cfg.opexMult,
+  };
+  return calcFinanceRow(simulated);
+}
+
+// Returns one calculated record per partner+month for the requested scenario.
+// Uses the sheet's own row for that scenario when the workbook actually
+// provides it; otherwise simulates from the Base row via FINANCE_CONFIG.
+function getFinanceRecordsForScenario(scenarioKey) {
+  const byPM = new Map();
+  STATE.finance.rows.forEach(r => {
+    const k = `${r.partner_code}|${r.month}|${r.year}`;
+    if(!byPM.has(k)) byPM.set(k, {});
+    byPM.get(k)[r.scenario] = r;
+  });
+  const out = [];
+  byPM.forEach(scenMap => {
+    if(scenMap[scenarioKey]) out.push(calcFinanceRow(scenMap[scenarioKey]));
+    else if(scenMap['Base']) out.push(applyScenario(scenMap['Base'], scenarioKey));
+  });
+  return out;
+}
+
+// ── 18d: RAG grading with grace-period handling ─────────
+function gradeFinanceRAG(f) {
+  const age = f.partner_age_months;
+  const isEarly = age != null && age < FINANCE_CONFIG.GRACE_PERIOD_MONTHS;
+  const roi = f.annualized_roi, em = f.ebitda_margin, im = f.ebit_margin, pb = f.payback_months,
+        np = f.net_profit, nm = f.net_margin, spread = f.roi_spread;
+
+  const criticalHit =
+    (roi != null && roi < 7) || (em != null && em < 4) || (im != null && im < 2) ||
+    (pb != null && pb > 60) || (np != null && np < 0);
+
+  const healthyAll =
+    (roi != null && roi >= 15) && (em != null && em >= 10) && (im != null && im >= 6) &&
+    (pb != null && pb <= 36) && (spread != null && spread > 3);
+
+  let grade, reason;
+  if(criticalHit) {
+    const severeLoss = nm != null && nm < FINANCE_CONFIG.SEVERE_LOSS_NET_MARGIN_PCT;
+    if(isEarly && !severeLoss) {
+      grade = 'early_stage';
+      reason = `Partner is ${age} month(s) old (grace period) — some metrics below threshold, not flagged Critical while young.`;
+    } else {
+      grade = 'critical';
+      const reasons = [];
+      if(roi != null && roi < 7) reasons.push(`ROI ${roi.toFixed(1)}% below 7%`);
+      if(em != null && em < 4) reasons.push(`EBITDA margin ${em.toFixed(1)}% below 4%`);
+      if(im != null && im < 2) reasons.push(`EBIT margin ${im.toFixed(1)}% below 2%`);
+      if(pb != null && pb > 60) reasons.push(`Payback ${pb.toFixed(0)} months exceeds 60`);
+      if(np != null && np < 0) reasons.push('Negative Net Profit');
+      reason = reasons.join(' · ') || 'Below critical thresholds.';
+    }
+  } else if(healthyAll) {
+    grade = 'healthy';
+    reason = `ROI ${roi!=null?roi.toFixed(1):'—'}%, EBITDA margin ${em!=null?em.toFixed(1):'—'}%, Payback ${pb!=null?pb.toFixed(0)+'mo':'—'} — all above healthy thresholds.`;
+  } else {
+    grade = isEarly ? 'early_stage' : 'watchlist';
+    reason = isEarly ? `Partner is ${age} month(s) old — tracked as Early Stage until 12 months.` : 'Metrics sit between Watchlist and Healthy thresholds.';
+  }
+  return { grade, reason, early: isEarly };
+}
+
+// ── 18e: Per-partner snapshot (latest month + cumulative) ─
+function buildPartnerFinanceSnapshots(scenarioKey) {
+  const records = getFinanceRecordsForScenario(scenarioKey);
+  const byPartner = new Map();
+  records.forEach(r => {
+    if(!byPartner.has(r.partner_code)) byPartner.set(r.partner_code, []);
+    byPartner.get(r.partner_code).push(r);
+  });
+  const snapshots = [];
+  byPartner.forEach(rowsArr => {
+    rowsArr.sort((a,b) => (a.year - b.year) || ((FY_MONTH_ORDER[a.month]||0) - (FY_MONTH_ORDER[b.month]||0)));
+    const latest = rowsArr[rowsArr.length - 1];
+    const cumNetProfit = rowsArr.reduce((s,r) => s + (r.net_profit||0), 0);
+    const cumulativeROI = latest.roi_base > 0 ? (cumNetProfit / latest.roi_base * 100) : null;
+    const rag = gradeFinanceRAG(latest);
+    snapshots.push({
+      ...latest, months_count: rowsArr.length, cumulative_net_profit: cumNetProfit,
+      cumulative_roi: cumulativeROI, rag: rag.grade, rag_reason: rag.reason, early_stage: rag.early,
+      all_rows: rowsArr,
+    });
+  });
+  return snapshots;
+}
+
+// ── 18f: Weighted rollups — never naively averages percentages ─
+function sumFinanceGroup(arr) {
+  const revenue     = arr.reduce((s,r) => s + (r.revenue||0), 0);
+  const grossProfit = arr.reduce((s,r) => s + (r.gross_profit||0), 0);
+  const ebitda      = arr.reduce((s,r) => s + (r.ebitda||0), 0);
+  const ebit        = arr.reduce((s,r) => s + (r.ebit||0), 0);
+  const netProfit   = arr.reduce((s,r) => s + (r.net_profit||0), 0);
+  const cashProfit  = arr.reduce((s,r) => s + (r.cash_profit||0), 0);
+  const roiBase     = arr.reduce((s,r) => s + (r.roi_base||0), 0);
+  const grossMarginPct = revenue > 0 ? grossProfit/revenue*100 : null;
+  const ebitdaMargin   = revenue > 0 ? ebitda/revenue*100 : null;
+  const ebitMargin     = revenue > 0 ? ebit/revenue*100 : null;
+  const netMargin      = revenue > 0 ? netProfit/revenue*100 : null;
+  const annualizedROI  = roiBase > 0 ? netProfit*12/roiBase*100 : null;
+  const monthlyROI     = roiBase > 0 ? netProfit/roiBase*100 : null;
+  const paybackMonths  = cashProfit > 0 ? roiBase/cashProfit : null;
+  const roiSpread = annualizedROI != null ? annualizedROI - FINANCE_CONFIG.FD_BENCHMARK_PCT : null;
+  return {
+    revenue, gross_profit:grossProfit, ebitda, ebit, net_profit:netProfit, cash_profit:cashProfit,
+    roi_base:roiBase, gross_margin_pct:grossMarginPct, ebitda_margin:ebitdaMargin, ebit_margin:ebitMargin,
+    net_margin:netMargin, annualized_roi:annualizedROI, monthly_roi:monthlyROI, payback_months:paybackMonths,
+    roi_spread:roiSpread, count: arr.length,
+  };
+}
+
+function rollupFinanceByLevel(snapshots, levelKey) {
+  if(levelKey === 'overall') return [{ key:'overall', label:'Overall', ...sumFinanceGroup(snapshots) }];
+  if(levelKey === 'partner') {
+    return snapshots.map(s => ({ key:s.partner_code, label:s.partner_name||s.partner_code, ...sumFinanceGroup([s]), rag:s.rag }))
+                     .sort((a,b) => b.net_profit - a.net_profit);
+  }
+  const lvl = FINANCE_CONFIG.ROLLUP_LEVELS.find(l => l.key === levelKey);
+  const field = lvl ? lvl.field : 'geo_zone';
+  const groups = new Map();
+  snapshots.forEach(s => {
+    const k = s[field] || 'Unmapped';
+    if(!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(s);
+  });
+  const out = [];
+  groups.forEach((arr,k) => out.push({ key:k, label:k, ...sumFinanceGroup(arr) }));
+  return out.sort((a,b) => b.net_profit - a.net_profit);
+}
+
+// ── 18g: Percentage-axis chart options (ROI/margins — never ₹) ──
+function pctChartOpts(extra = {}) {
+  const t = themeVars();
+  return {
+    responsive:true, maintainAspectRatio:false, animation:{duration:280},
+    plugins:{
+      legend:{ labels:{ color:t.tick, font:{size:10,family:'Inter'}, boxWidth:10, padding:9 } },
+      tooltip:{ bodyFont:{family:'Inter',size:11}, titleFont:{family:'Inter',size:11},
+        callbacks:{ label: ctx => ` ${ctx.dataset.label||''}: ${ctx.raw==null?'—':ctx.raw.toFixed(1)+'%'}` } },
+      datalabels:{ display:false },
+    },
+    scales:{
+      x:{ grid:{color:t.grid}, ticks:{color:t.tick,font:{size:10}} },
+      y:{ grid:{color:t.grid}, ticks:{color:t.tick,font:{size:10}, callback:v=>v+'%'} },
+    },
+    ...extra,
+  };
+}
+function dlPctBar(t) {
+  return { display: ctx => ctx.dataset.data[ctx.dataIndex] != null, color:t.tick, font:{size:8,family:'Inter',weight:'600'},
+    formatter: v => v==null?'':v.toFixed(1)+'%', anchor:'end', align:'top', offset:1, clamp:true };
+}
+function dlDoughnutCount() {
+  return { display: ctx => ctx.dataset.data[ctx.dataIndex] > 0, color:'#fff', font:{size:10,family:'Inter',weight:'700'},
+    formatter: v => v };
+}
+
+function financeEmptyState(detail) {
+  return `<div class="fin-empty">
+    <div class="ico">💹</div>
+    <h3>Partner Financial Health unavailable</h3>
+    <p>${detail || 'Upload a workbook that includes an "ROI" sheet (Partner Code, Revenue, Gross Margin %, OPEX, CAPEX, Tax Rate) to activate ROI Intelligence, EBITDA/EBIT views, payback tracking and RAG grading.'}</p>
+    ${STATE.role==='admin' ? `<button class="btn primary" onclick="navigateTo('data-sources')">📤 Go to Data Sources</button>` : ''}
+  </div>`;
+}
+
+function ragBadgeHTML(grade) {
+  const lbl = { healthy:'Healthy', watchlist:'Watchlist', critical:'Critical', early_stage:'Early Stage' };
+  return `<span class="rag-badge ${grade}"><span class="rag-dot ${grade}"></span>${lbl[grade]||grade}</span>`;
+}
+
+function finKPICard(lbl, val, sub, color, ico, cls) {
+  return `<div class="kpi-card" style="--kpi-color:${color}">
+    <div class="kpi-head"><span class="kpi-lbl">${lbl}</span><span class="kpi-ico">${ico}</span></div>
+    <div class="kpi-val${cls?' '+cls:''}">${val}</div>
+    <div class="kpi-foot"><span class="kpi-sub">${sub}</span></div>
+  </div>`;
+}
+
+// ── 18h: Rollup + Scenario filter bar (shared across sub-tabs) ──
+function finRollupBarHTML() {
+  const opts = FINANCE_CONFIG.ROLLUP_LEVELS.map(l =>
+    `<option value="${l.key}" ${STATE.finance.rollupLevel===l.key?'selected':''}>${l.label}</option>`).join('');
+  const scenarios = ['Base','Upside','Stress'];
+  const pills = scenarios.map(s => {
+    const cls = s==='Upside' ? 'upside' : s==='Stress' ? 'stress' : '';
+    return `<button class="scenario-pill ${cls} ${STATE.finance.scenario===s?'active':''}" data-scenario="${s}">${s}</button>`;
+  }).join('');
+  return `<div class="fin-rollup-bar">
+    <div class="fg"><label>Rollup Level</label><select id="fin-rollup-select">${opts}</select></div>
+    <div class="fg"><label>Scenario</label><div class="scenario-pills" id="fin-scenario-pills">${pills}</div></div>
+  </div>`;
+}
+
+// ── 18i: Financial Summary ──────────────────────────────
+function renderFinSummary() {
+  const root = $('fin-summary');
+  if(!STATE.finance.enabled) { root.innerHTML = financeEmptyState(); return; }
+  const snaps = buildPartnerFinanceSnapshots(STATE.finance.scenario);
+  if(!snaps.length) { root.innerHTML = financeEmptyState('ROI sheet was found but no rows could be matched or validated. Check Data Sources diagnostics.'); return; }
+  const totals = sumFinanceGroup(snaps);
+  const healthy = snaps.filter(s=>s.rag==='healthy').length;
+  const watchlist = snaps.filter(s=>s.rag==='watchlist').length;
+  const critical = snaps.filter(s=>s.rag==='critical').length;
+  const early = snaps.filter(s=>s.rag==='early_stage').length;
+  const missing = Math.max(STATE.dealers.length - snaps.filter(s=>s.match_type!=='unmapped').length, 0);
+  const belowFD = snaps.filter(s=>s.annualized_roi!=null && s.annualized_roi < FINANCE_CONFIG.FD_BENCHMARK_PCT).length;
+  const negEbit = snaps.filter(s=>s.ebit!=null && s.ebit < 0).length;
+
+  const kpis = [
+    finKPICard('Total Revenue', fL(totals.revenue), `${STATE.finance.scenario} scenario`, '#2563eb','💰',''),
+    finKPICard('Gross Profit', fL(totals.gross_profit), fPct(totals.gross_margin_pct)+' margin', '#2563eb','📊',''),
+    finKPICard('EBITDA', fL(totals.ebitda), fPct(totals.ebitda_margin)+' margin', '#7c3aed','📈',''),
+    finKPICard('EBIT', fL(totals.ebit), fPct(totals.ebit_margin)+' margin', '#7c3aed','📐',''),
+    finKPICard('Net Profit (After Tax)', fL(totals.net_profit), fPct(totals.net_margin)+' margin', totals.net_profit>=0?'#16a34a':'#dc2626', '🏦', totals.net_profit>=0?'ok':'danger'),
+    finKPICard('Cash Profit', fL(totals.cash_profit), 'Net profit + depreciation', '#0891b2','💵',''),
+    finKPICard('Annualized ROI', fPct(totals.annualized_roi), `vs ${FINANCE_CONFIG.FD_BENCHMARK_PCT}% FD benchmark`, achColor(totals.annualized_roi||0), '🎯',''),
+    finKPICard('ROI vs FD Spread', (totals.roi_spread!=null?(totals.roi_spread>=0?'+':'')+totals.roi_spread.toFixed(1)+'%':'—'), 'Annualized ROI minus FD', totals.roi_spread>=0?'#16a34a':'#dc2626', '⚖️', totals.roi_spread>=0?'ok':'danger'),
+    finKPICard('Avg Payback', totals.payback_months!=null?totals.payback_months.toFixed(0)+' mo':'Not meaningful', 'Capital recovery period', '#d97706','⏳',''),
+    finKPICard('Healthy Partners', healthy, `${snaps.length?Math.round(healthy/snaps.length*100):0}% of base`, '#16a34a','✅','ok'),
+    finKPICard('Watchlist', watchlist, 'Needs monitoring', '#d97706','👀','warn'),
+    finKPICard('Critical', critical, 'Below thresholds', '#dc2626','🚨', critical>0?'danger':''),
+    finKPICard('Early Stage', early, '< 12 months, grace period', '#7c3aed','🌱',''),
+    finKPICard('Missing Finance Data', missing, 'Dealers without ROI match', '#94a3b8','❓',''),
+  ];
+
+  // Smart insight callouts
+  const zoneRoll = rollupFinanceByLevel(snaps, 'geo_zone').filter(z=>z.key!=='Unmapped');
+  const topZone = [...zoneRoll].sort((a,b)=>(b.annualized_roi||-999)-(a.annualized_roi||-999))[0];
+  const weakZone = [...zoneRoll].sort((a,b)=>(a.annualized_roi||999)-(b.annualized_roi||999))[0];
+  const bestEbitda = [...snaps].sort((a,b)=>b.ebitda-a.ebitda)[0];
+  const slowest = [...snaps].filter(s=>s.payback_months!=null).sort((a,b)=>b.payback_months-a.payback_months)[0];
+  const highPotentialEarly = snaps.filter(s=>s.early_stage && s.ebitda_margin!=null && s.ebitda_margin>=10).length;
+
+  const pills = [];
+  if(topZone) pills.push(`<span class="insight-pill ok"><span class="ico">🏆</span>Top ROI Zone: <strong>${topZone.label}</strong> · ${fPct(topZone.annualized_roi)}</span>`);
+  if(weakZone && zoneRoll.length>1) pills.push(`<span class="insight-pill warn"><span class="ico">⬇</span>Weakest ROI Zone: <strong>${weakZone.label}</strong> · ${fPct(weakZone.annualized_roi)}</span>`);
+  if(bestEbitda) pills.push(`<span class="insight-pill ok"><span class="ico">⭐</span>Best EBITDA: <strong>${bestEbitda.partner_name}</strong> · ${fL(bestEbitda.ebitda)}</span>`);
+  if(slowest) pills.push(`<span class="insight-pill warn"><span class="ico">🐢</span>Slowest Payback: <strong>${slowest.partner_name}</strong> · ${slowest.payback_months.toFixed(0)}mo</span>`);
+  if(belowFD>0) pills.push(`<span class="insight-pill warn"><span class="ico">⚠️</span><strong>${belowFD}</strong> partner${belowFD>1?'s':''} below FD benchmark</span>`);
+  if(negEbit>0) pills.push(`<span class="insight-pill warn"><span class="ico">🔻</span><strong>${negEbit}</strong> partner${negEbit>1?'s':''} with negative EBIT</span>`);
+  if(highPotentialEarly>0) pills.push(`<span class="insight-pill ok"><span class="ico">🌱</span><strong>${highPotentialEarly}</strong> early-stage with strong EBITDA margin</span>`);
+
+  root.innerHTML = `
+    ${finRollupBarHTML()}
+    <div class="kpi-grid">${kpis.join('')}</div>
+    <div class="insight-bar" style="display:flex">${pills.join('')}</div>
+  `;
+  wireFinRollupBar(renderFinSummary);
+}
+
+// ── 18j: ROI & Benchmark ─────────────────────────────────
+function renderFinROI() {
+  const root = $('fin-roi');
+  if(!STATE.finance.enabled) { root.innerHTML = financeEmptyState(); return; }
+  const snaps = buildPartnerFinanceSnapshots(STATE.finance.scenario);
+  if(!snaps.length) { root.innerHTML = financeEmptyState(); return; }
+  const totals = sumFinanceGroup(snaps);
+  const FD = FINANCE_CONFIG.FD_BENCHMARK_PCT;
+  const roiVal = totals.annualized_roi || 0;
+  const scaleMax = Math.max(30, Math.ceil((roiVal+5)/5)*5);
+  const barPct = Math.max(0, Math.min(100, roiVal/scaleMax*100));
+  const fdPct  = FD/scaleMax*100;
+
+  const below = snaps.filter(s=>s.annualized_roi!=null && s.annualized_roi < FD);
+  const above = snaps.filter(s=>s.annualized_roi!=null && s.annualized_roi >= FD);
+  const top5 = [...snaps].filter(s=>s.roi_spread!=null).sort((a,b)=>b.roi_spread-a.roi_spread).slice(0,5);
+  const bottom5 = [...snaps].filter(s=>s.roi_spread!=null).sort((a,b)=>a.roi_spread-b.roi_spread).slice(0,5);
+
+  const rankRow = (s,i,positive) => `<div class="rank-row">
+    <span class="rank-num">${i+1}</span>
+    <div style="flex:1;min-width:0"><div class="rank-name">${s.partner_name}</div><div class="rank-sub">${s.geo_zone}</div></div>
+    <span class="rank-val" style="color:${positive?'var(--ok)':'var(--err)'}">${fPct(s.annualized_roi)}</span>
+  </div>`;
+
+  root.innerHTML = `
+    ${finRollupBarHTML()}
+    <div class="benchmark-card">
+      <div class="benchmark-head"><span class="benchmark-val" style="color:${roiVal>=FD?'var(--ok)':'var(--err)'}">${fPct(roiVal)}</span><span class="benchmark-fd">FD Benchmark: ${FD}%</span></div>
+      <div class="benchmark-bar-wrap">
+        <div class="benchmark-bar" style="width:${barPct}%;background:${roiVal>=FD?'var(--ok)':'var(--err)'}"></div>
+        <div class="benchmark-marker" style="left:${fdPct}%"></div>
+        <div class="benchmark-marker-lbl" style="left:${fdPct}%">FD ${FD}%</div>
+      </div>
+      <div class="benchmark-scale"><span>0%</span><span>${scaleMax}%</span></div>
+    </div>
+    <div class="fin-grid-3">
+      ${finKPICard('Above FD Benchmark', above.length, `of ${snaps.length} partners`, '#16a34a','✅','ok')}
+      ${finKPICard('Below FD Benchmark', below.length, `of ${snaps.length} partners`, '#dc2626','⚠️', below.length>0?'danger':'')}
+      ${finKPICard('Avg Spread', (totals.roi_spread!=null?(totals.roi_spread>=0?'+':'')+totals.roi_spread.toFixed(1)+'%':'—'), 'vs FD benchmark', totals.roi_spread>=0?'#16a34a':'#dc2626','⚖️','')}
+    </div>
+    <div class="chart-card" style="margin-bottom:10px">
+      <div class="cc-head"><div><div class="cc-title">Zone-wise ROI vs FD Benchmark</div><div class="cc-sub">Annualized ROI % by zone — dashed line = FD ${FD}%</div></div></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="fin-roi-zone-chart"></canvas></div>
+    </div>
+    <div class="ana-grid">
+      <div class="chart-card"><div class="cc-head"><div class="cc-title">Top Outperformers vs Benchmark</div></div><div class="rank-list">${top5.map((s,i)=>rankRow(s,i,true)).join('')||'<div class="rank-row">No data</div>'}</div></div>
+      <div class="chart-card"><div class="cc-head"><div class="cc-title">Underperformers vs Benchmark</div></div><div class="rank-list">${bottom5.map((s,i)=>rankRow(s,i,false)).join('')||'<div class="rank-row">No data</div>'}</div></div>
+    </div>
+  `;
+  wireFinRollupBar(renderFinROI);
+  renderFinROIZoneChart(snaps);
+}
+
+function renderFinROIZoneChart(snaps) {
+  const zoneRoll = rollupFinanceByLevel(snaps, 'geo_zone').filter(z=>z.key!=='Unmapped');
+  const labels = zoneRoll.map(z=>z.label);
+  const data   = zoneRoll.map(z=>z.annualized_roi);
+  const fdLine = labels.map(()=>FINANCE_CONFIG.FD_BENCHMARK_PCT);
+  const opts = pctChartOpts();
+  opts.plugins.datalabels = dlPctBar(themeVars());
+  mkChart('fin-roi-zone-chart', {
+    data: { labels, datasets: [
+      { type:'bar', label:'Annualized ROI', data, backgroundColor: data.map(v=>v>=FINANCE_CONFIG.FD_BENCHMARK_PCT?'rgba(22,163,74,0.78)':'rgba(220,38,38,0.78)'), borderRadius:4 },
+      { type:'line', label:'FD Benchmark', data:fdLine, borderColor:'#94a3b8', borderDash:[5,4], borderWidth:1.5, pointRadius:0, datalabels:{display:false} },
+    ]},
+    options: opts,
+  });
+}
+
+// ── 18k: EBITDA / EBIT ───────────────────────────────────
+function renderFinEBITDA() {
+  const root = $('fin-ebitda');
+  if(!STATE.finance.enabled) { root.innerHTML = financeEmptyState(); return; }
+  const snaps = buildPartnerFinanceSnapshots(STATE.finance.scenario);
+  if(!snaps.length) { root.innerHTML = financeEmptyState(); return; }
+  const totals = sumFinanceGroup(snaps);
+
+  const buckets = ['<0%','0–2%','2–6%','6–10%','≥10%'];
+  const counts = [0,0,0,0,0];
+  snaps.forEach(s => {
+    const m = s.ebit_margin;
+    if(m==null) return;
+    if(m<0) counts[0]++; else if(m<2) counts[1]++; else if(m<6) counts[2]++; else if(m<10) counts[3]++; else counts[4]++;
+  });
+
+  const contributionProfit = snaps.reduce((s,r) => s + (r.contribution_profit||0), 0);
+
+  root.innerHTML = `
+    ${finRollupBarHTML()}
+    <div class="kpi-grid">
+      ${finKPICard('EBITDA', fL(totals.ebitda), fPct(totals.ebitda_margin)+' margin','#7c3aed','📈','')}
+      ${finKPICard('EBIT', fL(totals.ebit), fPct(totals.ebit_margin)+' margin','#7c3aed','📐','')}
+      ${finKPICard('Net Profit (After Tax)', fL(totals.net_profit), fPct(totals.net_margin)+' margin', totals.net_profit>=0?'#16a34a':'#dc2626','🏦', totals.net_profit>=0?'ok':'danger')}
+      ${finKPICard('Contribution Profit', fL(contributionProfit), 'Gross Profit − OPEX', '#0891b2','🧮','')}
+    </div>
+    <div class="chart-card" style="margin-bottom:10px">
+      <div class="cc-head"><div><div class="cc-title">EBITDA vs EBIT by Zone</div><div class="cc-sub">Currency values — ₹ Lakhs / Cr</div></div></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="fin-ebitda-zone-chart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-head"><div><div class="cc-title">EBIT Margin Distribution</div><div class="cc-sub">Count of partners by EBIT margin band</div></div></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="fin-ebit-dist-chart"></canvas></div>
+    </div>
+  `;
+  wireFinRollupBar(renderFinEBITDA);
+
+  const zoneRoll = rollupFinanceByLevel(snaps, 'geo_zone').filter(z=>z.key!=='Unmapped');
+  const eOpts = salesChartOpts(); eOpts.plugins.datalabels = dlSalesBar(themeVars());
+  mkChart('fin-ebitda-zone-chart', {
+    type:'bar',
+    data:{ labels:zoneRoll.map(z=>z.label), datasets:[
+      { label:'EBITDA', data:zoneRoll.map(z=>z.ebitda), backgroundColor:'rgba(124,58,237,0.7)', borderRadius:3 },
+      { label:'EBIT',   data:zoneRoll.map(z=>z.ebit),   backgroundColor:'rgba(37,99,235,0.78)', borderRadius:3 },
+    ]},
+    options:eOpts,
+  });
+
+  const cOpts = countChartOpts(); cOpts.plugins.datalabels = dlCountBar();
+  cOpts.plugins.tooltip.callbacks.label = ctx => ` ${Math.round(ctx.raw)} partner${ctx.raw!==1?'s':''}`;
+  mkChart('fin-ebit-dist-chart', {
+    type:'bar',
+    data:{ labels:buckets, datasets:[{ label:'Partners', data:counts, backgroundColor:['#dc2626','#f97316','#d97706','#65a30d','#16a34a'], borderRadius:4 }]},
+    options:cOpts,
+  });
+}
+
+// ── 18l: Partner P&L ─────────────────────────────────────
+function renderFinPL() {
+  const root = $('fin-pl');
+  if(!STATE.finance.enabled) { root.innerHTML = financeEmptyState(); return; }
+  const snaps = buildPartnerFinanceSnapshots(STATE.finance.scenario).sort((a,b)=>b.revenue-a.revenue);
+  if(!snaps.length) { root.innerHTML = financeEmptyState(); return; }
+
+  const plRow = (lbl,val,cls='',sub=false) => `<div class="pl-row${sub?' sub':''}"><span>${lbl}</span><span class="pl-v ${cls}">${val}</span></div>`;
+  const cards = snaps.map(s => `
+    <div class="pl-card">
+      <div class="pl-card-head">
+        <div><div class="pl-card-name">${s.partner_name}</div><div class="pl-card-sub">${s.geo_zone} · ${s.month} ${s.year}</div></div>
+        ${ragBadgeHTML(s.rag)}
+      </div>
+      ${plRow('Revenue', fL(s.revenue))}
+      ${plRow('COGS', '−'+fL(s.cogs), 'neg', true)}
+      ${plRow('Gross Profit', fL(s.gross_profit))}
+      ${plRow('OPEX Monthly', '−'+fL(s.opex_monthly), 'neg', true)}
+      ${plRow('EBITDA', fL(s.ebitda), s.ebitda>=0?'pos':'neg')}
+      ${plRow('Depreciation', '−'+fL(s.monthly_depreciation), 'neg', true)}
+      ${plRow('EBIT', fL(s.ebit), s.ebit>=0?'pos':'neg')}
+      ${plRow('Tax', '−'+fL(Math.max(s.ebit-s.net_profit,0)), 'neg', true)}
+      <div class="pl-row total"><span>Net Profit (After Tax)</span><span class="pl-v ${s.net_profit>=0?'pos':'neg'}">${fL(s.net_profit)}</span></div>
+    </div>`).join('');
+
+  root.innerHTML = `${finRollupBarHTML()}<div class="pl-grid">${cards}</div>`;
+  wireFinRollupBar(renderFinPL);
+}
+
+// ── 18m: Payback & Recovery ──────────────────────────────
+function renderFinPayback() {
+  const root = $('fin-payback');
+  if(!STATE.finance.enabled) { root.innerHTML = financeEmptyState(); return; }
+  const snaps = buildPartnerFinanceSnapshots(STATE.finance.scenario);
+  if(!snaps.length) { root.innerHTML = financeEmptyState(); return; }
+  const totals = sumFinanceGroup(snaps);
+  const buckets = ['<12mo','12–24mo','24–36mo','36–60mo','>60mo','Not meaningful'];
+  const counts = [0,0,0,0,0,0];
+  snaps.forEach(s => {
+    const p = s.payback_months;
+    if(p==null) counts[5]++;
+    else if(p<12) counts[0]++; else if(p<24) counts[1]++; else if(p<36) counts[2]++; else if(p<60) counts[3]++; else counts[4]++;
+  });
+  const slowest = [...snaps].filter(s=>s.payback_months!=null).sort((a,b)=>b.payback_months-a.payback_months).slice(0,8);
+  const naCount = snaps.filter(s=>s.payback_months==null).length;
+
+  root.innerHTML = `
+    ${finRollupBarHTML()}
+    <div class="fin-grid-3">
+      ${finKPICard('Avg Payback', totals.payback_months!=null?totals.payback_months.toFixed(0)+' mo':'Not meaningful', 'Weighted by ROI base','#d97706','⏳','')}
+      ${finKPICard('Within 36 Months', snaps.filter(s=>s.payback_months!=null&&s.payback_months<=36).length, 'Healthy payback range','#16a34a','✅','ok')}
+      ${finKPICard('Not Meaningful', naCount, 'Cash profit ≤ 0','#94a3b8','❓','')}
+    </div>
+    <div class="chart-card" style="margin-bottom:10px">
+      <div class="cc-head"><div><div class="cc-title">Payback Distribution</div><div class="cc-sub">Count of partners by recovery period</div></div></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="fin-payback-dist-chart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-head"><div class="cc-title">Slowest Recovery — Needs Review</div></div>
+      <div class="rank-list">${slowest.map((s,i)=>`<div class="rank-row"><span class="rank-num">${i+1}</span><div style="flex:1;min-width:0"><div class="rank-name">${s.partner_name}</div><div class="rank-sub">${s.geo_zone}</div></div><span class="rank-val" style="color:var(--err)">${s.payback_months.toFixed(0)}mo</span></div>`).join('')||'<div class="rank-row">No data</div>'}</div>
+    </div>
+  `;
+  wireFinRollupBar(renderFinPayback);
+
+  const opts = countChartOpts(); opts.plugins.datalabels = dlCountBar();
+  opts.plugins.tooltip.callbacks.label = ctx => ` ${Math.round(ctx.raw)} partner${ctx.raw!==1?'s':''}`;
+  mkChart('fin-payback-dist-chart', {
+    type:'bar',
+    data:{ labels:buckets, datasets:[{ label:'Partners', data:counts, backgroundColor:['#16a34a','#65a30d','#d97706','#f97316','#dc2626','#64748b'], borderRadius:4 }]},
+    options:opts,
+  });
+}
+
+// ── 18n: Scenario Planner ────────────────────────────────
+function renderFinScenario() {
+  const root = $('fin-scenario');
+  if(!STATE.finance.enabled) { root.innerHTML = financeEmptyState(); return; }
+  const base   = sumFinanceGroup(buildPartnerFinanceSnapshots('Base'));
+  const upside = sumFinanceGroup(buildPartnerFinanceSnapshots('Upside'));
+  const stress = sumFinanceGroup(buildPartnerFinanceSnapshots('Stress'));
+  if(!base.count) { root.innerHTML = financeEmptyState(); return; }
+
+  const card = (label, t, cls) => `<div class="scenario-compare-card" style="border-top:3px solid var(--${cls})">
+    <div class="scn-lbl">${label}</div>
+    <div class="scn-val" style="color:var(--${cls})">${fL(t.net_profit)}</div>
+    <div class="scn-sub">Net Profit</div>
+    <div class="scn-val" style="font-size:13px;margin-top:6px">${fPct(t.annualized_roi)}</div>
+    <div class="scn-sub">Annualized ROI</div>
+  </div>`;
+
+  root.innerHTML = `
+    <p style="font-size:11px;color:var(--t2);margin-bottom:10px;line-height:1.6">Base uses actual ROI sheet values. Upside and Stress are simulated using centralized assumptions (revenue, margin and OPEX multipliers) unless the workbook already provides Scenario-specific rows.</p>
+    <div class="fin-grid-3">${card('Base',base,'p')}${card('Upside',upside,'ok')}${card('Stress',stress,'err')}</div>
+    <div class="ana-grid">
+      <div class="chart-card"><div class="cc-head"><div class="cc-title">Net Profit by Scenario</div></div><div class="chart-wrap" style="height:200px"><canvas id="fin-scn-profit-chart"></canvas></div></div>
+      <div class="chart-card"><div class="cc-head"><div class="cc-title">Annualized ROI by Scenario</div></div><div class="chart-wrap" style="height:200px"><canvas id="fin-scn-roi-chart"></canvas></div></div>
+    </div>
+    <div class="chart-card" style="margin-top:10px">
+      <div class="cc-head"><div class="cc-title">Scenario Assumptions</div></div>
+      <div style="font-size:11px;color:var(--t2);line-height:1.9">
+        <strong>Upside:</strong> Revenue ×${FINANCE_CONFIG.SCENARIOS.Upside.revenueMult}, Margin +${FINANCE_CONFIG.SCENARIOS.Upside.marginDeltaPts}pts, OPEX ×${FINANCE_CONFIG.SCENARIOS.Upside.opexMult}<br>
+        <strong>Stress:</strong> Revenue ×${FINANCE_CONFIG.SCENARIOS.Stress.revenueMult}, Margin ${FINANCE_CONFIG.SCENARIOS.Stress.marginDeltaPts}pts, OPEX ×${FINANCE_CONFIG.SCENARIOS.Stress.opexMult}
+      </div>
+    </div>
+  `;
+
+  const pOpts = salesChartOpts(); pOpts.plugins.legend = { display:false }; pOpts.plugins.datalabels = dlSalesBar(themeVars());
+  mkChart('fin-scn-profit-chart', { type:'bar', data:{ labels:['Base','Upside','Stress'], datasets:[{ label:'Net Profit', data:[base.net_profit,upside.net_profit,stress.net_profit], backgroundColor:['#2563eb','#16a34a','#dc2626'], borderRadius:4 }]}, options:pOpts });
+
+  const rOpts = pctChartOpts(); rOpts.plugins.legend = { display:false }; rOpts.plugins.datalabels = dlPctBar(themeVars());
+  mkChart('fin-scn-roi-chart', { type:'bar', data:{ labels:['Base','Upside','Stress'], datasets:[{ label:'Annualized ROI', data:[base.annualized_roi,upside.annualized_roi,stress.annualized_roi], backgroundColor:['#2563eb','#16a34a','#dc2626'], borderRadius:4 }]}, options:rOpts });
+}
+
+// ── 18o: Financial Health Grades (RAG) ───────────────────
+function renderFinGrades() {
+  const root = $('fin-grades');
+  if(!STATE.finance.enabled) { root.innerHTML = financeEmptyState(); return; }
+  const snaps = buildPartnerFinanceSnapshots(STATE.finance.scenario);
+  if(!snaps.length) { root.innerHTML = financeEmptyState(); return; }
+  const buckets = { healthy:[], watchlist:[], critical:[], early_stage:[] };
+  snaps.forEach(s => buckets[s.rag]?.push(s));
+
+  const listHTML = (arr) => arr.length ? arr.map(s=>`
+    <div class="rank-row" style="cursor:pointer" data-rag-partner="${s.partner_code}">
+      <span class="rag-dot ${s.rag}"></span>
+      <div style="flex:1;min-width:0"><div class="rank-name">${s.partner_name}</div><div class="rank-sub">${s.rag_reason}</div></div>
+      <span class="rank-val">${fPct(s.annualized_roi)}</span>
+    </div>`).join('') : '<div class="rank-row">None</div>';
+
+  root.innerHTML = `
+    ${finRollupBarHTML()}
+    <div class="kpi-grid">
+      ${finKPICard('Healthy', buckets.healthy.length, `${snaps.length?Math.round(buckets.healthy.length/snaps.length*100):0}%`, '#16a34a','✅','ok')}
+      ${finKPICard('Watchlist', buckets.watchlist.length, `${snaps.length?Math.round(buckets.watchlist.length/snaps.length*100):0}%`, '#d97706','👀','warn')}
+      ${finKPICard('Critical', buckets.critical.length, `${snaps.length?Math.round(buckets.critical.length/snaps.length*100):0}%`, '#dc2626','🚨', buckets.critical.length>0?'danger':'')}
+      ${finKPICard('Early Stage', buckets.early_stage.length, `${snaps.length?Math.round(buckets.early_stage.length/snaps.length*100):0}%`, '#7c3aed','🌱','')}
+    </div>
+    <div class="chart-card" style="margin-bottom:10px">
+      <div class="cc-head"><div class="cc-title">RAG Distribution</div></div>
+      <div class="chart-wrap" style="height:200px"><canvas id="fin-rag-chart"></canvas></div>
+    </div>
+    <div class="ana-grid">
+      <div class="chart-card"><div class="cc-head"><div class="cc-title">🚨 Critical</div></div><div class="rank-list">${listHTML(buckets.critical)}</div></div>
+      <div class="chart-card"><div class="cc-head"><div class="cc-title">👀 Watchlist</div></div><div class="rank-list">${listHTML(buckets.watchlist)}</div></div>
+    </div>
+  `;
+  wireFinRollupBar(renderFinGrades);
+  qsa('[data-rag-partner]', root).forEach(el => el.addEventListener('click', () => {
+    const d = STATE.dealers.find(x => normName(x.name) === normName(snaps.find(s=>s.partner_code===el.dataset.ragPartner)?.partner_name||''));
+    if(d) openDealerModal(d); else toast('No matching dealer card for this partner.', 'inf');
+  }));
+
+  const t = themeVars();
+  mkChart('fin-rag-chart', {
+    type:'doughnut',
+    data:{ labels:['Healthy','Watchlist','Critical','Early Stage'], datasets:[{ data:[buckets.healthy.length,buckets.watchlist.length,buckets.critical.length,buckets.early_stage.length], backgroundColor:['#16a34a','#d97706','#dc2626','#7c3aed'], borderWidth:0, hoverOffset:6 }]},
+    options:{ responsive:true, maintainAspectRatio:false, animation:{duration:280},
+      plugins:{ legend:{position:'bottom', labels:{color:t.tick,font:{size:10,family:'Inter'},padding:7,boxWidth:10}},
+        tooltip:{ callbacks:{ label:ctx => ` ${ctx.label}: ${ctx.raw} partner${ctx.raw!==1?'s':''}` } },
+        datalabels: dlDoughnutCount() } },
+  });
+}
+
+// ── 18p: Finance Audit Log ───────────────────────────────
+function renderFinAuditLog() {
+  const root = $('fin-audit');
+  const entries = STATE.finance.auditLog;
+  if(!entries.length) {
+    root.innerHTML = financeEmptyState('No finance audit events yet. Uploads, overrides and scenario changes will appear here.');
+    return;
+  }
+  root.innerHTML = entries.slice(0,200).map(e => `
+    <div class="audit-row">
+      <div class="a-top"><span class="a-action">${e.action}</span><span class="a-time">${new Date(e.timestamp).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></div>
+      <div class="a-detail">${e.user}${e.partner_code?' · '+e.partner_code:''}${(e.old_value!=='' || e.new_value!=='')?' · '+e.old_value+' → '+e.new_value:''}${e.notes?' · '+e.notes:''}</div>
+    </div>`).join('');
+}
+
+// ── 18q: Sub-tab navigation + dispatcher ────────────────
+const FIN_RENDERERS = {
+  summary: renderFinSummary, roi: renderFinROI, ebitda: renderFinEBITDA,
+  pl: renderFinPL, payback: renderFinPayback, scenario: renderFinScenario,
+  grades: renderFinGrades, audit: renderFinAuditLog,
+};
+
+function financeNavigateTo(sub) {
+  STATE.finance.subpage = sub;
+  qsa('.fin-tab').forEach(t => t.classList.toggle('active', t.dataset.finsub === sub));
+  qsa('.fin-subpage').forEach(p => p.classList.remove('active'));
+  const target = $('fin-' + sub);
+  if(target) target.classList.add('active');
+  try {
+    (FIN_RENDERERS[sub] || renderFinSummary)();
+  } catch(err) {
+    console.error('Finance render error:', err);
+    if(target) target.innerHTML = financeEmptyState('A calculation error occurred while rendering this view. Check the ROI sheet data and try again.');
+    writeFinanceAudit('Finance calculation error', { notes: err.message, source: sub });
+  }
+}
+
+function renderFinanceDashboard() { financeNavigateTo(STATE.finance.subpage || 'summary'); }
+
+function wireFinRollupBar(rerenderFn) {
+  const sel = $('fin-rollup-select');
+  if(sel) sel.addEventListener('change', () => { STATE.finance.rollupLevel = sel.value; rerenderFn(); });
+  qsa('#fin-scenario-pills .scenario-pill').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const newScn = btn.dataset.scenario;
+      if(newScn === STATE.finance.scenario) return;
+      const old = STATE.finance.scenario;
+      STATE.finance.scenario = newScn;
+      await writeFinanceAudit('Scenario changed', { old_value:old, new_value:newScn, source:'ui' });
+      rerenderFn();
+    });
+  });
+}
+
+// ── 18r: Partner drill-down Financial Health section ────
+function renderPartnerFinanceSection(dealer) {
+  const body = $('m-finance-body');
+  if(!body) return;
+  if(!STATE.finance.enabled) {
+    body.innerHTML = `<p style="font-size:11px;color:var(--t3)">Upload a workbook with an ROI sheet to see financial health for this partner.</p>`;
+    return;
+  }
+  const nn = normName(dealer.name);
+  const allSnaps = buildPartnerFinanceSnapshots(STATE.finance.scenario);
+  const snap = allSnaps.find(s => s.partner_code && normName(s.partner_name) === nn) ||
+               allSnaps.find(s => normName(s.partner_name) === nn);
+  if(!snap) {
+    body.innerHTML = `<p style="font-size:11px;color:var(--t3)">No ROI sheet record matched to <strong>${dealer.name}</strong>. Check Partner Code / Channel Partner Name spelling in the ROI sheet.</p>`;
+    return;
+  }
+
+  const ov = STATE.finance.overrides[snap.partner_code] || {};
+  const gmCurrent  = ov.gross_margin_pct != null ? ov.gross_margin_pct : snap.gross_margin_pct;
+  const taxCurrent = ov.tax_rate_pct != null ? ov.tax_rate_pct : snap.tax_rate_pct;
+  const isAdmin = STATE.role === 'admin';
+
+  const metric = (lbl, val, sub='') => `<div class="sbox"><div class="sl">${lbl}</div><div class="sv">${val}</div>${sub?`<div style="font-size:10px;color:var(--t3)">${sub}</div>`:''}</div>`;
+
+  body.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+      ${ragBadgeHTML(snap.rag)}
+      ${snap.early_stage?'<span class="early-flag">🌱 Early Stage</span>':''}
+      <div class="scenario-pills" id="m-fin-scenario-pills">
+        ${['Base','Upside','Stress'].map(s=>`<button class="scenario-pill ${s==='Upside'?'upside':s==='Stress'?'stress':''} ${STATE.finance.scenario===s?'active':''}" data-mfin-scenario="${s}">${s}</button>`).join('')}
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--t3);margin-bottom:10px">${snap.rag_reason}</div>
+    <div class="stat-grid c3" style="margin-bottom:8px">
+      ${metric('Revenue', fL(snap.revenue), snap.month+' '+snap.year)}
+      ${metric('Gross Profit', fL(snap.gross_profit), fPct(gmCurrent)+' margin')}
+      ${metric('OPEX Monthly', fL(snap.opex_monthly))}
+      ${metric('EBITDA', fL(snap.ebitda), fPct(snap.ebitda_margin)+' margin')}
+      ${metric('EBIT', fL(snap.ebit), fPct(snap.ebit_margin)+' margin')}
+      ${metric('Net Profit (After Tax)', fL(snap.net_profit), fPct(snap.net_margin)+' margin')}
+      ${metric('Cash Profit', fL(snap.cash_profit))}
+      ${metric('Depreciable CAPEX', fL(snap.depreciable_capex))}
+      ${metric('Security Deposit', fL(snap.security_deposit), 'Excluded from ROI base')}
+      ${metric('Monthly ROI', fPct(snap.monthly_roi))}
+      ${metric('Annualized ROI', fPct(snap.annualized_roi), `vs FD ${FINANCE_CONFIG.FD_BENCHMARK_PCT}%`)}
+      ${metric('Cumulative ROI', fPct(snap.cumulative_roi), snap.months_count+' month(s)'+(snap.months_count<2?' — limited data':''))}
+      ${metric('ROI vs FD Spread', (snap.roi_spread!=null?(snap.roi_spread>=0?'+':'')+snap.roi_spread.toFixed(1)+'%':'—'))}
+      ${metric('Payback', snap.payback_months!=null?snap.payback_months.toFixed(0)+' months':'Not meaningful')}
+      ${metric('Partner Age', snap.partner_age_months!=null?snap.partner_age_months+' months':'—')}
+    </div>
+    ${isAdmin ? `
+    <div style="background:var(--bg);border-radius:var(--r-sm);padding:9px 11px;margin-bottom:8px">
+      <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Admin Override</div>
+      <div class="fin-override-row"><span>Gross Margin %</span><input type="number" id="m-fin-gm-input" value="${gmCurrent.toFixed(1)}" step="0.1"></div>
+      <div class="fin-override-row"><span>Tax Rate %</span><input type="number" id="m-fin-tax-input" value="${taxCurrent.toFixed(1)}" step="0.1"></div>
+      <button class="btn-xs sol" id="m-fin-save-override" style="margin-top:4px;width:100%;justify-content:center" data-partner-code="${snap.partner_code}">Save Override</button>
+    </div>` : ''}
+    ${snap.notes ? `<div class="notes-box" style="margin-bottom:8px">${snap.notes}</div>` : ''}
+    <div style="font-size:9px;color:var(--t3)">Last updated by ${snap.last_updated_by||'—'} on ${snap.last_updated_on||'—'}${snap.tax_rate_defaulted?' · Tax rate defaulted (not provided in sheet)':''}</div>
+  `;
+
+  qsa('[data-mfin-scenario]', body).forEach(btn => btn.addEventListener('click', async () => {
+    const newScn = btn.dataset.mfinScenario;
+    if(newScn === STATE.finance.scenario) return;
+    const old = STATE.finance.scenario;
+    STATE.finance.scenario = newScn;
+    await writeFinanceAudit('Scenario changed (partner view)', { partner_code:snap.partner_code, old_value:old, new_value:newScn, source:'partner_modal' });
+    renderPartnerFinanceSection(dealer);
+  }));
+
+  const saveBtn = $('m-fin-save-override');
+  if(saveBtn) saveBtn.addEventListener('click', async () => {
+    const code = saveBtn.dataset.partnerCode;
+    const newGM  = parseFloat($('m-fin-gm-input').value);
+    const newTax = parseFloat($('m-fin-tax-input').value);
+    const prevOv = STATE.finance.overrides[code] || {};
+    const oldGM  = prevOv.gross_margin_pct != null ? prevOv.gross_margin_pct : snap.gross_margin_pct;
+    const oldTax = prevOv.tax_rate_pct != null ? prevOv.tax_rate_pct : snap.tax_rate_pct;
+    STATE.finance.overrides[code] = { gross_margin_pct:newGM, tax_rate_pct:newTax };
+    STATE.finance.rows.forEach(r => { if(r.partner_code === code) { r.gross_margin_override = newGM; r.tax_rate_override = newTax; } });
+    if(Math.abs(newGM-oldGM) > 0.001) await writeFinanceAudit('Gross margin override changed', { partner_code:code, old_value:oldGM.toFixed(1)+'%', new_value:newGM.toFixed(1)+'%', source:'partner_modal' });
+    if(Math.abs(newTax-oldTax) > 0.001) await writeFinanceAudit('Tax rate override changed', { partner_code:code, old_value:oldTax.toFixed(1)+'%', new_value:newTax.toFixed(1)+'%', source:'partner_modal' });
+    toast('Override saved for this session', 'ok');
+    renderPartnerFinanceSection(dealer);
+    if($('page-finance')?.classList.contains('active')) renderFinanceDashboard();
+  });
+}
+
+// ── 18s: Finance audit log (Firestore-backed, local fallback) ──
+async function writeFinanceAudit(action, details = {}) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    user: STATE.userProfile?.name || STATE.userProfile?.email || 'admin',
+    action,
+    partner_code: details.partner_code || '',
+    old_value: details.old_value != null ? String(details.old_value) : '',
+    new_value: details.new_value != null ? String(details.new_value) : '',
+    source: details.source || 'app',
+    notes: details.notes || '',
+  };
+  STATE.finance.auditLog.unshift(entry);
+  if(STATE.finance.auditLog.length > 500) STATE.finance.auditLog.length = 500;
+  if(FBDB && STATE.role === 'admin') {
+    try {
+      await FBDB.collection('finance_audit_logs').add({ ...entry, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch(e) { console.warn('Finance audit log write failed:', e.message); }
+  }
+  if(STATE.page === 'finance' && STATE.finance.subpage === 'audit') renderFinAuditLog();
+}
+
+async function loadFinanceAuditLog() {
+  if(!FBDB || STATE.role !== 'admin') return;
+  try {
+    const snap = await FBDB.collection('finance_audit_logs').orderBy('created_at','desc').limit(100).get();
+    const remote = snap.docs.map(d => {
+      const v = d.data();
+      return { ...v, timestamp: v.created_at?.toDate?.()?.toISOString() || v.timestamp || new Date().toISOString() };
+    });
+    if(remote.length) STATE.finance.auditLog = remote;
+  } catch(e) { /* collection may not exist yet — non-critical */ }
+}
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 17 — INIT & EVENT LISTENERS
@@ -2547,10 +3672,22 @@ document.addEventListener('DOMContentLoaded', () => {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s27H,['Apr-26','01-Apr-26','Sample Hardware Pvt Ltd','9876543210',1800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window'],['May-26','10-May-26','Sample Hardware Pvt Ltd','9876543210',2800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window']]), 'FY27 Dump');
     const s26H = ['Month','Dealer Phone','Dealer Name','Final basic Value ( without Inst)','Territory','ASM Name','ASM EMP CODE','City','State','Dealer/Direct'];
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s26H,['Apr-25','9876543210','Sample Hardware Pvt Ltd',800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer'],['May-25','9876543210','Sample Hardware Pvt Ltd',2200000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer']]), 'FY26 Dump');
+    const roiH = ['Serial Number','Partner Code','Channel Partner Name','Month','Year','Revenue','Gross Margin %','OPEX Monthly','Windows CAPEX','Showroom Build CAPEX','Refundable Security Deposit','Tax Rate %','Partner Start Date','Partner Age Months','Scenario','Notes','Last Updated By','Last Updated On'];
+    const roiR1 = [1,'PC1001','Sample Hardware Pvt Ltd','Apr-26',2026,1800000,42,180000,1200000,800000,300000,25,'01-Jan-25',17,'Base','','admin','30-Jun-26'];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([roiH, roiR1]), 'ROI');
     XLSX.writeFile(wb, 'ChannelIntel_Workbook_Template.xlsx');
     toast('Template downloaded!', 'ok');
   });
 
+});
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION 19 — FINANCE UI WIRING (Partner Financial Health)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+document.addEventListener('DOMContentLoaded', () => {
+  qsa('.fin-tab').forEach(tab => {
+    tab.addEventListener('click', () => financeNavigateTo(tab.dataset.finsub));
+  });
 });
 
 console.log(`📊 Channel Intelligence | DEV_MODE=${DEV_MODE} | Firebase=${FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY' ? 'Configured' : 'Not Configured'}`);
