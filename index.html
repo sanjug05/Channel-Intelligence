@@ -10,322 +10,343 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Channel Intel">
 <style>
-/* ═══════════ CSS VARIABLES & RESET ═══════════ */
+/* ── Variables ── */
 :root{
   --p:#2563eb;--p2:#1d4ed8;--plt:#dbeafe;
   --ok:#16a34a;--okt:#dcfce7;
   --warn:#d97706;--warnt:#fef3c7;
   --err:#dc2626;--errt:#fee2e2;
   --info:#7c3aed;--infot:#ede9fe;
-  --bg:#f1f5f9;--card:#fff;--border:#e2e8f0;
+  --bg:#f0f4f8;--card:#fff;--border:#e2e8f0;
   --t:#0f172a;--t2:#475569;--t3:#94a3b8;
-  --sb:#1e293b;--sb-t:#94a3b8;--sb-act:#60a5fa;--sb-h:#334155;
+  --sb:#1a2436;--sb-t:#8fa3b8;--sb-act:#60a5fa;--sb-h:#253347;
   --topbar:#fff;
-  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
-  --shm:0 4px 16px rgba(0,0,0,.10);
-  --shl:0 8px 32px rgba(0,0,0,.14);
-  --r:10px;--r-sm:6px;--r-lg:14px;
-  --sw:232px;--sc:60px;--th:56px;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shm:0 4px 16px rgba(0,0,0,.09);
+  --shl:0 8px 32px rgba(0,0,0,.13);
+  --r:9px;--r-sm:5px;--r-lg:13px;
+  --sw:220px;--sc:56px;--th:50px;
 }
 [data-theme=dark]{
-  --bg:#0f172a;--card:#1e293b;--border:#334155;
-  --t:#f1f5f9;--t2:#94a3b8;--t3:#64748b;
-  --topbar:#1e293b;
-  --sh:0 1px 3px rgba(0,0,0,.30);--shm:0 4px 16px rgba(0,0,0,.40);--shl:0 8px 32px rgba(0,0,0,.50);
+  --bg:#0d1525;--card:#1a2436;--border:#253347;
+  --t:#f0f4f8;--t2:#94a3b8;--t3:#5a7a9a;
+  --topbar:#1a2436;
+  --sh:0 1px 3px rgba(0,0,0,.35);--shm:0 4px 16px rgba(0,0,0,.45);--shl:0 8px 32px rgba(0,0,0,.55);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:14px}
+html{font-size:13px}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t);line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 a{color:inherit;text-decoration:none}
 button{border:none;background:none;cursor:pointer;font-family:inherit;font-size:inherit}
 input,select{font-family:inherit;font-size:inherit}
 .hidden{display:none!important}
-::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-/* ═══════════ PWA BANNER ═══════════ */
-#pwa-banner{
-  position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:2px solid var(--p);
-  padding:12px 20px;display:none;align-items:center;justify-content:space-between;
-  gap:14px;z-index:3000;box-shadow:0 -4px 20px rgba(0,0,0,.12);flex-wrap:wrap;
-}
+/* ── PWA Banner ── */
+#pwa-banner{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:2px solid var(--p);padding:10px 18px;display:none;align-items:center;justify-content:space-between;gap:12px;z-index:3000;box-shadow:0 -4px 20px rgba(0,0,0,.12);flex-wrap:wrap}
 #pwa-banner.show{display:flex}
-.pwa-text{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500}
-.pwa-icon{font-size:26px}
-.pwa-btns{display:flex;gap:8px}
-.btn-install{background:var(--p);color:#fff;padding:8px 16px;border-radius:var(--r-sm);font-weight:600;font-size:13px;transition:.15s}
+.pwa-text{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:500}
+.pwa-icon{font-size:22px}
+.pwa-btns{display:flex;gap:7px}
+.btn-install{background:var(--p);color:#fff;padding:7px 14px;border-radius:var(--r-sm);font-weight:600;font-size:12px;transition:.15s}
 .btn-install:hover{background:var(--p2)}
-.btn-dismiss-pwa{background:var(--bg);color:var(--t2);padding:8px 14px;border-radius:var(--r-sm);border:1px solid var(--border);font-size:13px;transition:.15s}
-.btn-dismiss-pwa:hover{background:var(--border)}
+.btn-dismiss-pwa{background:var(--bg);color:var(--t2);padding:7px 12px;border-radius:var(--r-sm);border:1px solid var(--border);font-size:12px}
 
-/* ═══════════ LOGIN ═══════════ */
-#login-screen{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#0b1120 0%,#1a2e52 50%,#0b1120 100%);padding:16px;
-}
-.login-card{
-  width:100%;max-width:380px;background:var(--card);border-radius:var(--r-lg);
-  padding:40px 36px;box-shadow:var(--shl);
-}
-.login-logo{width:46px;height:46px;background:var(--p);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;margin-bottom:18px}
-.login-card h1{font-size:20px;font-weight:700}
-.login-sub{font-size:13px;color:var(--t3);margin:4px 0 26px}
-.fg-login{margin-bottom:14px}
-.fg-login label{display:block;font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
-.fg-login input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--t);outline:none;transition:border .15s}
+/* ── Login ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#08101e 0%,#16284a 50%,#08101e 100%);padding:14px}
+.login-card{width:100%;max-width:360px;background:var(--card);border-radius:var(--r-lg);padding:34px 30px;box-shadow:var(--shl)}
+.login-logo{width:40px;height:40px;background:var(--p);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;margin-bottom:14px}
+.login-card h1{font-size:18px;font-weight:700}
+.login-sub{font-size:12px;color:var(--t3);margin:3px 0 22px}
+.fg-login{margin-bottom:12px}
+.fg-login label{display:block;font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.fg-login input{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--t);outline:none;transition:border .15s;font-size:13px}
 .fg-login input:focus{border-color:var(--p)}
-.btn-login{width:100%;padding:11px;background:var(--p);color:#fff;border-radius:var(--r);font-weight:600;font-size:14px;transition:.15s;margin-top:4px}
+.btn-login{width:100%;padding:10px;background:var(--p);color:#fff;border-radius:var(--r);font-weight:600;font-size:13px;transition:.15s;margin-top:4px}
 .btn-login:hover{background:var(--p2)}
-.login-div{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--t3);font-size:12px}
+.login-div{display:flex;align-items:center;gap:9px;margin:15px 0;color:var(--t3);font-size:11px}
 .login-div::before,.login-div::after{content:'';flex:1;height:1px;background:var(--border)}
-.demo-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.btn-demo{padding:9px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-weight:500;color:var(--t2);background:var(--bg);transition:.15s;text-align:center}
+.demo-btns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.btn-demo{padding:8px;border:1px solid var(--border);border-radius:var(--r);font-size:11px;font-weight:500;color:var(--t2);background:var(--bg);transition:.15s;text-align:center}
 .btn-demo:hover{border-color:var(--p);color:var(--p);background:var(--plt)}
-.login-err{margin-top:12px;padding:10px 12px;background:var(--errt);color:var(--err);border-radius:var(--r);font-size:13px}
-.login-hint{margin-top:16px;font-size:11px;color:var(--t3);text-align:center;line-height:1.7}
+.login-err{margin-top:10px;padding:9px 11px;background:var(--errt);color:var(--err);border-radius:var(--r);font-size:12px}
+.login-hint{margin-top:13px;font-size:10px;color:var(--t3);text-align:center;line-height:1.7}
 
-/* ═══════════ APP SHELL ═══════════ */
+/* ── App Shell ── */
 #app-shell{display:flex;height:100vh;overflow:hidden}
 
-/* SIDEBAR */
-#sidebar{
-  width:var(--sw);min-width:var(--sw);height:100vh;background:var(--sb);
-  display:flex;flex-direction:column;transition:width .22s,min-width .22s;
-  z-index:200;overflow:hidden;flex-shrink:0
-}
-.sb-brand{padding:0 16px;height:var(--th);display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
-.sb-icon{width:30px;height:30px;border-radius:7px;background:var(--p);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0}
-.sb-text{overflow:hidden}
-.sb-text strong{font-size:13px;font-weight:700;color:#f8fafc;white-space:nowrap;display:block}
-.sb-text em{font-size:10px;font-style:normal;color:#64748b;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.sb-nav{flex:1;padding:10px 8px;overflow-y:auto}
-.nav-lbl{font-size:10px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.08em;padding:12px 10px 5px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);color:var(--sb-t);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;white-space:nowrap;user-select:none}
-.nav-item:hover{background:var(--sb-h);color:#cbd5e1}
-.nav-item.active{background:rgba(37,99,235,.18);color:var(--sb-act)}
-.nav-ico{width:18px;font-size:15px;flex-shrink:0;text-align:center}
-.nav-lbl-text{overflow:hidden;transition:opacity .15s}
-.sb-foot{padding:12px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-.sb-user .un{font-size:12px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sb-user .ur{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
-
-/* Collapsed sidebar */
+/* ── Sidebar ── */
+#sidebar{width:var(--sw);min-width:var(--sw);height:100vh;background:var(--sb);display:flex;flex-direction:column;transition:width .22s,min-width .22s;z-index:200;overflow:hidden;flex-shrink:0}
+.sb-brand{padding:0 14px;height:var(--th);display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0}
+.sb-icon{width:28px;height:28px;border-radius:6px;background:var(--p);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0}
+.sb-text strong{font-size:12px;font-weight:700;color:#f0f4f8;white-space:nowrap;display:block}
+.sb-text em{font-size:9px;font-style:normal;color:#5a7a9a;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.sb-nav{flex:1;padding:8px 7px;overflow-y:auto}
+.nav-lbl{font-size:9px;font-weight:600;color:#3d5a75;text-transform:uppercase;letter-spacing:.08em;padding:10px 9px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:var(--r-sm);color:var(--sb-t);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:1px;white-space:nowrap;user-select:none}
+.nav-item:hover{background:var(--sb-h);color:#c8d8e8}
+.nav-item.active{background:rgba(37,99,235,.2);color:var(--sb-act)}
+.nav-ico{width:16px;font-size:14px;flex-shrink:0;text-align:center}
+.nav-lbl-text{overflow:hidden}
+.sb-foot{padding:10px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.sb-user .un{font-size:11px;font-weight:600;color:#e0eaf0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user .ur{font-size:9px;color:#3d5a75;text-transform:uppercase;letter-spacing:.05em}
 #app-shell.sc #sidebar{width:var(--sc);min-width:var(--sc)}
 #app-shell.sc .nav-lbl-text,#app-shell.sc .sb-text,#app-shell.sc .sb-user,#app-shell.sc .nav-lbl{display:none}
 #app-shell.sc .sb-brand{justify-content:center}
-#app-shell.sc .nav-item{justify-content:center;padding:10px}
+#app-shell.sc .nav-item{justify-content:center;padding:9px}
 #app-shell.sc .sb-foot{justify-content:center}
 
-/* MAIN */
+/* ── Topbar ── */
 #main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-#topbar{
-  height:var(--th);background:var(--topbar);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;padding:0 16px;flex-shrink:0;z-index:100
-}
-.ib{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);color:var(--t2);font-size:16px;transition:.15s;flex-shrink:0}
+#topbar{height:var(--th);background:var(--topbar);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;padding:0 14px;flex-shrink:0;z-index:100}
+.ib{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);color:var(--t2);font-size:15px;transition:.15s;flex-shrink:0}
 .ib:hover{background:var(--bg);color:var(--t)}
-.tb-title{font-size:15px;font-weight:600;white-space:nowrap}
-.tb-search{flex:1;max-width:300px;position:relative}
-.tb-search input{width:100%;padding:7px 12px 7px 32px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--t);font-size:13px;outline:none;transition:border .15s}
+.tb-title{font-size:14px;font-weight:600;white-space:nowrap}
+.tb-search{flex:1;max-width:280px;position:relative}
+.tb-search input{width:100%;padding:6px 11px 6px 29px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--t);font-size:12px;outline:none;transition:border .15s}
 .tb-search input:focus{border-color:var(--p)}
-.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;pointer-events:none}
-.tb-right{display:flex;align-items:center;gap:6px;margin-left:auto}
-.src-badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
+.tb-right{display:flex;align-items:center;gap:5px;margin-left:auto}
+.src-badge{padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
 .src-badge.demo{background:#fef3c7;color:#92400e}
 .src-badge.upload{background:#d1fae5;color:#065f46}
-.user-pill{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border-radius:var(--r-sm);cursor:pointer;transition:.15s}
+.role-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.08em}
+.role-badge.admin{background:#fde68a;color:#92400e}
+.role-badge.asm{background:#d1fae5;color:#065f46}
+.role-badge.viewer{background:#e0e7ff;color:#3730a3}
+.user-pill{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;border-radius:var(--r-sm);cursor:pointer;transition:.15s}
 .user-pill:hover{background:var(--bg)}
-.av-sm{width:26px;height:26px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
-.un-top{font-size:13px;font-weight:500}
+.av-sm{width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.un-top{font-size:12px;font-weight:500}
 
-/* CONTENT */
-#main-content{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px;background:var(--bg)}
+/* ── Content ── */
+#main-content{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px;background:var(--bg)}
 .page{display:none}
 .page.active{display:block;animation:fadeIn .18s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{transform:translateX(28px);opacity:0}to{transform:none;opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* EMPTY STATE */
-.empty-state{text-align:center;padding:80px 20px;color:var(--t3)}
-.empty-ico{font-size:56px;margin-bottom:12px;opacity:.4}
-.empty-state h2{font-size:18px;font-weight:600;color:var(--t2);margin-bottom:8px}
-.empty-state p{font-size:13px;line-height:1.6;max-width:400px;margin:0 auto 20px}
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:60px 16px;color:var(--t3)}
+.empty-ico{font-size:48px;margin-bottom:10px;opacity:.4}
+.empty-state h2{font-size:16px;font-weight:600;color:var(--t2);margin-bottom:6px}
+.empty-state p{font-size:12px;line-height:1.6;max-width:380px;margin:0 auto 16px}
 
-/* FILTERS */
-.filters-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-.fg{display:flex;flex-direction:column;gap:4px}
-.fg label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
-.fg select{padding:6px 24px 6px 9px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:12px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2394A3B8' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;min-width:110px;transition:border .15s}
+/* ── Insight bar ── */
+.insight-bar{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);border-left:3px solid var(--p);overflow:hidden}
+.insight-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);padding:8px 12px;border-right:1px solid var(--border)}
+.insight-pill:last-child{border-right:none}
+.insight-pill strong{color:var(--t);font-weight:600}
+.insight-pill .ico{font-size:13px}
+.insight-pill.warn strong{color:var(--err)}
+.insight-pill.ok strong{color:var(--ok)}
+
+/* ── Filters ── */
+.filters-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.fg select{padding:5px 22px 5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 10 10'%3E%3Cpath fill='%2394A3B8' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;min-width:100px;transition:border .15s}
 .fg select:focus{border-color:var(--p)}
-.filter-actions{display:flex;gap:7px;align-self:flex-end}
-.btn-xs{padding:6px 12px;border-radius:var(--r-sm);font-size:12px;font-weight:500;cursor:pointer;transition:.15s}
+.filter-actions{display:flex;gap:6px;align-self:flex-end}
+.btn-xs{padding:5px 10px;border-radius:var(--r-sm);font-size:11px;font-weight:500;cursor:pointer;transition:.15s}
 .btn-xs.out{border:1px solid var(--border);background:var(--card);color:var(--t2)}
 .btn-xs.out:hover{border-color:var(--p);color:var(--p)}
 .btn-xs.sol{border:none;background:var(--p);color:#fff;font-weight:600}
 .btn-xs.sol:hover{background:var(--p2)}
 
-/* KPI GRID */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:16px}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:6px;transition:box-shadow .15s;position:relative;overflow:hidden}
+/* ── KPI Grid ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-bottom:12px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;display:flex;flex-direction:column;gap:5px;transition:box-shadow .15s;position:relative;overflow:hidden}
 .kpi-card:hover{box-shadow:var(--shm)}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-color,var(--p))}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--p))}
 .kpi-head{display:flex;align-items:center;justify-content:space-between}
-.kpi-lbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em}
-.kpi-ico{font-size:16px;opacity:.6}
-.kpi-val{font-size:22px;font-weight:700;line-height:1;letter-spacing:-.4px}
-.kpi-val.sm{font-size:18px}
+.kpi-lbl{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;line-height:1.2}
+.kpi-ico{font-size:14px;opacity:.55}
+.kpi-val{font-size:19px;font-weight:700;line-height:1;letter-spacing:-.4px}
+.kpi-val.sm{font-size:16px}
 .kpi-val.danger{color:var(--err)}
 .kpi-val.warn{color:var(--warn)}
 .kpi-val.ok{color:var(--ok)}
-.kpi-foot{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.delta{font-size:11px;font-weight:600;padding:2px 5px;border-radius:3px}
+.kpi-foot{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.delta{font-size:10px;font-weight:600;padding:1px 4px;border-radius:3px}
 .delta.up{background:var(--okt);color:var(--ok)}
 .delta.dn{background:var(--errt);color:var(--err)}
 .delta.flat{background:var(--bg);color:var(--t3)}
-.kpi-sub{font-size:11px;color:var(--t3)}
+.kpi-sub{font-size:10px;color:var(--t3);line-height:1.2}
 
-/* CHARTS */
-.charts-row{display:grid;grid-template-columns:3fr 2fr;gap:10px;margin-bottom:16px}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
-.cc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
-.cc-title{font-size:13px;font-weight:600}
-.cc-sub{font-size:11px;color:var(--t3);margin-top:2px}
+/* ── Charts ── */
+.charts-row{display:grid;grid-template-columns:3fr 2fr;gap:8px;margin-bottom:12px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px}
+.cc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.cc-title{font-size:12px;font-weight:600}
+.cc-sub{font-size:10px;color:var(--t3);margin-top:1px}
 .chart-wrap{position:relative}
 
-/* SECTION HEADER */
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.sec-title{font-size:14px;font-weight:600}
-.sec-sub{font-size:12px;color:var(--t3)}
-.count-pill{font-size:11px;color:var(--t3);background:var(--bg);padding:3px 8px;border-radius:20px;font-weight:500;border:1px solid var(--border)}
+/* ── Section header ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-title{font-size:13px;font-weight:600}
+.sec-sub{font-size:11px;color:var(--t3)}
+.count-pill{font-size:10px;color:var(--t3);background:var(--bg);padding:2px 7px;border-radius:20px;font-weight:500;border:1px solid var(--border)}
 
-/* DEALER CARDS */
-.dealer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-.dealer-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+/* ── Dealer cards ── */
+.dealer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.dealer-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 13px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
 .dealer-card:hover{box-shadow:var(--shm);border-color:var(--p);transform:translateY(-1px)}
 .dealer-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--p);opacity:0;transition:.15s}
 .dealer-card:hover::before{opacity:1}
-.dc-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.chip{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.dc-chips{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
+.chip{display:inline-flex;align-items:center;padding:2px 6px;border-radius:20px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
 .chip.zone{background:var(--plt);color:var(--p)}
 .chip.terr{background:var(--bg);color:var(--t2);border:1px solid var(--border)}
 .chip.new-d{background:var(--okt);color:var(--ok)}
 .chip.ex{background:var(--infot);color:var(--info)}
 .chip.tod{background:var(--warnt);color:var(--warn)}
 .chip.no-match{background:var(--errt);color:var(--err)}
-.dc-name{font-size:13px;font-weight:700;line-height:1.3;margin-bottom:3px}
-.dc-meta{font-size:11px;color:var(--t2);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:3px 10px}
-.dc-divider{height:1px;background:var(--border);margin:8px 0}
-.dc-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
-.dk-lbl{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px}
-.dk-val{font-size:14px;font-weight:700;line-height:1}
+.dc-name{font-size:12px;font-weight:700;line-height:1.3;margin-bottom:2px}
+.dc-meta{font-size:10px;color:var(--t2);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:2px 8px}
+.dc-divider{height:1px;background:var(--border);margin:7px 0}
+.dc-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
+.dk-lbl{font-size:8px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:1px}
+.dk-val{font-size:13px;font-weight:700;line-height:1}
 .dk-val.ok{color:var(--ok)}
 .dk-val.warn{color:var(--warn)}
 .dk-val.err{color:var(--err)}
-.progress-bar-wrap{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
-.progress-bar{height:100%;border-radius:3px;transition:width .4s}
+.progress-bar-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:3px}
+.progress-bar{height:100%;border-radius:2px;transition:width .4s}
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:1000;display:flex;align-items:flex-start;justify-content:flex-end;animation:fadeIn .18s}
-.modal-drawer{width:min(680px,100vw);height:100vh;background:var(--card);display:flex;flex-direction:column;overflow:hidden;box-shadow:-6px 0 32px rgba(0,0,0,.2);animation:slideIn .2s ease}
-@keyframes slideIn{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
-@keyframes spin{to{transform:rotate(360deg)}}
-.modal-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;flex-shrink:0}
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:flex-start;justify-content:flex-end;animation:fadeIn .18s}
+.modal-drawer{width:min(640px,100vw);height:100vh;background:var(--card);display:flex;flex-direction:column;overflow:hidden;box-shadow:-6px 0 30px rgba(0,0,0,.18);animation:slideIn .2s ease}
+.modal-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:9px;flex-shrink:0}
 .modal-head-info{flex:1;min-width:0}
-.mh-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mh-sub{font-size:11px;color:var(--t3);margin-top:2px}
-.modal-close{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);color:var(--t3);font-size:15px;transition:.15s;flex-shrink:0}
+.mh-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mh-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.modal-close{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);color:var(--t3);font-size:14px;transition:.15s;flex-shrink:0}
 .modal-close:hover{background:var(--bg);color:var(--t)}
-.modal-body{flex:1;overflow-y:auto;padding:18px}
-.msec{margin-bottom:22px}
-.msec-title{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.modal-body{flex:1;overflow-y:auto;padding:14px 16px}
+.msec{margin-bottom:18px}
+.msec-title{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em;padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid var(--border)}
 .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0}
-.ir{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.ir{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
 .ir:last-child{border-bottom:none}
-.ir-lbl{font-size:12px;color:var(--t2)}
-.ir-val{font-size:12px;font-weight:600}
-.stat-grid{display:grid;gap:8px}
+.ir-lbl{font-size:11px;color:var(--t2)}
+.ir-val{font-size:11px;font-weight:600}
+.stat-grid{display:grid;gap:7px}
 .stat-grid.c2{grid-template-columns:repeat(2,1fr)}
 .stat-grid.c3{grid-template-columns:repeat(3,1fr)}
 .stat-grid.c4{grid-template-columns:repeat(4,1fr)}
-.sbox{background:var(--bg);border-radius:var(--r-sm);padding:11px 12px}
-.sbox .sv{font-size:18px;font-weight:700;line-height:1;letter-spacing:-.3px;margin-bottom:3px}
-.sbox .sl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
-.sbox .sd{font-size:11px;font-weight:600;margin-top:2px}
+.sbox{background:var(--bg);border-radius:var(--r-sm);padding:9px 11px}
+.sbox .sv{font-size:16px;font-weight:700;line-height:1;letter-spacing:-.3px;margin-bottom:2px}
+.sbox .sl{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px}
+.sbox .sd{font-size:10px;font-weight:600;margin-top:1px}
 .sbox .sd.up{color:var(--ok)}.sbox .sd.dn{color:var(--err)}
-.notes-box{background:var(--bg);border-radius:var(--r-sm);padding:12px;font-size:13px;color:var(--t2);line-height:1.65;border-left:3px solid var(--p)}
-.modal-chart-wrap{height:200px;position:relative;margin-top:6px}
+.notes-box{background:var(--bg);border-radius:var(--r-sm);padding:11px;font-size:12px;color:var(--t2);line-height:1.65;border-left:3px solid var(--p)}
+.modal-chart-wrap{height:180px;position:relative;margin-top:6px}
+.achieve-bar-wrap{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:5px}
+.achieve-bar{height:100%;border-radius:3px;transition:width .5s}
 
-/* ANALYTICS */
-.ana-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+/* ── Analytics ── */
+.ana-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 
-/* DATA SOURCES */
-.ds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-.ds-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:10px}
-.ds-icon{font-size:28px}
-.ds-title{font-size:14px;font-weight:700}
-.ds-desc{font-size:12px;color:var(--t2);line-height:1.55}
-.ds-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:3px;width:fit-content;text-transform:uppercase;letter-spacing:.05em}
-.ds-status.on{background:var(--okt);color:var(--ok)}
-.ds-status.off{background:var(--bg);color:var(--t3);border:1px solid var(--border)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+/* ── Data sources ── */
+.ds-status-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.ds-status-ico{font-size:26px;flex-shrink:0}
+.ds-status-body{flex:1;min-width:0}
+.ds-status-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.ds-status-sub{font-size:11px;color:var(--t2);line-height:1.5}
+.ds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:14px}
+.ds-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:9px}
+.ds-icon{font-size:24px}
+.ds-title{font-size:13px;font-weight:700}
+.ds-desc{font-size:11px;color:var(--t2);line-height:1.55}
+.ds-status-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;width:fit-content;text-transform:uppercase;letter-spacing:.05em}
+.ds-status-badge.on{background:var(--okt);color:var(--ok)}
+.ds-status-badge.off{background:var(--bg);color:var(--t3);border:1px solid var(--border)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
 .btn.primary{background:var(--p);color:#fff;border:none}
 .btn.primary:hover{background:var(--p2)}
 .btn.outline{background:var(--card);color:var(--t2);border:1px solid var(--border)}
 .btn.outline:hover{border-color:var(--p);color:var(--p)}
 
-/* UPLOAD */
-.upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:32px 20px;text-align:center;cursor:pointer;transition:.15s}
+/* ── Upload ── */
+.upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:26px 16px;text-align:center;cursor:pointer;transition:.15s}
 .upload-area:hover,.upload-area.drag{border-color:var(--p);background:var(--plt)}
-.upload-ico{font-size:40px;margin-bottom:10px;opacity:.5}
-.upload-area p{font-size:13px;color:var(--t2);margin-bottom:4px}
-.upload-area small{font-size:11px;color:var(--t3)}
-.upload-result{margin-top:12px;padding:10px 13px;border-radius:var(--r-sm);font-size:13px}
+.upload-ico{font-size:34px;margin-bottom:8px;opacity:.5}
+.upload-area p{font-size:12px;color:var(--t2);margin-bottom:3px}
+.upload-area small{font-size:10px;color:var(--t3)}
+.upload-result{margin-top:10px;padding:9px 12px;border-radius:var(--r-sm);font-size:12px}
 .upload-result.ok{background:var(--okt);color:var(--ok)}
 .upload-result.err{background:var(--errt);color:var(--err)}
 
-/* DIAGNOSTICS */
-.diag-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-top:14px}
-.diag-title{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
-.diag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px}
-.diag-item{background:var(--bg);border-radius:var(--r-sm);padding:10px}
-.diag-item .dv{font-size:20px;font-weight:700;line-height:1}
-.diag-item .dl{font-size:10px;color:var(--t3);margin-top:3px}
-.mapping-detail{font-size:11px;color:var(--t2);line-height:1.8;background:var(--bg);padding:10px;border-radius:var(--r-sm)}
+/* ── Diagnostics ── */
+.diag-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-top:12px}
+.diag-title{font-size:11px;font-weight:700;color:var(--t2);margin-bottom:9px;text-transform:uppercase;letter-spacing:.06em}
+.diag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:10px}
+.diag-item{background:var(--bg);border-radius:var(--r-sm);padding:8px 10px}
+.diag-item .dv{font-size:17px;font-weight:700;line-height:1}
+.diag-item .dl{font-size:9px;color:var(--t3);margin-top:2px}
+.mapping-detail{font-size:10px;color:var(--t2);line-height:1.8;background:var(--bg);padding:9px;border-radius:var(--r-sm)}
 .mapping-detail .mok{color:var(--ok)}
 .mapping-detail .mwarn{color:var(--warn)}
-.diag-warn{margin-top:8px;font-size:12px;color:var(--warn)}
-.diag-err{margin-top:4px;font-size:12px;color:var(--err)}
+.diag-warn{margin-top:6px;font-size:11px;color:var(--warn)}
+.diag-err{margin-top:3px;font-size:11px;color:var(--err)}
 
-/* TOAST */
-#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:7px;pointer-events:none}
-.toast{padding:11px 14px;border-radius:var(--r);background:var(--card);border:1px solid var(--border);box-shadow:var(--shm);font-size:13px;display:flex;align-items:center;gap:9px;animation:slideIn .2s ease;max-width:320px;pointer-events:all}
+/* ── Toast ── */
+#toast-wrap{position:fixed;bottom:18px;right:18px;z-index:2000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{padding:10px 13px;border-radius:var(--r);background:var(--card);border:1px solid var(--border);box-shadow:var(--shm);font-size:12px;display:flex;align-items:center;gap:8px;animation:slideIn .2s ease;max-width:300px;pointer-events:all}
 .toast.ok{border-left:3px solid var(--ok)}
 .toast.err{border-left:3px solid var(--err)}
 .toast.inf{border-left:3px solid var(--p)}
 
-/* PROGRESS BAR IN MODAL */
-.achieve-bar-wrap{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
-.achieve-bar{height:100%;border-radius:4px;transition:width .5s}
+/* ── Role-gated elements ── */
+[data-admin-only]{transition:opacity .2s}
+[data-admin-only].role-hidden{display:none!important}
 
-/* RESPONSIVE */
+/* ── Responsive ── */
+@media(max-width:1280px){#main-content{padding:13px}}
 @media(max-width:1100px){.charts-row{grid-template-columns:1fr}}
 @media(max-width:900px){.ana-grid{grid-template-columns:1fr}}
 @media(max-width:768px){
-  :root{--sw:240px}
+  :root{--sw:220px}
   #sidebar{position:fixed;top:0;left:0;height:100%;z-index:300;transform:translateX(0);transition:transform .25s ease}
   #app-shell.sc #sidebar{transform:translateX(-100%);width:var(--sw)!important;min-width:var(--sw)!important}
   #app-shell.sc #sidebar .nav-lbl-text,#app-shell.sc #sidebar .sb-text,#app-shell.sc #sidebar .sb-user,#app-shell.sc #sidebar .nav-lbl{display:flex!important}
   #app-shell.sc #sidebar .sb-brand{justify-content:flex-start!important}
-  #app-shell.sc #sidebar .nav-item{justify-content:flex-start!important;padding:9px 10px!important}
+  #app-shell.sc #sidebar .nav-item{justify-content:flex-start!important;padding:8px 9px!important}
   #app-shell.sc #sidebar .sb-foot{justify-content:flex-start!important}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
   .dealer-grid{grid-template-columns:1fr}
-  #main-content{padding:12px}
+  #main-content{padding:10px}
   .tb-search{display:none}
   .modal-drawer{width:100vw}
   .stat-grid.c3,.stat-grid.c4{grid-template-columns:repeat(2,1fr)}
+  .insight-bar{display:none}
 }
-@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .kpi-val{font-size:17px}
+  #main-content{padding:8px}
+  .chart-card{padding:10px}
+  .modal-body{padding:10px 12px}
+  .dealer-card{padding:10px 11px}
+  .filters-bar{padding:8px 10px}
+}
+@media(max-width:390px){
+  .kpi-val{font-size:16px}
+  .kpi-lbl{font-size:8px}
+  .kpi-grid{gap:6px}
+  #main-content{padding:7px}
+}
+@media(max-width:360px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .kpi-val{font-size:15px}
+  .dc-name{font-size:11px}
+  .tb-title{font-size:13px}
+}
 </style>
 </head>
 <body>
@@ -393,7 +414,7 @@ input,select{font-family:inherit;font-size:inherit}
   <aside id="sidebar">
     <div class="sb-brand">
       <div class="sb-icon">📊</div>
-      <div class="sb-text"><strong>Channel Intel</strong><em>Dealer Analytics</em></div>
+      <div class="sb-text"><strong>Channel Intel</strong><em>Sales Intelligence</em></div>
     </div>
     <nav class="sb-nav">
       <div class="nav-lbl">Main</div>
@@ -461,18 +482,21 @@ input,select{font-family:inherit;font-size:inherit}
 
           <div class="kpi-grid" id="kpi-grid"></div>
 
+          <!-- Smart insight callouts -->
+          <div class="insight-bar" id="insight-bar" style="display:none"></div>
+
           <div class="charts-row">
             <div class="chart-card">
               <div class="cc-head">
                 <div><div class="cc-title">Monthly Sales Trend</div><div class="cc-sub" id="trend-sub">FY27 vs FY26 — in Lakhs</div></div>
               </div>
-              <div class="chart-wrap" style="height:200px"><canvas id="trend-chart"></canvas></div>
+              <div class="chart-wrap" style="height:190px"><canvas id="trend-chart"></canvas></div>
             </div>
             <div class="chart-card">
               <div class="cc-head">
                 <div><div class="cc-title">Zone Performance</div><div class="cc-sub">FY27 YTD Sales</div></div>
               </div>
-              <div class="chart-wrap" style="height:200px"><canvas id="zone-chart"></canvas></div>
+              <div class="chart-wrap" style="height:190px"><canvas id="zone-chart"></canvas></div>
             </div>
           </div>
 
@@ -497,84 +521,83 @@ input,select{font-family:inherit;font-size:inherit}
       <section id="page-analytics" class="page">
         <div class="sec-head" style="margin-bottom:14px">
           <div class="sec-title">Analytics</div>
-          <div class="sec-sub">Aggregated performance metrics</div>
+          <div class="sec-sub">Aggregated performance · All dealers</div>
+        </div>
+        <div class="ana-grid" style="margin-bottom:10px">
+          <div class="chart-card">
+            <div class="cc-head"><div class="cc-title">Zone Sales — FY27 YTD vs FY26</div></div>
+            <div class="chart-wrap" style="height:220px"><canvas id="a-zone-chart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="cc-head"><div class="cc-title">Dealer Achievement Spread</div><div class="cc-sub">Count of dealers by % of FY27 target achieved</div></div>
+            <div class="chart-wrap" style="height:220px"><canvas id="a-ach-chart"></canvas></div>
+          </div>
+        </div>
+        <div class="chart-card" style="margin-bottom:10px">
+          <div class="cc-head"><div class="cc-title">ASM Performance — FY27 YTD vs Target</div></div>
+          <div class="chart-wrap" style="height:220px"><canvas id="a-asm-chart"></canvas></div>
         </div>
         <div class="ana-grid">
           <div class="chart-card">
-            <div class="cc-head"><div class="cc-title">Zone Sales — FY27 YTD vs FY26 Full Year</div></div>
-            <div class="chart-wrap" style="height:240px"><canvas id="a-zone-chart"></canvas></div>
+            <div class="cc-head"><div class="cc-title">Top 10 Dealers by FY27 YTD Sales</div></div>
+            <div class="chart-wrap" style="height:240px"><canvas id="a-top-chart"></canvas></div>
           </div>
           <div class="chart-card">
-            <div class="cc-head"><div class="cc-title">Achievement Distribution</div><div class="cc-sub">% of FY27 target achieved (YTD)</div></div>
-            <div class="chart-wrap" style="height:240px"><canvas id="a-ach-chart"></canvas></div>
-          </div>
-        </div>
-        <div class="chart-card" style="margin-bottom:12px">
-          <div class="cc-head"><div class="cc-title">ASM-wise FY27 YTD Sales vs Target</div></div>
-          <div class="chart-wrap" style="height:250px"><canvas id="a-asm-chart"></canvas></div>
-        </div>
-        <div class="ana-grid">
-          <div class="chart-card">
-            <div class="cc-head"><div class="cc-title">Top 10 Dealers — FY27 YTD</div></div>
-            <div class="chart-wrap" style="height:260px"><canvas id="a-top-chart"></canvas></div>
-          </div>
-          <div class="chart-card">
-            <div class="cc-head"><div class="cc-title">Territory Performance</div><div class="cc-sub">FY27 YTD Actual</div></div>
-            <div class="chart-wrap" style="height:260px"><canvas id="a-terr-chart"></canvas></div>
+            <div class="cc-head"><div class="cc-title">Territory Performance — FY27 YTD</div></div>
+            <div class="chart-wrap" style="height:240px"><canvas id="a-terr-chart"></canvas></div>
           </div>
         </div>
       </section>
 
       <!-- ═══ DATA SOURCES PAGE ═══ -->
       <section id="page-data-sources" class="page">
-        <div class="sec-head" style="margin-bottom:16px">
-          <div class="sec-title">Data Sources</div>
-          <div class="sec-sub">Upload workbook or connect live data</div>
+        <div class="sec-head" style="margin-bottom:14px">
+          <div><div class="sec-title">Data Management</div><div class="sec-sub">Active dataset · Update · History</div></div>
         </div>
-        <div class="ds-grid">
-          <div class="ds-card">
-            <div class="ds-icon">📊</div>
-            <div class="ds-title">Dealer Workbook Upload</div>
-            <div class="ds-desc">Upload the 3-sheet workbook: <strong>Dealer Target Fy27</strong> (master + targets), <strong>FY27 Dump</strong> (FY27 transactions), <strong>FY26 Dump</strong> (FY26 transactions). Auto-parsed and joined on mobile number.</div>
-            <span class="ds-status off" id="wb-status">○ No File Loaded</span>
-            <label class="btn primary" data-admin-only style="cursor:pointer;justify-content:center">
-              📤 Upload Workbook
+
+        <!-- Active dataset status -->
+        <div class="ds-status-card" id="ds-active-card">
+          <div class="ds-status-ico">☁️</div>
+          <div class="ds-status-body">
+            <div class="ds-status-title" id="ds-active-title">No dataset loaded</div>
+            <div class="ds-status-sub" id="ds-active-sub">Upload your dealer workbook to activate the dashboard. Data is saved to the cloud and restored on every login.</div>
+          </div>
+          <span class="ds-status-badge off" id="wb-status">○ Awaiting Upload</span>
+        </div>
+
+        <!-- Upload card -->
+        <div class="chart-card" style="margin-bottom:12px">
+          <div class="cc-head">
+            <div><div class="cc-title">Upload Dealer Workbook</div><div class="cc-sub">Replaces the active dataset — all users will see the updated data</div></div>
+            <label class="btn primary" data-admin-only style="cursor:pointer;flex-shrink:0">
+              📤 Upload
               <input type="file" id="wb-upload" accept=".xlsx,.xls" style="display:none">
             </label>
           </div>
-          <div class="ds-card">
-            <div class="ds-icon">🔥</div>
-            <div class="ds-title">Firebase / Firestore</div>
-            <div class="ds-desc">Real-time sync from Firestore. Add Firebase credentials to <code>FIREBASE_CONFIG</code> in the script section to activate auth and live data.</div>
-            <span class="ds-status off">○ Not Configured</span>
-            <div style="font-size:11px;color:var(--t3);background:var(--bg);padding:8px;border-radius:var(--r-sm);font-family:monospace;line-height:1.7">
-              // Edit FIREBASE_CONFIG<br>
-              // in &lt;script&gt; section<br>
-              // then call initFirebase()
-            </div>
-            <button class="btn outline" onclick="toast('Fill FIREBASE_CONFIG in script and call initFirebase()','inf')">Configure →</button>
-          </div>
-          <div class="ds-card">
-            <div class="ds-icon">📐</div>
-            <div class="ds-title">Expected Workbook Schema</div>
-            <div class="ds-desc">Sheet 1: <strong>Dealer Target Fy27</strong> — Phone No, Dealer Name, Location, ASM Name, Region, Zone, FY27 Sales AOP, monthly actuals (cols 17-28), FY26 Actuals (cols 32-43).<br><br>Sheet 2: <strong>FY27 Dump</strong> — Mobile No, Dealer Name, Month, Final basic Value, Territory, ASM Name, Dealer/Direct.<br><br>Sheet 3: <strong>FY26 Dump</strong> — Dealer Phone, Dealer Name, Month, Final basic Value, Territory, ASM Name.</div>
-            <button class="btn outline" id="dl-sample-btn" data-admin-only>⬇ Download Sample Template</button>
-          </div>
-        </div>
-
-        <div class="chart-card" style="margin-top:16px">
-          <div class="cc-head"><div class="cc-title">Upload Workbook</div></div>
           <div class="upload-area" id="upload-area" data-admin-only>
             <div class="upload-ico">📂</div>
-            <p>Click to browse or drag &amp; drop your Excel workbook</p>
-            <small>Accepts .xlsx — auto-detects and parses all 3 sheets</small>
+            <p>Drag &amp; drop your Excel workbook here, or click to browse</p>
+            <small>Accepts .xlsx · Expects: Dealer Target Fy27 · FY27 Dump · FY26 Dump</small>
           </div>
           <input type="file" id="main-upload" accept=".xlsx,.xls" style="display:none">
           <div id="upload-result" class="hidden"></div>
         </div>
 
+        <!-- Schema reference -->
+        <div class="chart-card" style="margin-bottom:12px">
+          <div class="cc-head">
+            <div><div class="cc-title">Workbook Schema Reference</div><div class="cc-sub">Expected structure for the 3-sheet workbook</div></div>
+            <button class="btn outline" id="dl-sample-btn" data-admin-only style="flex-shrink:0">⬇ Sample Template</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;font-size:11px;color:var(--t2);line-height:1.7">
+            <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📋 Dealer Target Fy27</div>Phone No · Dealer Name · Location · ASM Name · Region · Zone · FY27 Sales AOP · Monthly actuals (Apr-26 → Mar-27) · FY26 Actuals</div>
+            <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📊 FY27 Dump</div>Mobile No · Dealer Name · Month · Final basic Value · Territory · ASM Name · ASM EMP CODE · City · State · Dealer/Direct</div>
+            <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📊 FY26 Dump</div>Dealer Phone · Dealer Name · Month · Final basic Value · Territory · ASM Name · ASM EMP CODE · City · State · Dealer/Direct</div>
+          </div>
+        </div>
+
         <div id="diag-panel" class="diag-panel hidden">
-          <div class="diag-title">📋 Import Diagnostics</div>
+          <div class="diag-title">📋 Last Import Diagnostics</div>
           <div class="diag-grid" id="diag-grid"></div>
           <div class="mapping-detail" id="mapping-detail"></div>
           <div id="diag-warns"></div>
@@ -628,6 +651,7 @@ input,select{font-family:inherit;font-size:inherit}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 'use strict';
@@ -636,13 +660,14 @@ input,select{font-family:inherit;font-size:inherit}
    SECTION 1 — FIREBASE CONFIGURATION (fill before deploy)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyDav3rI7fTr8KrXYxvnz5LB82CgjRq4v20",
-  authDomain:"ais-showroom-dashboard.firebaseapp.com",
-  projectId:"ais-showroom-dashboard",
-  storageBucket:"ais-showroom-dashboard.firebasestorage.app",
-  messagingSenderId:"175667492150",
-  appId:"1:175667492150:web:cb124eb267b4689e6a2f97"
+  apiKey:            'AIzaSyDav3rI7fTr8KrXYxvnz5LB82CgjRq4v20',
+  authDomain:        'ais-showroom-dashboard.firebaseapp.com',
+  projectId:         'ais-showroom-dashboard',
+  storageBucket:     'ais-showroom-dashboard.firebasestorage.app',
+  messagingSenderId: '175667492150',
+  appId:             '1:175667492150:web:cb124eb267b4689e6a2f97',
 };
+
 /* ── FIREBASE COLLECTION DESIGN ──────────────────────────
  /users/{uid}
    role: 'admin' | 'asm' | 'viewer'
@@ -1197,14 +1222,14 @@ function applyFilters() {
 function renderKPICards(kpis) {
   const defs = [
     { lbl:'Total Dealers',       val: kpis.total,                           ico:'🤝', sub:`${kpis.active} with FY27 sales`,       color:'#2563eb', cls: '' },
-    { lbl:'FY27 YTD Actual',     val: fL(kpis.fy27YTD),                    ico:'📈', sub:`vs ${fL(kpis.fy27Target)} target`,      color:'#2563eb', cls: '' },
+    { lbl:'FY27 YTD Sales',      val: fL(kpis.fy27YTD),                    ico:'📈', sub:`vs ${fL(kpis.fy27Target)} AOP`,      color:'#2563eb', cls: '' },
     { lbl:'FY27 Achievement',    val: fPct(kpis.achPct),                   ico:'🎯', sub:'YTD vs full-year AOP',                  color: achColor(kpis.achPct), cls: kpis.achPct>=50?'ok':kpis.achPct>=25?'warn':'danger' },
     { lbl:'YoY Growth',          val: fGrowth(kpis.yoyPct),                ico:'📊', sub:'FY27 YTD vs FY26 same period',          color: kpis.yoyPct>=0?'#16a34a':'#dc2626', cls: kpis.yoyPct>=0?'ok':'danger', delta: {v:kpis.yoyPct} },
     { lbl:'FY26 Full Year',      val: fL(kpis.fy26Full),                   ico:'📅', sub:'Reference baseline',                   color:'#7c3aed', cls: '' },
     { lbl:'FY27 Sales AOP',      val: fL(kpis.fy27Target),                 ico:'🏹', sub:'Full-year aggregate target',            color:'#2563eb', cls: '' },
-    { lbl:'Remaining Target',    val: fL(Math.max(kpis.targetGap,0)),      ico:'⏳', sub:'AOP minus YTD actual',                 color: kpis.targetGap>0?'#d97706':'#16a34a', cls: kpis.targetGap>0?'warn':'ok' },
-    { lbl:'Dealers On Track',    val: kpis.onTrack,                        ico:'✅', sub:`≥50% achieved (${kpis.aboveTarget} at 100%+)`, color:'#16a34a', cls: '' },
-    { lbl:'Dealers Behind',      val: kpis.total - kpis.onTrack,           ico:'⚠️', sub:'Below 50% achievement',                color:'#dc2626', cls: kpis.total-kpis.onTrack>10?'danger':'warn' },
+    { lbl:'Target Gap',          val: fL(Math.max(kpis.targetGap,0)),      ico:'⏳', sub:'Remaining to achieve full AOP',                 color: kpis.targetGap>0?'#d97706':'#16a34a', cls: kpis.targetGap>0?'warn':'ok' },
+    { lbl:'On Track',            val: kpis.onTrack,                        ico:'✅', sub:`≥50% of target (${kpis.aboveTarget} at full)`, color:'#16a34a', cls: '' },
+    { lbl:'Need Attention',      val: kpis.total - kpis.onTrack,           ico:'⚠️', sub:'Below 50% of FY27 target',                color:'#dc2626', cls: kpis.total-kpis.onTrack>10?'danger':'warn' },
     { lbl:'Avg Achievement',     val: fPct(kpis.avgAch),                   ico:'📐', sub:'Among dealers with FY27 sales',        color: achColor(kpis.avgAch), cls: '' },
     { lbl:'OBK Target FY27',     val: fL(kpis.obkTarget),                  ico:'💰', sub:'Order booking AOP',                   color:'#7c3aed', cls: '' },
     { lbl:'UEOB FY26',           val: fL(kpis.ueobFY26),                   ico:'🏦', sub:'Unexecuted order book (FY26 close)',   color:'#0891b2', cls: '' },
@@ -1219,6 +1244,50 @@ function renderKPICards(kpis) {
         <span class="kpi-sub">${k.sub}</span>
       </div>
     </div>`).join('');
+}
+
+/* ── Smart insight callouts ──────────────────────────── */
+function renderInsights(kpis, dealers) {
+  const bar = $('insight-bar');
+  if(!bar || !dealers.length) return;
+
+  // Top zone by FY27 YTD
+  const zones = [...new Set(dealers.map(d=>d.geo_zone).filter(Boolean))];
+  const zoneData = zones.map(z => ({ z, v: dealers.filter(d=>d.geo_zone===z).reduce((s,d)=>s+d.fy27_ytd,0) }));
+  zoneData.sort((a,b)=>b.v-a.v);
+  const topZone = zoneData[0];
+  const lowZone = zoneData[zoneData.length-1];
+
+  // Top ASM by FY27 YTD
+  const asms = [...new Set(dealers.map(d=>d.asm_name).filter(Boolean))];
+  const asmData = asms.map(a => ({ a, v: dealers.filter(d=>d.asm_name===a).reduce((s,d)=>s+d.fy27_ytd,0) }));
+  asmData.sort((a,b)=>b.v-a.v);
+  const topASM = asmData[0];
+
+  // Risk dealers — below 25% achievement with a target
+  const risk = dealers.filter(d=>d.achievement_pct<25 && d.fy27_sales_target>0).length;
+
+  // Best YoY gainer
+  const gainers = dealers.filter(d=>d.fy26_ytd>0).sort((a,b)=>b.yoy_pct-a.yoy_pct);
+  const best = gainers[0];
+
+  // Dealers at 100%+
+  const champs = kpis.aboveTarget;
+
+  const pills = [];
+  if(topZone) pills.push(`<span class="insight-pill ok"><span class="ico">🏆</span>Top Zone: <strong>${topZone.z}</strong> · ${fL(topZone.v)}</span>`);
+  if(topASM)  pills.push(`<span class="insight-pill ok"><span class="ico">👤</span>Lead ASM: <strong>${topASM.a}</strong> · ${fL(topASM.v)}</span>`);
+  if(risk>0)  pills.push(`<span class="insight-pill warn"><span class="ico">⚠️</span><strong>${risk}</strong> dealers below 25% target</span>`);
+  if(champs>0) pills.push(`<span class="insight-pill ok"><span class="ico">🎯</span><strong>${champs}</strong> dealer${champs>1?'s':''} at 100%+</span>`);
+  if(best && best.yoy_pct > 0) pills.push(`<span class="insight-pill ok"><span class="ico">📈</span>Best YoY: <strong>${best.name.split(' ')[0]}</strong> +${best.yoy_pct.toFixed(0)}%</span>`);
+  if(lowZone && zones.length > 1) pills.push(`<span class="insight-pill warn"><span class="ico">⬇</span>Weakest Zone: <strong>${lowZone.z}</strong> · ${fL(lowZone.v)}</span>`);
+
+  if(pills.length) {
+    bar.innerHTML = pills.join('');
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
 }
 
 function dealerCardHTML(d) {
@@ -1308,7 +1377,7 @@ function renderDashboard() {
   applyFilters();
   const kpis = computeKPIs(STATE.filtered);
   if(kpis) renderKPICards(kpis);
-
+  renderInsights(kpis, STATE.filtered);
   $('dealer-count').textContent = `${STATE.filtered.length} dealers`;
   renderDealerGrid(STATE.filtered, 'dealer-grid');
   renderTrendChart(STATE.filtered);
@@ -1403,6 +1472,13 @@ function closeModal() { $('dealer-modal').classList.add('hidden'); destroyChart(
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 10 — CHARTS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+// Register datalabels globally; disabled by default, enabled per chart
+if(typeof ChartDataLabels !== 'undefined') {
+  Chart.register(ChartDataLabels);
+  Chart.defaults.set('plugins.datalabels', { display: false });
+}
+
 function destroyChart(id) { if(STATE.charts[id]){STATE.charts[id].destroy();delete STATE.charts[id];} }
 function mkChart(id, cfg) {
   destroyChart(id);
@@ -1414,147 +1490,228 @@ function mkChart(id, cfg) {
 
 function themeVars() {
   const dk = document.documentElement.getAttribute('data-theme') === 'dark';
-  return { grid: dk?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)', tick: dk?'#94a3b8':'#64748b' };
+  return { grid: dk?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)', tick: dk?'#8fa3b8':'#64748b' };
 }
 
-function baseChartOpts(yFmt=v=>fL(v)) {
+// ── Reusable chart option builders ──────────────────────
+function salesChartOpts(extra = {}) {
   const t = themeVars();
   return {
-    responsive:true, maintainAspectRatio:false,
-    animation:{duration:300},
-    plugins:{
-      legend:{labels:{color:t.tick,font:{size:11,family:'Inter'},boxWidth:12,padding:10}},
-      tooltip:{bodyFont:{family:'Inter',size:12},titleFont:{family:'Inter',size:12}},
+    responsive: true, maintainAspectRatio: false, animation: { duration: 280 },
+    plugins: {
+      legend: { labels: { color: t.tick, font: { size: 10, family: 'Inter' }, boxWidth: 10, padding: 9 } },
+      tooltip: { bodyFont: { family: 'Inter', size: 11 }, titleFont: { family: 'Inter', size: 11 },
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fL(ctx.raw)}` } },
+      datalabels: { display: false },
     },
-    scales:{
-      x:{grid:{color:t.grid},ticks:{color:t.tick,font:{size:11}}},
-      y:{grid:{color:t.grid},ticks:{color:t.tick,font:{size:11},callback:yFmt}},
+    scales: {
+      x: { grid: { color: t.grid }, ticks: { color: t.tick, font: { size: 10 }, maxRotation: 45 } },
+      y: { grid: { color: t.grid }, ticks: { color: t.tick, font: { size: 10 }, callback: v => fL(v) } },
+    },
+    ...extra,
+  };
+}
+
+function countChartOpts(extra = {}) {
+  const t = themeVars();
+  return {
+    responsive: true, maintainAspectRatio: false, animation: { duration: 280 },
+    plugins: {
+      legend: { display: false },
+      tooltip: { bodyFont: { family: 'Inter', size: 11 }, titleFont: { family: 'Inter', size: 11 },
+        callbacks: { label: ctx => ` ${ctx.dataset.label || 'Dealers'}: ${Math.round(ctx.raw)}` } },
+      datalabels: { display: false },
+    },
+    scales: {
+      x: { grid: { color: t.grid }, ticks: { color: t.tick, font: { size: 10 } } },
+      y: { grid: { color: t.grid }, ticks: { color: t.tick, font: { size: 10 }, callback: v => Math.round(v), stepSize: 1 }, beginAtZero: true },
+    },
+    ...extra,
+  };
+}
+
+// Datalabels configs per chart type
+function dlSalesBar(t) {
+  return {
+    display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+    color: t.tick, font: { size: 8, family: 'Inter', weight: '600' },
+    formatter: v => fL(v), anchor: 'end', align: 'top', offset: 1, clamp: true,
+  };
+}
+function dlSalesHorizBar(t) {
+  return {
+    display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+    color: t.tick, font: { size: 8, family: 'Inter', weight: '600' },
+    formatter: v => fL(v), anchor: 'end', align: 'right', offset: 3, clamp: true,
+  };
+}
+function dlCountBar() {
+  return {
+    display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+    color: '#fff', font: { size: 10, family: 'Inter', weight: '700' },
+    formatter: v => v, anchor: 'center', align: 'center',
+  };
+}
+function dlDoughnut() {
+  return {
+    display: ctx => {
+      const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+      return total > 0 && (ctx.dataset.data[ctx.dataIndex]/total*100) >= 7;
+    },
+    color: '#fff', font: { size: 10, family: 'Inter', weight: '700' },
+    formatter: (v, ctx) => {
+      const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+      return total > 0 ? (v/total*100).toFixed(0)+'%' : '';
     },
   };
 }
 
+// ── Dashboard charts ────────────────────────────────────
 function renderTrendChart(dealers) {
-  // Aggregate monthly sales across filtered dealers
-  const fy27Data = FY27_MONTHS.map(m =>
-    dealers.reduce((s,d) => s + (d.fy27_monthly_dump[m] || d.fy27_monthly_sheet[m] || 0), 0)
-  );
-  const fy26Data = FY26_MONTHS.map(m =>
-    dealers.reduce((s,d) => s + (d.fy26_monthly_dump[m] || d.fy26_monthly_sheet[m] || 0), 0)
-  );
-  const labels = FY27_MONTHS.map((m,i) => m); // use FY27 labels on X
-
+  const t = themeVars();
+  const fy27Data = FY27_MONTHS.map(m => dealers.reduce((s,d)=>s+(d.fy27_monthly_dump[m]||d.fy27_monthly_sheet[m]||0),0));
+  const fy26Data = FY26_MONTHS.map(m => dealers.reduce((s,d)=>s+(d.fy26_monthly_dump[m]||d.fy26_monthly_sheet[m]||0),0));
+  const opts = salesChartOpts();
+  // On line chart we show point values only for FY27 data points that exist
+  opts.plugins.datalabels = {
+    display: ctx => ctx.datasetIndex === 1 && ctx.dataset.data[ctx.dataIndex] != null && ctx.dataset.data[ctx.dataIndex] > 0,
+    color: '#2563eb', font: { size: 8, weight: '700', family: 'Inter' },
+    formatter: v => fL(v), anchor: 'end', align: 'top', offset: 2,
+  };
   mkChart('trend-chart', {
-    type:'line',
-    data:{
-      labels,
-      datasets:[
-        {label:'FY26',data:fy26Data,borderColor:'#94a3b8',backgroundColor:'rgba(148,163,184,0.08)',tension:.4,pointRadius:3,borderWidth:2},
-        {label:'FY27',data:fy27Data.map((v,i)=>v>0?v:null),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.08)',tension:.4,pointRadius:3,borderWidth:2,spanGaps:false},
+    type: 'line',
+    data: {
+      labels: FY27_MONTHS,
+      datasets: [
+        { label:'FY26', data:fy26Data, borderColor:'#94a3b8', backgroundColor:'rgba(148,163,184,0.07)', tension:.4, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
+        { label:'FY27', data:fy27Data.map(v=>v>0?v:null), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.07)', tension:.4, pointRadius:3, borderWidth:2, spanGaps:false },
       ],
     },
-    options:baseChartOpts(),
+    options: opts,
   });
 }
 
 function renderZoneChart(dealers) {
+  const t = themeVars();
   const zones = [...new Set(dealers.map(d=>d.geo_zone).filter(Boolean))].sort();
-  const data  = zones.map(z => dealers.filter(d=>d.geo_zone===z).reduce((s,d)=>s+d.fy27_ytd,0));
-  const t     = themeVars();
-  mkChart('zone-chart',{
-    type:'doughnut',
-    data:{labels:zones,datasets:[{data,backgroundColor:CHART_COLORS.slice(0,zones.length),borderWidth:0,hoverOffset:8}]},
-    options:{
-      responsive:true,maintainAspectRatio:false,animation:{duration:300},
-      plugins:{
-        legend:{position:'bottom',labels:{color:t.tick,font:{size:11,family:'Inter'},padding:8,boxWidth:12}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fL(ctx.raw)}`}},
+  const data  = zones.map(z=>dealers.filter(d=>d.geo_zone===z).reduce((s,d)=>s+d.fy27_ytd,0));
+  mkChart('zone-chart', {
+    type: 'doughnut',
+    data: { labels: zones, datasets: [{ data, backgroundColor: CHART_COLORS.slice(0,zones.length), borderWidth: 0, hoverOffset: 6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 280 },
+      plugins: {
+        legend: { position:'bottom', labels:{ color:t.tick, font:{size:10,family:'Inter'}, padding:7, boxWidth:10 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fL(ctx.raw)}` } },
+        datalabels: dlDoughnut(),
       },
     },
   });
 }
 
 function renderModalChart(d) {
-  // All 12 months for FY27 and FY26 (use dump + sheet fallback)
-  const fy27 = FY27_MONTHS.map(m => d.fy27_monthly_dump[m] || d.fy27_monthly_sheet[m] || 0);
-  const fy26 = FY26_MONTHS.map(m => d.fy26_monthly_dump[m] || d.fy26_monthly_sheet[m] || 0);
-  mkChart('m-trend-chart',{
-    type:'bar',
-    data:{
-      labels:FY27_MONTHS,
-      datasets:[
-        {label:'FY26',data:fy26,backgroundColor:'rgba(148,163,184,0.45)',borderRadius:3},
-        {label:'FY27',data:fy27.map(v=>v>0?v:null),backgroundColor:'rgba(37,99,235,0.75)',borderRadius:3},
+  const t = themeVars();
+  const fy27 = FY27_MONTHS.map(m=>d.fy27_monthly_dump[m]||d.fy27_monthly_sheet[m]||0);
+  const fy26 = FY26_MONTHS.map(m=>d.fy26_monthly_dump[m]||d.fy26_monthly_sheet[m]||0);
+  const opts = salesChartOpts();
+  opts.plugins.datalabels = {
+    display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+    color: t.tick, font: { size: 7, weight: '600' },
+    formatter: v => fL(v), anchor: 'end', align: 'top', offset: 1, clamp: true,
+  };
+  mkChart('m-trend-chart', {
+    type: 'bar',
+    data: {
+      labels: FY27_MONTHS,
+      datasets: [
+        { label:'FY26', data:fy26, backgroundColor:'rgba(148,163,184,0.4)', borderRadius:3 },
+        { label:'FY27', data:fy27.map(v=>v>0?v:null), backgroundColor:'rgba(37,99,235,0.75)', borderRadius:3 },
       ],
     },
-    options:baseChartOpts(),
+    options: opts,
   });
 }
 
+// ── Analytics charts ────────────────────────────────────
 function renderAnalyticsCharts() {
   const dealers = STATE.dealers;
   if(!dealers.length) return;
+  const t = themeVars();
 
-  // ─ Zone bar chart (FY27 YTD vs FY26 full)
-  const zones   = [...new Set(dealers.map(d=>d.geo_zone).filter(Boolean))].sort();
-  const z27     = zones.map(z => dealers.filter(d=>d.geo_zone===z).reduce((s,d)=>s+d.fy27_ytd,0));
-  const z26     = zones.map(z => dealers.filter(d=>d.geo_zone===z).reduce((s,d)=>s+d.fy26_full,0));
-  mkChart('a-zone-chart',{
-    type:'bar',
-    data:{labels:zones,datasets:[
-      {label:'FY26 Full Year',data:z26,backgroundColor:'rgba(148,163,184,0.5)',borderRadius:4},
-      {label:'FY27 YTD',      data:z27,backgroundColor:'rgba(37,99,235,0.75)',borderRadius:4},
+  // Zone: FY27 YTD vs FY26 Full — sales values → currency axis ✅
+  const zones = [...new Set(dealers.map(d=>d.geo_zone).filter(Boolean))].sort();
+  const z27   = zones.map(z=>dealers.filter(d=>d.geo_zone===z).reduce((s,d)=>s+d.fy27_ytd,0));
+  const z26   = zones.map(z=>dealers.filter(d=>d.geo_zone===z).reduce((s,d)=>s+d.fy26_full,0));
+  const zOpts = salesChartOpts();
+  zOpts.plugins.datalabels = dlSalesBar(t);
+  mkChart('a-zone-chart', {
+    type: 'bar',
+    data: { labels: zones, datasets: [
+      { label:'FY26 Full Year', data:z26, backgroundColor:'rgba(148,163,184,0.45)', borderRadius:3 },
+      { label:'FY27 YTD',      data:z27, backgroundColor:'rgba(37,99,235,0.78)', borderRadius:3 },
     ]},
-    options:baseChartOpts(),
+    options: zOpts,
   });
 
-  // ─ Achievement distribution (bucket dealers by achievement %)
-  const buckets  = ['<25%','25-50%','50-75%','75-100%','>100%'];
-  const counts   = [0,0,0,0,0];
+  // Achievement Distribution — Y axis = DEALER COUNT (not currency) ✅
+  const buckets = ['<25%','25–50%','50–75%','75–100%','≥100%'];
+  const counts  = [0,0,0,0,0];
+  const colors  = ['#dc2626','#f97316','#d97706','#65a30d','#16a34a'];
   dealers.forEach(d => {
     const a = d.achievement_pct;
-    if(a < 25)       counts[0]++;
-    else if(a < 50)  counts[1]++;
-    else if(a < 75)  counts[2]++;
-    else if(a < 100) counts[3]++;
-    else             counts[4]++;
+    if(a < 25) counts[0]++; else if(a < 50) counts[1]++;
+    else if(a < 75) counts[2]++; else if(a < 100) counts[3]++; else counts[4]++;
   });
-  mkChart('a-ach-chart',{
-    type:'bar',
-    data:{labels:buckets,datasets:[{label:'Dealers',data:counts,
-      backgroundColor:['#dc2626','#f97316','#d97706','#65a30d','#16a34a'],borderRadius:4}]},
-    options:{...baseChartOpts(v=>Math.round(v)),plugins:{...baseChartOpts().plugins,legend:{display:false}}},
+  const achOpts = countChartOpts();        // integer Y axis — no ₹ ✅
+  achOpts.plugins.datalabels = dlCountBar();
+  achOpts.plugins.tooltip.callbacks.label = ctx => ` ${Math.round(ctx.raw)} dealer${ctx.raw !== 1?'s':''}`;
+  mkChart('a-ach-chart', {
+    type: 'bar',
+    data: { labels: buckets, datasets: [{ label:'Dealers', data:counts, backgroundColor:colors, borderRadius:4 }] },
+    options: achOpts,
   });
 
-  // ─ ASM bar chart
+  // ASM: YTD Sales vs Target — sales values → currency axis ✅
   const asms  = [...new Set(dealers.map(d=>d.asm_name).filter(Boolean))].sort();
-  const asm27 = asms.map(a => dealers.filter(d=>d.asm_name===a).reduce((s,d)=>s+d.fy27_ytd,0));
-  const asmT  = asms.map(a => dealers.filter(d=>d.asm_name===a).reduce((s,d)=>s+d.fy27_sales_target,0));
-  mkChart('a-asm-chart',{
-    type:'bar',
-    data:{labels:asms,datasets:[
-      {label:'FY27 Target',data:asmT,backgroundColor:'rgba(148,163,184,0.4)',borderRadius:3},
-      {label:'FY27 YTD',   data:asm27,backgroundColor:'rgba(37,99,235,0.75)',borderRadius:3},
+  const asm27 = asms.map(a=>dealers.filter(d=>d.asm_name===a).reduce((s,d)=>s+d.fy27_ytd,0));
+  const asmT  = asms.map(a=>dealers.filter(d=>d.asm_name===a).reduce((s,d)=>s+d.fy27_sales_target,0));
+  const asmOpts = salesChartOpts();
+  asmOpts.plugins.datalabels = dlSalesBar(t);
+  mkChart('a-asm-chart', {
+    type: 'bar',
+    data: { labels: asms, datasets: [
+      { label:'FY27 Target', data:asmT, backgroundColor:'rgba(148,163,184,0.38)', borderRadius:3 },
+      { label:'FY27 YTD',   data:asm27, backgroundColor:'rgba(37,99,235,0.78)', borderRadius:3 },
     ]},
-    options:baseChartOpts(),
+    options: asmOpts,
   });
 
-  // ─ Top 10 dealers
+  // Top 10 Dealers — horizontal bar, sales values on X axis → currency ✅, ranked labels on Y ✅
   const top10 = [...dealers].sort((a,b)=>b.fy27_ytd-a.fy27_ytd).slice(0,10);
-  const t     = themeVars();
-  mkChart('a-top-chart',{
-    type:'bar',
-    data:{labels:top10.map(d=>d.name.split(' ').slice(0,3).join(' ')),
-      datasets:[{label:'FY27 YTD (L)',data:top10.map(d=>d.fy27_ytd),backgroundColor:'#2563eb',borderRadius:4}]},
-    options:{...baseChartOpts(),indexAxis:'y'},
+  const topOpts = salesChartOpts({ indexAxis:'y' });
+  topOpts.plugins.datalabels = dlSalesHorizBar(t);
+  // X axis = sales value → currency; Y axis = dealer names (ranked)
+  topOpts.scales.x.ticks.callback = v => fL(v);
+  topOpts.plugins.legend = { display: false };
+  mkChart('a-top-chart', {
+    type: 'bar',
+    data: {
+      labels: top10.map((d,i) => `${i+1}. ${d.name.split(' ').slice(0,2).join(' ')}`),
+      datasets: [{ label:'FY27 YTD', data:top10.map(d=>d.fy27_ytd), backgroundColor:'rgba(37,99,235,0.78)', borderRadius:3 }],
+    },
+    options: topOpts,
   });
 
-  // ─ Territory performance
+  // Territory — sales values → currency axis ✅
   const terrs  = [...new Set(dealers.map(d=>d.territory).filter(Boolean))].sort();
-  const terr27 = terrs.map(t => dealers.filter(d=>d.territory===t).reduce((s,d)=>s+d.fy27_ytd,0));
-  mkChart('a-terr-chart',{
-    type:'bar',
-    data:{labels:terrs,datasets:[{label:'FY27 YTD',data:terr27,backgroundColor:CHART_COLORS,borderRadius:4}]},
-    options:{...baseChartOpts(),plugins:{...baseChartOpts().plugins,legend:{display:false}}},
+  const terr27 = terrs.map(tr=>dealers.filter(d=>d.territory===tr).reduce((s,d)=>s+d.fy27_ytd,0));
+  const terrOpts = salesChartOpts();
+  terrOpts.plugins.datalabels = dlSalesBar(t);
+  terrOpts.plugins.legend = { display: false };
+  mkChart('a-terr-chart', {
+    type: 'bar',
+    data: { labels: terrs, datasets: [{ label:'FY27 YTD', data:terr27, backgroundColor: terrs.map((_,i)=>CHART_COLORS[i%CHART_COLORS.length]), borderRadius:3 }] },
+    options: terrOpts,
   });
 }
 
@@ -1987,12 +2144,19 @@ async function loadActiveImport() {
     $('src-badge').textContent = 'FIRESTORE';
     $('src-badge').className   = 'src-badge upload';
 
-    // Update data sources page status
+    // Update data sources page status card
     const ws = $('wb-status');
     if(ws) {
-      ws.textContent = `✔ ${meta.file_name} — ${dealers.length} dealers — uploaded by ${meta.uploaded_by_name || '?'} on ${meta.uploaded_at?.toDate?.()?.toLocaleDateString() || '?'}`;
-      ws.className   = 'ds-status on';
+      ws.textContent = '✔ Live — Firestore';
+      ws.className   = 'ds-status-badge on';
     }
+    const dstitle = $('ds-active-title');
+    const dssub   = $('ds-active-sub');
+    const dstupd  = meta.uploaded_at?.toDate?.()?.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) || '—';
+    if(dstitle) dstitle.textContent = `${meta.file_name || 'Dealer Workbook'} · ${dealers.length} dealers`;
+    if(dssub)   dssub.textContent   = `Uploaded by ${meta.uploaded_by_name || 'admin'} on ${dstupd} · FY27 YTD ${fL(meta.fy27_sales_lakhs||0)} · FY26 Full ${fL(meta.fy26_sales_lakhs||0)}`;
+    const dico = $('ds-active-card')?.querySelector('.ds-status-ico');
+    if(dico) dico.textContent = '✅';
 
     renderDiagnostics(diag);
   } catch(err) {
@@ -2110,10 +2274,12 @@ async function handleFileProduction(file) {
   srcBadge.textContent = 'UPLOAD';
 
   const wb2 = $('wb-status');
-  if(wb2) {
-    wb2.textContent = `✔ ${file.name} — ${dealers.length} dealers`;
-    wb2.className   = 'ds-status on';
-  }
+  if(wb2) { wb2.textContent = '✔ Uploaded'; wb2.className = 'ds-status-badge on'; }
+  const dt2 = $('ds-active-title'), ds2 = $('ds-active-sub');
+  if(dt2) dt2.textContent = `${file.name} · ${dealers.length} dealers`;
+  if(ds2) ds2.textContent = `Just uploaded · FY27 YTD ${fL(diag.fy27_sales_lakhs||0)} · FY26 Full ${fL(diag.fy26_sales_lakhs||0)}`;
+  const dico2 = $('ds-active-card')?.querySelector('.ds-status-ico');
+  if(dico2) dico2.textContent = '✅';
   const ur = $('upload-result');
   if(ur) {
     ur.className   = 'upload-result ok';
