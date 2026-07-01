@@ -1320,9 +1320,9 @@ function importWorkbook(wb, fileName) {
 
   // Partner Financial Health: parse ROI sheet if present (does not block core app on failure)
   let financeRows = [], financeDiag = null;
-  const byPartnerCode = new Map(); // currently empty — future-proofed primary join key
+  const byPartnerCode = new Map(); // sparse in current workbook — mobile is primary join key
   if(sheets.roi) {
-    const roiResult = parseROISheet(wb.Sheets[sheets.roi], byName, byPartnerCode, diag);
+    const roiResult = parseROISheet(wb.Sheets[sheets.roi], byMobile, byName, byPartnerCode, diag);
     financeRows = roiResult.rows;
     financeDiag = roiResult.fdiag;
   } else {
@@ -1935,7 +1935,7 @@ function renderDiagnostics(diag) {
       <strong>Partner Financial Health (ROI sheet):</strong>
       ${sheets.roi
         ? (diag.finance?.valid_rows
-            ? `<span class="mok">✅ "${sheets.roi}" — ${diag.finance.valid_rows} valid record(s), ${diag.finance.matched_by_code+diag.finance.matched_by_name} matched, ${diag.finance.unmapped_partners||0} unmapped</span>`
+            ? `<span class="mok">✅ "${sheets.roi}" — ${diag.finance.valid_rows} valid record(s), ${(diag.finance.matched_by_code||0)+(diag.finance.matched_by_mobile||0)+(diag.finance.matched_by_name||0)} matched (${diag.finance.matched_by_mobile||0} by mobile, ${diag.finance.matched_by_name||0} by name), ${diag.finance.unmapped_partners||0} unmapped</span>`
             : `<span class="mwarn">⚠️ "${sheets.roi}" found but produced 0 usable rows</span>`)
         : `<span class="mwarn">○ No ROI sheet found — Financial Health module unavailable</span>`}
     </div>
@@ -2717,16 +2717,19 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
     revenue:     findCol('Revenue', 'TOD Eligible Sales - DP'),
     gmPct:       findCol('Gross Margin %', 'Margin'),
     opexMonthly: findCol('OPEX Monthly'),
+    opexAnnual:  findCol('Total Operating Expenditure', 'Total Opex'),
     windowsCapex:  findCol('Windows CAPEX', 'Display Material Cost'),
     showroomCapex: findCol('Showroom Build CAPEX', 'Showroom Making Cost'),
     securityDep: findCol('Refundable Security Deposit', 'Security Deposit'),
     taxRate:     findCol('Tax Rate %'),
     startDate:   findCol('Partner Start Date', 'Appointment Date'),
     ageMonths:   findCol('Partner Age Months', 'Age in months'),
+    opMonths:    findCol('Operational months in current FY'),
     scenario:    findCol('Scenario'),
     month:       findCol('Month'),
     year:        findCol('Year'),
     particulars: findCol('Particulars'),
+    depreciation:findCol('Depreciation'),
     notes:       findCol('Notes'),
     updBy:       findCol('Last Updated By'),
     updOn:       findCol('Last Updated On'),
@@ -2802,9 +2805,29 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
     let opex;
     if(isFlatSchema) {
       opex = parseNum(r[C.opexMonthly], 0);
+    } else if(C.opexAnnual !== -1 && r[C.opexAnnual] !== '') {
+      // Real P&L schema stores annual OPEX — convert to monthly via operational months
+      const opMoCount = C.opMonths !== -1 ? (parseNum(r[C.opMonths], 0) || 12) : 12;
+      opex = parseNum(r[C.opexAnnual], 0) / Math.max(opMoCount, 1);
     } else {
       opex = manpowerMonthlyCols.reduce((s,ci) => s + parseNum(r[ci],0), 0) +
              overheadMonthlyCols.reduce((s,ci) => s + parseNum(r[ci],0), 0);
+    }
+
+    // Revenue in the real schema is annual (full-year TOD eligible sales, lakhs).
+    // Convert to monthly using operational months so calcFinanceRow works on
+    // a consistent monthly basis (multiplied back to annual for ROI).
+    const isAnnualSchema = !isFlatSchema;
+    const opMonthCount = C.opMonths !== -1 ? (parseNum(r[C.opMonths], 0) || 12) : 12;
+    if(isAnnualSchema && revenue > 0) {
+      revenue = revenue / Math.max(opMonthCount, 1);  // monthly revenue
+    }
+
+    // Use the sheet's pre-computed annual depreciation when available (already verified
+    // it reflects the business's own asset-life assumptions). Divide to get monthly.
+    let depnAnnual = null;
+    if(C.depreciation !== -1 && r[C.depreciation] !== '') {
+      depnAnnual = parseNum(r[C.depreciation], 0);
     }
 
     const capexW = C.windowsCapex !== -1 ? parseNum(r[C.windowsCapex], 0) : 0;
@@ -2852,6 +2875,7 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
       revenue, gross_margin_pct: gmPct, opex_monthly: opex,
       windows_capex: capexW, showroom_capex: capexS, security_deposit: secDep,
       tax_rate_pct: taxRate, tax_rate_defaulted: taxDefaulted,
+      depn_annual_from_sheet: depnAnnual,    // use sheet's own dep when available
       partner_start_date: startDate, partner_age_months: ageMonths,
       notes, last_updated_by: updBy, last_updated_on: updOn,
       match_type: matchType,
@@ -2883,7 +2907,11 @@ function calcFinanceRow(row) {
   const grossProfit = revenue * (gmPct / 100);
   const cogs = revenue - grossProfit;
   const depreciableCapex = (row.windows_capex || 0) + (row.showroom_capex || 0);
-  const annualDep  = depreciableCapex / FINANCE_CONFIG.ASSET_LIFE_YEARS;
+  // Use sheet's own annual depreciation if present (reflects business's asset-life assumption).
+  // Fall back to standard ASSET_LIFE_YEARS formula when not provided (flat/future schemas).
+  const annualDep  = (row.depn_annual_from_sheet != null && row.depn_annual_from_sheet > 0)
+    ? row.depn_annual_from_sheet
+    : depreciableCapex / FINANCE_CONFIG.ASSET_LIFE_YEARS;
   const monthlyDep = annualDep / 12;
   const ebitda = revenue - cogs - (row.opex_monthly || 0);
   const ebit   = ebitda - monthlyDep;
@@ -2891,13 +2919,15 @@ function calcFinanceRow(row) {
   const netProfit = ebitAfterTax;
   const contributionProfit = grossProfit - (row.opex_monthly || 0);
   const cashProfit = netProfit + monthlyDep;
-  const roiBase = depreciableCapex + (row.opex_monthly || 0) * FINANCE_CONFIG.WORKING_CAPITAL_OPEX_MONTHS;
+  // ROI base = total invested capital (capex + security deposit), consistent
+  // with the real workbook's treatment where all three are sunk costs.
+  const roiBase = depreciableCapex + (row.security_deposit || 0);
   const monthlyROI    = roiBase > 0 ? (netProfit / roiBase * 100) : null;
   const annualizedROI = roiBase > 0 ? (netProfit * 12 / roiBase * 100) : null;
   const ebitdaMargin = revenue > 0 ? (ebitda / revenue * 100) : null;
   const ebitMargin   = revenue > 0 ? (ebit / revenue * 100) : null;
   const netMargin    = revenue > 0 ? (netProfit / revenue * 100) : null;
-  const paybackMonths = cashProfit > 0 ? (roiBase / cashProfit) : null;
+  const paybackMonths = (cashProfit > 0 && roiBase > 0) ? (roiBase / cashProfit) : null;
   const roiSpread = annualizedROI != null ? (annualizedROI - FINANCE_CONFIG.FD_BENCHMARK_PCT) : null;
   return {
     ...row, gross_profit:grossProfit, cogs, depreciable_capex:depreciableCapex,
@@ -3521,12 +3551,16 @@ function renderPartnerFinanceSection(dealer) {
     body.innerHTML = `<p style="font-size:11px;color:var(--t3)">Upload a workbook with an ROI sheet to see financial health for this partner.</p>`;
     return;
   }
-  const nn = normName(dealer.name);
+  const nn  = normName(dealer.name);
+  const mob = dealer.mobile || '';
   const allSnaps = buildPartnerFinanceSnapshots(STATE.finance.scenario);
-  const snap = allSnaps.find(s => s.partner_code && normName(s.partner_name) === nn) ||
-               allSnaps.find(s => normName(s.partner_name) === nn);
+  // Mirror parser priority: mobile > name
+  const snap = (mob && allSnaps.find(s => normMobile(s.partner_code) === mob)) ||
+               (mob && allSnaps.find(s => normMobile(s.partner_name) === mob)) ||
+               allSnaps.find(s => normName(s.partner_name) === nn) ||
+               allSnaps.find(s => normName(s.partner_name).includes(nn.split(' ')[0]) && nn.length > 4);
   if(!snap) {
-    body.innerHTML = `<p style="font-size:11px;color:var(--t3)">No ROI sheet record matched to <strong>${dealer.name}</strong>. Check Partner Code / Channel Partner Name spelling in the ROI sheet.</p>`;
+    body.innerHTML = `<p style="font-size:11px;color:var(--t3)">No ROI sheet record matched to <strong>${dealer.name}</strong>. Check the dealer name or phone number in the ROI sheet matches the dealer master.</p>`;
     return;
   }
 
