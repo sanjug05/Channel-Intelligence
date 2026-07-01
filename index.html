@@ -2769,6 +2769,8 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
     const name = C.name !== -1 ? String(r[C.name]||'').trim() : '';
     const code = normPartnerCode(codeRaw);
     const mobile = normMobile(phoneRaw);
+    // Skip dealers marked as exited (phone field = "Exit" in this workbook's convention)
+    if(String(phoneRaw).trim().toLowerCase() === 'exit') { continue; }
     if(!code && !mobile && !name) { fdiag.missing_partner_code++; continue; }
 
     let month, yearNum;
@@ -2776,12 +2778,13 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
       month = excelSerialToLabel(r[C.month]) || String(r[C.month]||'').trim();
       yearNum = parseInt(String(r[C.year]||'').replace(/[^\d]/g,''), 10);
     } else {
-      // No explicit Month/Year — derive a stable snapshot period from the
-      // fiscal-year label (e.g. "FY26" -> Mar-26 / 2026, the FY's close).
+      // No explicit Month/Year — derive from fiscal-year label (e.g. "FY26" → Mar-26).
       const fyLabel = C.particulars !== -1 ? String(r[C.particulars]||'').trim() : '';
-      const fyMatch = fyLabel.match(/FY\s*(\d{2})/i);
-      const fyEndYY = fyMatch ? fyMatch[1] : '26';
-      if(!fyMatch) fyDefaultedCount++;
+      const fyMatch = fyLabel.match(/FY\s*(\d{2,4})/i);
+      let fyEndYY;
+      if(fyMatch) {
+        const raw4 = fyMatch[1]; fyEndYY = raw4.length === 4 ? raw4.slice(2) : raw4;
+      } else { fyEndYY = '26'; fyDefaultedCount++; }
       month = `Mar-${fyEndYY}`;
       yearNum = 2000 + parseInt(fyEndYY, 10);
     }
@@ -2790,7 +2793,7 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
     if(!monthOk || !yearOk) { fdiag.invalid_month_year++; continue; }
 
     const scenario = C.scenario !== -1 ? (String(r[C.scenario]||'Base').trim() || 'Base') : 'Base';
-    const dedupeKey = `${code||mobile}|${month}|${yearNum}|${scenario}`;
+    const dedupeKey = `${code||mobile||normName(name)}|${month}|${yearNum}|${scenario}`;
     if(seenKeys.has(dedupeKey)) { fdiag.duplicate_rows++; continue; }
     seenKeys.add(dedupeKey);
 
