@@ -113,6 +113,9 @@ input,select{font-family:inherit;font-size:inherit}
 .src-badge{padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
 .src-badge.demo{background:#fef3c7;color:#92400e}
 .src-badge.upload{background:#d1fae5;color:#065f46}
+.roi-badge{padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.roi-badge.avail{background:#ede9fe;color:#5b21b6}
+.roi-badge.miss{background:#f1f5f9;color:#94a3b8;border:1px solid var(--border)}
 .role-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.08em}
 .role-badge.admin{background:#fde68a;color:#92400e}
 .role-badge.asm{background:#d1fae5;color:#065f46}
@@ -536,6 +539,7 @@ input,select{font-family:inherit;font-size:inherit}
       <div class="tb-search"><span class="si">🔍</span><input type="search" id="g-search" placeholder="Search dealers…"></div>
       <div class="tb-right">
         <span class="src-badge demo" id="src-badge">NO DATA</span>
+        <span class="roi-badge miss hidden" id="roi-badge">ROI</span>
         <span class="role-badge admin hidden" id="role-badge">admin</span>
         <button class="ib" id="theme-btn" title="Toggle theme">🌙</button>
         <div class="user-pill"><div class="av-sm" id="tb-av">A</div><span class="un-top" id="tb-un">Admin</span></div>
@@ -679,9 +683,12 @@ input,select{font-family:inherit;font-size:inherit}
           <div class="ds-status-ico">☁️</div>
           <div class="ds-status-body">
             <div class="ds-status-title" id="ds-active-title">No dataset loaded</div>
-            <div class="ds-status-sub" id="ds-active-sub">Upload your dealer workbook to activate the dashboard. Data is saved to the cloud and restored on every login.</div>
+            <div class="ds-status-sub" id="ds-active-sub">Upload your dealer workbook (Sheets: Dealer Target Fy27 · FY27 Dump · FY26 Dump · ROI optional) to activate the dashboard.</div>
           </div>
-          <span class="ds-status-badge off" id="wb-status">○ Awaiting Upload</span>
+          <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+            <span class="ds-status-badge off" id="wb-status">○ Awaiting Upload</span>
+            <span class="ds-status-badge off" id="roi-ds-status">○ ROI Missing</span>
+          </div>
         </div>
 
         <!-- Upload card -->
@@ -705,13 +712,13 @@ input,select{font-family:inherit;font-size:inherit}
         <!-- Schema reference -->
         <div class="chart-card" style="margin-bottom:12px">
           <div class="cc-head">
-            <div><div class="cc-title">Workbook Schema Reference</div><div class="cc-sub">Expected structure for the 3-sheet workbook</div></div>
+            <div><div class="cc-title">Workbook Schema Reference</div><div class="cc-sub">Expected workbook structure (ROI sheet is optional)</div></div>
             <button class="btn outline" id="dl-sample-btn" data-admin-only style="flex-shrink:0">⬇ Sample Template</button>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;font-size:11px;color:var(--t2);line-height:1.7">
             <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📋 Dealer Target Fy27</div>Phone No · Dealer Name · Location · ASM Name · Region · Zone · FY27 Sales AOP · Monthly actuals (Apr-26 → Mar-27) · FY26 Actuals</div>
-            <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📊 FY27 Dump</div>Mobile No · Dealer Name · Month · Final basic Value · Territory · ASM Name · ASM EMP CODE · City · State · Dealer/Direct</div>
-            <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📊 FY26 Dump</div>Dealer Phone · Dealer Name · Month · Final basic Value · Territory · ASM Name · ASM EMP CODE · City · State · Dealer/Direct</div>
+            <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📊 FY27 Dump <span style="font-weight:400;font-size:10px;color:var(--t3)">(actual sales — rupees ÷ 100,000 = lakhs)</span></div>Month · Dealer Name · Mobile No · <strong>Final basic Value ( without Inst)</strong> · Territory · Final Mapping · ASM Name · ASM EMP CODE · City · State · Dealer/Direct · Segment</div>
+            <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">📊 FY26 Dump <span style="font-weight:400;font-size:10px;color:var(--t3)">(actual sales — rupees ÷ 100,000 = lakhs)</span></div>Month · <strong>Dealer Phone</strong> · Dealer Name · <strong>Final basic Value ( without Inst)</strong> · Territory · Final Mapping · ASM Name · ASM EMP CODE · City · State · Dealer/Direct</div>
             <div><div style="font-weight:600;color:var(--t);margin-bottom:4px">💹 ROI <span style="font-weight:400;color:var(--t3)">(optional)</span></div>Partner Code · Channel Partner Name · Month · Year · Revenue · Gross Margin % · OPEX Monthly · Windows CAPEX · Showroom Build CAPEX · Refundable Security Deposit · Tax Rate % · Partner Start Date · Partner Age Months · Scenario</div>
           </div>
         </div>
@@ -753,7 +760,10 @@ input,select{font-family:inherit;font-size:inherit}
       <div class="msec"><div class="msec-title">YoY Comparison</div><div class="stat-grid c3" id="m-yoy"></div></div>
       <div class="msec"><div class="msec-title">OBK · ORP · UEOB Targets</div><div class="stat-grid c3" id="m-obk"></div></div>
       <div class="msec" id="m-finance-section">
-        <div class="msec-title">Partner Financial Health</div>
+        <div class="msec-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Partner Financial Health</span>
+          <span id="m-fin-source-label" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--infot);color:var(--info)">ROI Sheet</span>
+        </div>
         <div id="m-finance-body">—</div>
       </div>
       <div class="msec">
@@ -942,6 +952,18 @@ function toast(msg, type='inf') {
 }
 
 // ── Format helpers ─────────────────────────────────────
+function updateROIBadge() {
+  const b = $('roi-badge');
+  if(!b) return;
+  b.classList.remove('hidden');
+  if(STATE.finance && STATE.finance.enabled) {
+    b.textContent = 'ROI ✓';
+    b.className = 'roi-badge avail';
+  } else {
+    b.textContent = 'ROI MISSING';
+    b.className = 'roi-badge miss';
+  }
+}
 function fL(v, digits=1) {
   // Format lakhs value: show Cr when ≥100L, else L
   if(v===null||v===undefined||isNaN(v)) return '—';
@@ -1907,18 +1929,21 @@ function renderDiagnostics(diag) {
   p.classList.remove('hidden');
 
   const statItems = [
-    { lbl:'Master Dealers',     v: diag.master_rows||0 },
-    { lbl:'FY27 Dump Rows',     v: diag.fy27_dealer_rows||0 },
-    { lbl:'FY26 Dump Rows',     v: diag.fy26_dealer_rows||0 },
-    { lbl:'Matched by Mobile',  v: (diag.fy27_matched_mobile||0) + (diag.fy26_matched_mobile||0) },
-    { lbl:'Matched by Name',    v: (diag.fy27_matched_name||0)   + (diag.fy26_matched_name||0) },
-    { lbl:'Target-Only',        v: diag.target_only||0 },
-    { lbl:'FY27 Unmatched',     v: diag.fy27_unmatched||0 },
-    { lbl:'FY26 Unmatched',     v: diag.fy26_unmatched||0 },
-    { lbl:'FY27 Sales Total',   v: fL(diag.fy27_sales_lakhs||0) },
-    { lbl:'FY26 Sales Total',   v: fL(diag.fy26_sales_lakhs||0) },
-    { lbl:'FY27 Months',        v: (diag.fy27_months_available||[]).join(', ')||'—' },
-    { lbl:'Import Time',        v: new Date(diag.timestamp).toLocaleTimeString() },
+    { lbl:'Dealer Master Rows',           v: diag.master_rows||0 },
+    { lbl:'FY27 Dump — Dealer Rows',      v: diag.fy27_dealer_rows||0 },
+    { lbl:'FY26 Dump — Dealer Rows',      v: diag.fy26_dealer_rows||0 },
+    { lbl:'Matched by Mobile (FY27)',     v: diag.fy27_matched_mobile||0 },
+    { lbl:'Matched by Mobile (FY26)',     v: diag.fy26_matched_mobile||0 },
+    { lbl:'Matched by Name',              v: (diag.fy27_matched_name||0) + (diag.fy26_matched_name||0) },
+    { lbl:'Target-Only (no dump match)',  v: diag.target_only||0 },
+    { lbl:'Unmatched Dump Rows',          v: (diag.fy27_unmatched||0) + (diag.fy26_unmatched||0) },
+    { lbl:'FY27 Sales (from Dump)',       v: fL(diag.fy27_sales_lakhs||0) },
+    { lbl:'FY26 Sales (from Dump)',       v: fL(diag.fy26_sales_lakhs||0) },
+    { lbl:'FY27 Months in Dump',          v: (diag.fy27_months_available||[]).join(', ')||'—' },
+    { lbl:'ROI Finance Rows',             v: diag.finance?.valid_rows||0 },
+    { lbl:'ROI Matched',                  v: (diag.finance?.matched_by_mobile||0)+(diag.finance?.matched_by_name||0) },
+    { lbl:'ROI Unmapped Partners',        v: diag.finance?.unmapped_partners||0 },
+    { lbl:'Import Time',                  v: new Date(diag.timestamp).toLocaleTimeString() },
   ];
   $('diag-grid').innerHTML = statItems.map(s =>
     `<div class="diag-item"><div class="dv">${s.v}</div><div class="dl">${s.lbl}</div></div>`
@@ -1932,7 +1957,8 @@ function renderDiagnostics(diag) {
     <div>FY26 dump: <strong>${sheets.fy26||'Not found'}</strong></div>
     <div style="margin-top:4px">Sheets in workbook: ${(diag.sheetNames||[]).join(', ')}</div>
     <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-      <strong>Partner Financial Health (ROI sheet):</strong>
+      <div style="font-weight:600;color:var(--t2);margin-bottom:3px">Sales source: FY27 Dump (col "Final basic Value ( without Inst)") · FY26 Dump (col "Final basic Value ( without Inst)")</div>
+      <strong>Partner Financial Health (ROI sheet only):</strong>
       ${sheets.roi
         ? (diag.finance?.valid_rows
             ? `<span class="mok">✅ "${sheets.roi}" — ${diag.finance.valid_rows} valid record(s), ${(diag.finance.matched_by_code||0)+(diag.finance.matched_by_mobile||0)+(diag.finance.matched_by_name||0)} matched (${diag.finance.matched_by_mobile||0} by mobile, ${diag.finance.matched_by_name||0} by name), ${diag.finance.unmapped_partners||0} unmapped</span>`
@@ -2030,6 +2056,7 @@ const PAGE_TITLES = {
 
 function navigateTo(page) {
   if(page === 'finance' && STATE.role !== 'admin') { toast('Partner Financial Health is admin-only.', 'err'); return; }
+  if(page === 'finance' && !STATE.finance) { STATE.finance = { enabled:false, rows:[], diag:null, rollupLevel:'overall', scenario:'Base', subpage:'summary', auditLog:[], overrides:{} }; }
   STATE.page = page;
   qsa('.page').forEach(p => p.classList.remove('active'));
   qsa('.nav-item').forEach(n => n.classList.remove('active'));
@@ -2061,7 +2088,7 @@ function navigateTo(page) {
    When true, demo login buttons appear and Firebase is
    skipped. Set to false before any production deployment.
 
-   FIRESTORE SECURITY RULES (paste in Firebase Console):
+   FIRESTORE SECURITY RULES — deploy this block exactly in Firebase Console:
    ─────────────────────────────────────────────────────
    rules_version = '2';
    service cloud.firestore {
@@ -2073,11 +2100,11 @@ function navigateTo(page) {
        function isAtLeastASM() { return isSignedIn() && userRole() in ['admin','asm']; }
        function isAnyUser()    { return isSignedIn() && userRole() in ['admin','asm','viewer']; }
 
-       match /users/{uid} {
-         allow read:  if isSignedIn() && request.auth.uid == uid;
+       match /users/{userId} {
+         allow read:  if isSignedIn() && request.auth.uid == userId;
          allow write: if isAdmin();
        }
-       match /appState/currentImport {
+       match /appState/{doc} {
          allow read:  if isAnyUser();
          allow write: if isAdmin();
        }
@@ -2088,10 +2115,18 @@ function navigateTo(page) {
            allow read:  if isAnyUser();
            allow write: if isAdmin();
          }
-         match /meta/summary {
+         match /meta/{metaDoc} {
            allow read:  if isAnyUser();
            allow write: if isAdmin();
          }
+         match /finance/{financeRowId} {
+           allow read:  if isAnyUser();
+           allow write: if isAdmin();
+         }
+       }
+       match /finance_audit_logs/{logId} {
+         allow read:  if isAdmin();
+         allow write: if isAdmin();
        }
      }
    }
@@ -2099,24 +2134,28 @@ function navigateTo(page) {
    FIRESTORE COLLECTION DESIGN:
    /users/{uid}
      name, email, role ('admin'|'asm'|'viewer'),
-     asm_code, allowed_zones[], allowed_territories[],
-     created_at, last_login
+     asm_code, allowed_zones[], allowed_territories[], created_at, last_login
 
-   /appState/currentImport        ← single doc, pointer to active import
-     import_id, uploaded_by_uid, uploaded_by_name,
-     uploaded_at, file_name, available_months[],
-     dealer_count, fy27_sales_lakhs, fy26_sales_lakhs
+   /appState/currentImport
+     import_id, uploaded_by_uid, uploaded_by_name, uploaded_at,
+     file_name, available_months[], dealer_count,
+     fy27_sales_lakhs, fy26_sales_lakhs,
+     finance_enabled, finance_row_count
 
-   /imports/{importId}            ← one doc per upload (audit history)
-     (same fields as appState/currentImport)
-     + status: 'active'|'archived'
+   /imports/{importId}             ← one doc per upload
+     (same as appState/currentImport) + status: 'active'|'archived'
 
    /imports/{importId}/meta/summary
-     diagnostics object (full diag JSON)
+     { diagnostics: {...} }
 
    /imports/{importId}/dealers/{mobile}
-     full dealer object (split to avoid 1MB doc limit)
-     mobile is the document key (normalized 10-digit)
+     full dealer object (one doc per dealer, avoids 1MB limit)
+
+   /imports/{importId}/finance/{key}
+     one ROI row per partner+period+scenario (Partner Financial Health)
+
+   /finance_audit_logs/{logId}
+     timestamp, user, action, partner_code, old_value, new_value, source, notes
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const DEV_MODE = false; // ← SET TO FALSE IN PRODUCTION
@@ -2345,21 +2384,21 @@ async function loadActiveImport() {
 
     // Update data sources page status card
     const ws = $('wb-status');
-    if(ws) {
-      ws.textContent = '✔ Live — Firestore';
-      ws.className   = 'ds-status-badge on';
-    }
+    if(ws) { ws.textContent = '✔ Live — Firestore'; ws.className = 'ds-status-badge on'; }
+    const rds2 = $('roi-ds-status');
     const dstitle = $('ds-active-title');
     const dssub   = $('ds-active-sub');
     const dstupd  = meta.uploaded_at?.toDate?.()?.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) || '—';
     if(dstitle) dstitle.textContent = `${meta.file_name || 'Dealer Workbook'} · ${dealers.length} dealers`;
-    if(dssub)   dssub.textContent   = `Uploaded by ${meta.uploaded_by_name || 'admin'} on ${dstupd} · FY27 YTD ${fL(meta.fy27_sales_lakhs||0)} · FY26 Full ${fL(meta.fy26_sales_lakhs||0)}`;
+    if(dssub) dssub.textContent = `Sales: FY27 YTD ${fL(meta.fy27_sales_lakhs||0)} (FY27 Dump) · FY26 Full ${fL(meta.fy26_sales_lakhs||0)} (FY26 Dump) · Uploaded by ${meta.uploaded_by_name||'admin'} on ${dstupd}`;
+    const finEnabled = STATE.finance && STATE.finance.enabled;
+    if(rds2) { rds2.textContent = finEnabled ? `✔ ROI — ${STATE.finance.rows.length} records` : '○ ROI Missing'; rds2.className = `ds-status-badge ${finEnabled?'on':'off'}`; }
     const dico = $('ds-active-card')?.querySelector('.ds-status-ico');
     if(dico) dico.textContent = '✅';
 
     // Restore Partner Financial Health data (self-contained rows — no re-matching needed)
     try {
-      const finSnap = await FBDB.collection('imports').doc(importId).collection('finance_roi').get();
+      const finSnap = await FBDB.collection('imports').doc(importId).collection('finance').get();
       if(!finSnap.empty) {
         STATE.finance.rows = finSnap.docs.map(d => d.data());
         STATE.finance.enabled = STATE.finance.rows.length > 0;
@@ -2371,6 +2410,7 @@ async function loadActiveImport() {
     } catch(e) { console.warn('Finance data restore skipped:', e.message); }
 
     renderDiagnostics(diag);
+    updateROIBadge();
   } catch(err) {
     console.error('loadActiveImport error:', err);
     toast('Could not restore dataset: ' + err.message, 'err');
@@ -2379,84 +2419,103 @@ async function loadActiveImport() {
 
 /* ── Save import to Firestore ──────────────────────── */
 async function saveImportToFirestore(dealers, diag, meta, financeRows = []) {
-  if(!FBDB || STATE.role !== 'admin') return;
+  if(!FBDB) { console.warn('saveImportToFirestore: Firestore not initialised'); return null; }
+  if(!FBAUTH?.currentUser) { toast('Not signed in — cannot save to Firestore', 'err'); return null; }
+  if(STATE.role !== 'admin') { toast('Only admins can save data to Firestore', 'err'); return null; }
+
   setLoading(true, 'Saving dataset to Firestore…');
+  const importId  = 'import_' + Date.now();
+  const importRef = FBDB.collection('imports').doc(importId);
+  const now       = firebase.firestore.FieldValue.serverTimestamp();
+  const BATCH_SIZE = 400;
+
+  const ptrData = {
+    import_id:          importId,
+    uploaded_by_uid:    STATE.uid,
+    uploaded_by_name:   STATE.userProfile?.name || '',
+    uploaded_at:        now,
+    file_name:          diag.fileName || 'unknown',
+    available_months:   diag.fy27_months_available || [],
+    dealer_count:       dealers.length,
+    fy27_sales_lakhs:   diag.fy27_sales_lakhs || 0,
+    fy26_sales_lakhs:   diag.fy26_sales_lakhs || 0,
+    status:             'active',
+    finance_enabled:    financeRows.length > 0,
+    finance_row_count:  financeRows.length,
+  };
+
+  const fsErr = (path, err) => {
+    const code = err.code || 'unknown';
+    let hint = '';
+    if(code === 'permission-denied') hint = ' — check Firestore rules for: ' + path;
+    else if(code === 'unauthenticated') hint = ' — user not authenticated';
+    console.error(`Firestore write FAILED [${path}] code=${code}${hint}`, err);
+    return new Error(`[${path}] ${err.message}${hint}`);
+  };
+
   try {
-    const importId  = 'import_' + Date.now();
-    const importRef = FBDB.collection('imports').doc(importId);
-    const now       = firebase.firestore.FieldValue.serverTimestamp();
-
-    const ptrData = {
-      import_id:          importId,
-      uploaded_by_uid:    STATE.uid,
-      uploaded_by_name:   STATE.userProfile?.name || '',
-      uploaded_at:        now,
-      file_name:          diag.fileName || 'unknown',
-      available_months:   diag.fy27_months_available || [],
-      dealer_count:       dealers.length,
-      fy27_sales_lakhs:   diag.fy27_sales_lakhs || 0,
-      fy26_sales_lakhs:   diag.fy26_sales_lakhs || 0,
-      status:             'active',
-      finance_enabled:    financeRows.length > 0,
-      finance_row_count:  financeRows.length,
-      finance_diag:       diag.finance || null,
-    };
-
-    // 1. Archive previous active import (non-blocking)
+    // 1. Archive previous active import (non-blocking, ignore errors)
     if(STATE.activeImportId) {
+      const archPath = `imports/${STATE.activeImportId}`;
       FBDB.collection('imports').doc(STATE.activeImportId)
-          .update({ status: 'archived' }).catch(() => {});
+          .update({ status: 'archived' })
+          .catch(e => console.warn('Archive skipped:', archPath, e.code));
     }
 
-    // 2. Write import header doc
-    await importRef.set(ptrData);
+    // 2. Write import header — imports/{importId}
+    try { await importRef.set(ptrData); }
+    catch(e) { throw fsErr('imports/' + importId, e); }
 
-    // 3. Write diagnostics to meta/summary subcollection
-    await importRef.collection('meta').doc('summary').set({ diagnostics: diag });
+    // 3. Write diagnostics — imports/{importId}/meta/summary
+    try { await importRef.collection('meta').doc('summary').set({ diagnostics: diag }); }
+    catch(e) { throw fsErr('imports/' + importId + '/meta/summary', e); }
 
-    // 4. Write dealers in parallel batches (Firestore batch max = 500 ops)
-    const BATCH_SIZE = 400;
+    // 4. Write dealers — imports/{importId}/dealers/{key}
     for(let i = 0; i < dealers.length; i += BATCH_SIZE) {
       const batch = FBDB.batch();
-      const chunk = dealers.slice(i, i + BATCH_SIZE);
-      chunk.forEach(d => {
-        const key     = d.mobile || normName(d.name).replace(/\s/g, '_').slice(0, 50);
-        const docRef  = importRef.collection('dealers').doc(key);
-        // Omit computed heavy fields that can be recalculated on load
-        const toStore = { ...d };
-        batch.set(docRef, toStore);
+      dealers.slice(i, i + BATCH_SIZE).forEach(d => {
+        const key = d.mobile || normName(d.name).replace(/\s/g,'_').slice(0,50);
+        batch.set(importRef.collection('dealers').doc(key), { ...d });
       });
-      await batch.commit();
-      setLoading(true, `Saving dealers… ${Math.min(i + BATCH_SIZE, dealers.length)}/${dealers.length}`);
+      try { await batch.commit(); }
+      catch(e) { throw fsErr('imports/' + importId + '/dealers (batch ' + i + ')', e); }
+      setLoading(true, `Saving dealers… ${Math.min(i+BATCH_SIZE,dealers.length)}/${dealers.length}`);
     }
 
-    // 4b. Write Partner Financial Health (ROI) rows — self-contained, no re-matching needed on restore
+    // 5. Write finance rows — imports/{importId}/finance/{key}
     if(financeRows.length) {
       for(let i = 0; i < financeRows.length; i += BATCH_SIZE) {
         const batch = FBDB.batch();
-        const chunk = financeRows.slice(i, i + BATCH_SIZE);
-        chunk.forEach(r => {
+        financeRows.slice(i, i + BATCH_SIZE).forEach(r => {
           const key = `${r.partner_code}_${r.month}_${r.year}_${r.scenario}`.replace(/[^A-Za-z0-9_]/g,'').slice(0,140);
-          batch.set(importRef.collection('finance_roi').doc(key), r);
+          batch.set(importRef.collection('finance').doc(key), r);
         });
-        await batch.commit();
-        setLoading(true, `Saving finance records… ${Math.min(i + BATCH_SIZE, financeRows.length)}/${financeRows.length}`);
+        try { await batch.commit(); }
+        catch(e) { throw fsErr('imports/' + importId + '/finance (batch ' + i + ')', e); }
+        setLoading(true, `Saving finance records… ${Math.min(i+BATCH_SIZE,financeRows.length)}/${financeRows.length}`);
       }
     }
 
-    // 5. Update appState/currentImport pointer
-    await FBDB.collection('appState').doc('currentImport').set(ptrData);
+    // 6. Update pointer — appState/currentImport
+    try { await FBDB.collection('appState').doc('currentImport').set(ptrData); }
+    catch(e) { throw fsErr('appState/currentImport', e); }
 
     STATE.activeImportId = importId;
     STATE.importMeta     = ptrData;
-
     setLoading(false);
-    toast(`Saved to Firestore: ${dealers.length} dealers${financeRows.length?` · ${financeRows.length} ROI records`:''}`, 'ok');
+    toast(`Saved: ${dealers.length} dealers${financeRows.length?' · '+financeRows.length+' ROI records':''}`, 'ok');
     return importId;
   } catch(err) {
     setLoading(false);
-    toast('Firestore save failed: ' + err.message, 'err');
-    console.error('saveImportToFirestore:', err);
+    const msg = err.message || String(err);
+    if(msg.includes('permission-denied') || msg.includes('Insufficient')) {
+      toast('Permission denied — deploy updated Firestore rules and reload', 'err');
+    } else if(msg.includes('unauthenticated')) {
+      toast('Session expired — please sign in again', 'err');
+    } else {
+      toast('Firestore save failed: ' + msg.split(' — ')[0], 'err');
+    }
+    console.error('saveImportToFirestore fatal:', err);
     return null;
   }
 }
@@ -2517,9 +2576,11 @@ async function handleFileProduction(file) {
 
   const wb2 = $('wb-status');
   if(wb2) { wb2.textContent = '✔ Uploaded'; wb2.className = 'ds-status-badge on'; }
+  const rds = $('roi-ds-status');
+  if(rds) { rds.textContent = financeRows.length ? `✔ ROI — ${financeRows.length} records` : '○ ROI Missing'; rds.className = `ds-status-badge ${financeRows.length?'on':'off'}`; }
   const dt2 = $('ds-active-title'), ds2 = $('ds-active-sub');
   if(dt2) dt2.textContent = `${file.name} · ${dealers.length} dealers`;
-  if(ds2) ds2.textContent = `Just uploaded · FY27 YTD ${fL(diag.fy27_sales_lakhs||0)} · FY26 Full ${fL(diag.fy26_sales_lakhs||0)}${financeRows.length?` · Finance: ${financeRows.length} ROI records`:' · Finance: ROI sheet not found'}`;
+  if(ds2) ds2.textContent = `Sales: FY27 YTD ${fL(diag.fy27_sales_lakhs||0)} (FY27 Dump) · FY26 ${fL(diag.fy26_sales_lakhs||0)} (FY26 Dump)${financeRows.length?` · Finance: ${financeRows.length} ROI records`:' · Finance: ROI sheet not found'}`;
   const dico2 = $('ds-active-card')?.querySelector('.ds-status-ico');
   if(dico2) dico2.textContent = '✅';
   const ur = $('upload-result');
@@ -2542,6 +2603,7 @@ async function handleFileProduction(file) {
     setLoading(false);
   }
 
+  updateROIBadge();
   // Navigate to dashboard
   if(STATE.page === 'data-sources') navigateTo('dashboard');
   toast(`Loaded ${dealers.length} dealers — FY27 YTD ${fL(diag.fy27_sales_lakhs||0)}`, 'ok');
@@ -3550,8 +3612,11 @@ function wireFinRollupBar(rerenderFn) {
 function renderPartnerFinanceSection(dealer) {
   const body = $('m-finance-body');
   if(!body) return;
+  // Update modal source label
+  const srcLbl = $('m-fin-source-label');
+  if(srcLbl) { srcLbl.textContent = STATE.finance.enabled ? 'ROI Sheet' : 'ROI Missing'; srcLbl.style.background = STATE.finance.enabled ? 'var(--infot)' : 'var(--bg)'; srcLbl.style.color = STATE.finance.enabled ? 'var(--info)' : 'var(--t3)'; }
   if(!STATE.finance.enabled) {
-    body.innerHTML = `<p style="font-size:11px;color:var(--t3)">Upload a workbook with an ROI sheet to see financial health for this partner.</p>`;
+    body.innerHTML = `<div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);border-left:3px solid var(--warn)"><div style="font-size:11px;font-weight:600;color:var(--warn);margin-bottom:4px">⚠️ ROI Data Not Available</div><div style="font-size:11px;color:var(--t2);line-height:1.6">Upload a workbook containing an <strong>ROI sheet</strong> (with columns: Phone No, Dealer name, Particulars/FY label, TOD Eligible Sales - DP, Margin, Total Operating Expenditure, Showroom Making Cost, Display Material Cost, Security Deposit, Depreciation) to activate financial health metrics for this partner.</div></div>`;
     return;
   }
   const nn  = normName(dealer.name);
@@ -3652,16 +3717,19 @@ async function writeFinanceAudit(action, details = {}) {
   };
   STATE.finance.auditLog.unshift(entry);
   if(STATE.finance.auditLog.length > 500) STATE.finance.auditLog.length = 500;
-  if(FBDB && STATE.role === 'admin') {
+  if(FBDB && STATE.role === 'admin' && FBAUTH?.currentUser) {
     try {
       await FBDB.collection('finance_audit_logs').add({ ...entry, created_at: firebase.firestore.FieldValue.serverTimestamp() });
-    } catch(e) { console.warn('Finance audit log write failed:', e.message); }
+    } catch(e) {
+      const hint = e.code === 'permission-denied' ? ' (check Firestore rule: finance_audit_logs/{logId})' : '';
+      console.warn('Finance audit log write failed' + hint + ':', e.message);
+    }
   }
   if(STATE.page === 'finance' && STATE.finance.subpage === 'audit') renderFinAuditLog();
 }
 
 async function loadFinanceAuditLog() {
-  if(!FBDB || STATE.role !== 'admin') return;
+  if(!FBDB || STATE.role !== 'admin' || !FBAUTH?.currentUser) return;
   try {
     const snap = await FBDB.collection('finance_audit_logs').orderBy('created_at','desc').limit(100).get();
     const remote = snap.docs.map(d => {
@@ -3669,7 +3737,10 @@ async function loadFinanceAuditLog() {
       return { ...v, timestamp: v.created_at?.toDate?.()?.toISOString() || v.timestamp || new Date().toISOString() };
     });
     if(remote.length) STATE.finance.auditLog = remote;
-  } catch(e) { /* collection may not exist yet — non-critical */ }
+  } catch(e) {
+    if(e.code === 'permission-denied') console.warn('Finance audit log: add rule for finance_audit_logs/{logId}');
+    // Collection may not exist yet or rules not deployed — non-critical
+  }
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3810,10 +3881,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const pR1 = ['','','1','Existing','dealer@email.com','9876543210','Sample Hardware Pvt Ltd','Delhi','01-Jan-25','EMP001','Rajesh Kumar','N3','Delhi NCR',320,650,620,480,18,28,0,0,0,0,0,0,0,0,0,0,46,0.096,250,8,22,14,0,0,0,0,0,0,0,0,0,175,0.7,1.52,'','TOD Letter Sent',480,''];
     const pR2 = ['','','2','New','new@email.com','9988776655','New Dealer Agency','Mumbai','05-Mar-25','EMP002','Priya Singh','W1','West',0,200,190,150,5,8,0,0,0,0,0,0,0,0,0,0,13,0.087,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',150,''];
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([pH,pR1,pR2]), 'Dealer Target Fy27');
-    const s27H = ['Month','Invoice Date','Dealer Name','Mobile No','Final basic Value ( without Inst)','Territory','ASM Name','ASM EMP CODE','City','State','Dealer/Direct','Segment'];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s27H,['Apr-26','01-Apr-26','Sample Hardware Pvt Ltd','9876543210',1800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window'],['May-26','10-May-26','Sample Hardware Pvt Ltd','9876543210',2800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window']]), 'FY27 Dump');
-    const s26H = ['Month','Dealer Phone','Dealer Name','Final basic Value ( without Inst)','Territory','ASM Name','ASM EMP CODE','City','State','Dealer/Direct'];
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s26H,['Apr-25','9876543210','Sample Hardware Pvt Ltd',800000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer'],['May-25','9876543210','Sample Hardware Pvt Ltd',2200000,'N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer']]), 'FY26 Dump');
+    // FY27 Dump — key columns only (actual workbook has 96 cols; include the critical ones)
+    const s27H = ['Month','Dealer Name','Mobile No','Final basic Value ( without Inst)','Territory','Final Mapping','ASM Name','ASM EMP CODE','City','State','Dealer/Direct','Segment'];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s27H,['Apr-26','Sample Hardware Pvt Ltd','9876543210',1800000,'N3','N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window'],['May-26','Sample Hardware Pvt Ltd','9876543210',2800000,'N3','N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer','UPVC-Window']]), 'FY27 Dump');
+    // FY26 Dump — key columns only (actual workbook has 96 cols; Dealer Phone is the mobile field)
+    const s26H = ['Month','Dealer Phone','Dealer Name','Final basic Value ( without Inst)','Territory','Final Mapping','ASM Name','ASM EMP CODE','City','State','Dealer/Direct'];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([s26H,['Apr-25','9876543210','Sample Hardware Pvt Ltd',800000,'N3','N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer'],['May-25','9876543210','Sample Hardware Pvt Ltd',2200000,'N3','N3','Rajesh Kumar','EMP001','Delhi','Delhi','Dealer']]), 'FY26 Dump');
     const roiH = ['Serial Number','Partner Code','Channel Partner Name','Month','Year','Revenue','Gross Margin %','OPEX Monthly','Windows CAPEX','Showroom Build CAPEX','Refundable Security Deposit','Tax Rate %','Partner Start Date','Partner Age Months','Scenario','Notes','Last Updated By','Last Updated On'];
     const roiR1 = [1,'PC1001','Sample Hardware Pvt Ltd','Apr-26',2026,1800000,42,180000,1200000,800000,300000,25,'01-Jan-25',17,'Base','','admin','30-Jun-26'];
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([roiH, roiR1]), 'ROI');
