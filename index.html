@@ -34,7 +34,7 @@
   --sh:0 1px 3px rgba(0,0,0,.35);--shm:0 4px 16px rgba(0,0,0,.45);--shl:0 8px 32px rgba(0,0,0,.55);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:13px}
+html{font-size:13.5px}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t);line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 a{color:inherit;text-decoration:none}
 button{border:none;background:none;cursor:pointer;font-family:inherit;font-size:inherit}
@@ -89,12 +89,21 @@ input,select{font-family:inherit;font-size:inherit}
 .nav-item.active{background:rgba(37,99,235,.2);color:var(--sb-act)}
 .nav-ico{width:16px;font-size:14px;flex-shrink:0;text-align:center}
 .nav-lbl-text{overflow:hidden}
-.sb-foot{padding:10px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.sb-foot{padding:10px;border-top:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.sb-foot-row{display:flex;align-items:center;gap:9px}
+.sb-version{font-size:9px;color:#3d5a75;line-height:1.5;padding-left:1px}
+.sb-version .env-badge{margin-left:5px}
+.version-footer{margin-top:14px;text-align:center;font-size:10px;color:var(--t3);line-height:1.7}
+.env-badge{display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;border-radius:20px;vertical-align:middle}
+.env-badge.dev{background:#e0e7ff;color:#3730a3}
+.env-badge.uat{background:#fef3c7;color:#92400e}
+.env-badge.prod{background:#dcfce7;color:#065f46}
+.build-info-block{font-size:11px;color:var(--t2);line-height:1.9;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px}
 .sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
 .sb-user .un{font-size:11px;font-weight:600;color:#e0eaf0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sb-user .ur{font-size:9px;color:#3d5a75;text-transform:uppercase;letter-spacing:.05em}
 #app-shell.sc #sidebar{width:var(--sc);min-width:var(--sc)}
-#app-shell.sc .nav-lbl-text,#app-shell.sc .sb-text,#app-shell.sc .sb-user,#app-shell.sc .nav-lbl{display:none}
+#app-shell.sc .nav-lbl-text,#app-shell.sc .sb-text,#app-shell.sc .sb-user,#app-shell.sc .sb-version,#app-shell.sc .nav-lbl{display:none}
 #app-shell.sc .sb-brand{justify-content:center}
 #app-shell.sc .nav-item{justify-content:center;padding:9px}
 #app-shell.sc .sb-foot{justify-content:center}
@@ -140,7 +149,7 @@ input,select{font-family:inherit;font-size:inherit}
 .empty-state p{font-size:12px;line-height:1.6;max-width:380px;margin:0 auto 16px}
 
 /* ── Insight bar ── */
-.insight-bar{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);border-left:3px solid var(--p);overflow:hidden}
+.insight-bar{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-top:2px solid var(--p);border-radius:var(--r);overflow:hidden}
 .insight-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);padding:8px 12px;border-right:1px solid var(--border)}
 .insight-pill:last-child{border-right:none}
 .insight-pill strong{color:var(--t);font-weight:600}
@@ -167,7 +176,7 @@ input,select{font-family:inherit;font-size:inherit}
 .kpi-card:hover{box-shadow:var(--shm)}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--p))}
 .kpi-head{display:flex;align-items:center;justify-content:space-between}
-.kpi-lbl{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;line-height:1.2}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;line-height:1.25}
 .kpi-ico{font-size:14px;opacity:.55}
 .kpi-val{font-size:19px;font-weight:700;line-height:1;letter-spacing:-.4px}
 .kpi-val.sm{font-size:16px}
@@ -210,7 +219,7 @@ input,select{font-family:inherit;font-size:inherit}
 .chip.tod{background:var(--warnt);color:var(--warn)}
 .chip.no-match{background:var(--errt);color:var(--err)}
 .dc-name{font-size:12px;font-weight:700;line-height:1.3;margin-bottom:2px}
-.dc-meta{font-size:10px;color:var(--t2);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:2px 8px}
+.dc-meta{font-size:11px;color:var(--t2);margin-bottom:8px;display:flex;flex-wrap:wrap;gap:2px 8px}
 .dc-divider{height:1px;background:var(--border);margin:7px 0}
 .dc-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
 .dk-lbl{font-size:8px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:1px}
@@ -232,7 +241,7 @@ input,select{font-family:inherit;font-size:inherit}
 .modal-close:hover{background:var(--bg);color:var(--t)}
 .modal-body{flex:1;overflow-y:auto;padding:14px 16px}
 .msec{margin-bottom:18px}
-.msec-title{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em;padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid var(--border)}
+.msec-title{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid var(--border)}
 .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0}
 .ir{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
 .ir:last-child{border-bottom:none}
@@ -244,10 +253,10 @@ input,select{font-family:inherit;font-size:inherit}
 .stat-grid.c4{grid-template-columns:repeat(4,1fr)}
 .sbox{background:var(--bg);border-radius:var(--r-sm);padding:9px 11px}
 .sbox .sv{font-size:16px;font-weight:700;line-height:1;letter-spacing:-.3px;margin-bottom:2px}
-.sbox .sl{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px}
+.sbox .sl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px}
 .sbox .sd{font-size:10px;font-weight:600;margin-top:1px}
 .sbox .sd.up{color:var(--ok)}.sbox .sd.dn{color:var(--err)}
-.notes-box{background:var(--bg);border-radius:var(--r-sm);padding:11px;font-size:12px;color:var(--t2);line-height:1.65;border-left:3px solid var(--p)}
+.notes-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;font-size:12px;color:var(--t2);line-height:1.65}
 .modal-chart-wrap{height:180px;position:relative;margin-top:6px}
 .achieve-bar-wrap{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:5px}
 .achieve-bar{height:100%;border-radius:3px;transition:width .5s}
@@ -291,7 +300,7 @@ input,select{font-family:inherit;font-size:inherit}
 .diag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:10px}
 .diag-item{background:var(--bg);border-radius:var(--r-sm);padding:8px 10px}
 .diag-item .dv{font-size:17px;font-weight:700;line-height:1}
-.diag-item .dl{font-size:9px;color:var(--t3);margin-top:2px}
+.diag-item .dl{font-size:10px;color:var(--t2);margin-top:2px}
 .mapping-detail{font-size:10px;color:var(--t2);line-height:1.8;background:var(--bg);padding:9px;border-radius:var(--r-sm)}
 .mapping-detail .mok{color:var(--ok)}
 .mapping-detail .mwarn{color:var(--warn)}
@@ -301,9 +310,9 @@ input,select{font-family:inherit;font-size:inherit}
 /* ── Toast ── */
 #toast-wrap{position:fixed;bottom:18px;right:18px;z-index:2000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 .toast{padding:10px 13px;border-radius:var(--r);background:var(--card);border:1px solid var(--border);box-shadow:var(--shm);font-size:12px;display:flex;align-items:center;gap:8px;animation:slideIn .2s ease;max-width:300px;pointer-events:all}
-.toast.ok{border-left:3px solid var(--ok)}
-.toast.err{border-left:3px solid var(--err)}
-.toast.inf{border-left:3px solid var(--p)}
+.toast.ok{border-left:2px solid var(--ok)}
+.toast.err{border-left:2px solid var(--err)}
+.toast.inf{border-left:2px solid var(--p)}
 
 /* ── Role-gated elements ── */
 [data-admin-only]{transition:opacity .2s}
@@ -397,6 +406,33 @@ input,select{font-family:inherit;font-size:inherit}
 .fin-override-row .btn-xs{flex-shrink:0}
 .early-flag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;color:var(--info);background:var(--infot);padding:2px 7px;border-radius:20px}
 
+/* ── Filter chips ── */
+.filter-chips{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 12px}
+.filter-chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:var(--p);background:var(--plt);padding:3px 8px 3px 9px;border-radius:20px}
+.filter-chip button{color:var(--p);font-size:11px;line-height:1;opacity:.7}
+.filter-chip button:hover{opacity:1}
+
+/* ── Executive summary strip ── */
+.exec-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px}
+.exec-item{display:flex;flex-direction:column;gap:1px;padding:2px 8px;border-right:1px solid var(--border)}
+.exec-item:last-child{border-right:none}
+.exec-item .ev{font-size:15px;font-weight:700;line-height:1.15}
+.exec-item .el{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+
+/* ── Management insights (reuses fin-tabbar/rank-list styling) ── */
+.mgmt-tabbar{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.mgmt-tabbar::-webkit-scrollbar{display:none}
+.mgmt-tab{flex-shrink:0;padding:6px 11px;border-radius:20px;font-size:11px;font-weight:600;color:var(--t2);background:var(--bg);border:1px solid var(--border);cursor:pointer;white-space:nowrap;transition:.15s}
+.mgmt-tab:hover{border-color:var(--p);color:var(--p)}
+.mgmt-tab.active{background:var(--p);color:#fff;border-color:var(--p)}
+.mgmt-subpage{display:none}
+.mgmt-subpage.active{display:block;animation:fadeIn .15s ease}
+
+/* ── Risk strip in dealer modal ── */
+.risk-strip{padding:9px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:7px 14px;align-items:center;font-size:11px;color:var(--t2)}
+.risk-strip strong{color:var(--t)}
+.fin-chip-mini{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--info);background:var(--infot);padding:2px 8px;border-radius:20px}
+
 /* ── Responsive ── */
 @media(max-width:1280px){#main-content{padding:13px}}
 @media(max-width:1100px){.charts-row{grid-template-columns:1fr}}
@@ -405,7 +441,7 @@ input,select{font-family:inherit;font-size:inherit}
   :root{--sw:220px}
   #sidebar{position:fixed;top:0;left:0;height:100%;z-index:300;transform:translateX(0);transition:transform .25s ease}
   #app-shell.sc #sidebar{transform:translateX(-100%);width:var(--sw)!important;min-width:var(--sw)!important}
-  #app-shell.sc #sidebar .nav-lbl-text,#app-shell.sc #sidebar .sb-text,#app-shell.sc #sidebar .sb-user,#app-shell.sc #sidebar .nav-lbl{display:flex!important}
+  #app-shell.sc #sidebar .nav-lbl-text,#app-shell.sc #sidebar .sb-text,#app-shell.sc #sidebar .sb-user,#app-shell.sc #sidebar .sb-version,#app-shell.sc #sidebar .nav-lbl{display:flex!important}
   #app-shell.sc #sidebar .sb-brand{justify-content:flex-start!important}
   #app-shell.sc #sidebar .nav-item{justify-content:flex-start!important;padding:8px 9px!important}
   #app-shell.sc #sidebar .sb-foot{justify-content:flex-start!important}
@@ -428,10 +464,12 @@ input,select{font-family:inherit;font-size:inherit}
   .modal-body{padding:10px 12px}
   .dealer-card{padding:10px 11px}
   .filters-bar{padding:8px 10px}
+  .exec-strip{grid-template-columns:repeat(2,1fr)}
+  .exec-item{border-right:none;padding:2px 0}
 }
 @media(max-width:390px){
   .kpi-val{font-size:16px}
-  .kpi-lbl{font-size:8px}
+  .kpi-lbl{font-size:9px}
   .kpi-grid{gap:6px}
   #main-content{padding:7px}
 }
@@ -496,6 +534,7 @@ input,select{font-family:inherit;font-size:inherit}
     </div>
     <div id="login-err" class="login-err hidden"></div>
     <p class="login-hint" id="login-hint-text" style="display:none">Demo: admin / admin123 · demo / demo123</p>
+    <div class="version-footer" id="login-version-footer"></div>
   </div>
 </div>
 
@@ -516,13 +555,16 @@ input,select{font-family:inherit;font-size:inherit}
       <div class="nav-item" data-page="dealers"><span class="nav-ico">🤝</span><span class="nav-lbl-text">All Dealers</span></div>
       <div class="nav-item" data-page="analytics"><span class="nav-ico">📈</span><span class="nav-lbl-text">Analytics</span></div>
       <div class="nav-lbl">Finance</div>
-      <div class="nav-item" data-page="finance" data-admin-only><span class="nav-ico">💹</span><span class="nav-lbl-text">Partner Financial Health</span></div>
+      <div class="nav-item hidden" data-page="finance" id="nav-finance"><span class="nav-ico">💹</span><span class="nav-lbl-text">Partner Financial Health</span></div>
       <div class="nav-lbl">Data</div>
       <div class="nav-item" data-page="data-sources"><span class="nav-ico">📂</span><span class="nav-lbl-text">Data Sources</span></div>
     </nav>
     <div class="sb-foot">
-      <div class="sb-avatar" id="sb-av">A</div>
-      <div class="sb-user"><div class="un" id="sb-un">Admin User</div><div class="ur" id="sb-ur">Administrator</div></div>
+      <div class="sb-foot-row">
+        <div class="sb-avatar" id="sb-av">A</div>
+        <div class="sb-user"><div class="un" id="sb-un">Admin User</div><div class="ur" id="sb-ur">Administrator</div></div>
+      </div>
+      <div class="sb-version" id="sb-version-footer"></div>
     </div>
   </aside>
 
@@ -556,26 +598,50 @@ input,select{font-family:inherit;font-size:inherit}
         <div id="upload-prompt" class="empty-state hidden">
           <div class="empty-ico">📂</div>
           <h2>No Dealer Data Loaded</h2>
-          <p>Upload the dealer sales workbook to see analytics, KPIs, and performance charts. Expected: <strong>Dealer Target Fy27</strong>, <strong>FY27 Dump</strong>, <strong>FY26 Dump</strong> sheets.</p>
+          <p>Upload the dealer workbook to see analytics, KPIs, and performance charts. Expected sheets: <strong>Dealer Target Fy27</strong> · <strong>FY27 Dump</strong> · <strong>FY26 Dump</strong> · <strong>ROI</strong> <span style="color:var(--t3)">(optional, for Partner Financial Health)</span>.</p>
           <label class="btn primary" data-admin-only style="cursor:pointer;margin:0 auto">
             📤 Upload Workbook
             <input type="file" id="quick-upload" accept=".xlsx,.xls" style="display:none">
           </label>
+          <p class="admin-only-note hidden" data-viewer-note style="font-size:11px;color:var(--t3);margin-top:4px">Uploading requires admin access. Ask an administrator to load the workbook.</p>
         </div>
 
         <!-- Dashboard content (shown when data loaded) -->
         <div id="dashboard-content" class="hidden">
+          <!-- Executive Summary -->
+          <div class="exec-strip" id="exec-strip"></div>
+
           <div class="filters-bar">
             <div class="fg"><label>Zone</label><select id="f-zone"></select></div>
             <div class="fg"><label>Territory</label><select id="f-terr"></select></div>
             <div class="fg"><label>ASM</label><select id="f-asm"></select></div>
             <div class="fg"><label>Dealer Type</label><select id="f-type"></select></div>
             <div class="fg"><label>TOD Status</label><select id="f-tod"></select></div>
+            <div class="fg"><label>Achievement Band</label>
+              <select id="f-achband">
+                <option value="">All</option>
+                <option value="lt25">&lt; 25%</option>
+                <option value="25-50">25 – 50%</option>
+                <option value="50-75">50 – 75%</option>
+                <option value="75-100">75 – 100%</option>
+                <option value="ge100">100%+</option>
+              </select>
+            </div>
+            <div class="fg"><label>Sales Presence</label>
+              <select id="f-presence">
+                <option value="">All</option>
+                <option value="target_only">Target-only (no sales)</option>
+                <option value="fy27">Has FY27 Sales</option>
+                <option value="fy26">Has FY26 Sales</option>
+                <option value="both">Matched Both Years</option>
+              </select>
+            </div>
             <div class="filter-actions">
               <button class="btn-xs out" id="reset-filters">Reset</button>
               <button class="btn-xs sol" id="apply-filters">Apply</button>
             </div>
           </div>
+          <div class="filter-chips" id="filter-chips"></div>
 
           <div class="kpi-grid" id="kpi-grid"></div>
 
@@ -597,7 +663,24 @@ input,select{font-family:inherit;font-size:inherit}
             </div>
           </div>
 
-          <div class="sec-head">
+          <!-- Management Insights -->
+          <div class="sec-head" style="margin-top:2px"><div class="sec-title">Management Insights</div><div class="sec-sub">Ranked views for quick decisions — no need to open every card</div></div>
+          <div class="mgmt-tabbar" id="mgmt-tabbar">
+            <div class="mgmt-tab active" data-mgmtsub="topbottom">Top / Bottom Dealers</div>
+            <div class="mgmt-tab" data-mgmtsub="yoy">YoY Gainers / Laggards</div>
+            <div class="mgmt-tab" data-mgmtsub="zones">Zone Leaderboard</div>
+            <div class="mgmt-tab" data-mgmtsub="asms">ASM Leaderboard</div>
+            <div class="mgmt-tab" data-mgmtsub="bands">Achievement Bands</div>
+            <div class="mgmt-tab" data-mgmtsub="attention">Needs Attention</div>
+          </div>
+          <div id="mgmt-topbottom" class="mgmt-subpage active"></div>
+          <div id="mgmt-yoy" class="mgmt-subpage"></div>
+          <div id="mgmt-zones" class="mgmt-subpage"></div>
+          <div id="mgmt-asms" class="mgmt-subpage"></div>
+          <div id="mgmt-bands" class="mgmt-subpage"></div>
+          <div id="mgmt-attention" class="mgmt-subpage"></div>
+
+          <div class="sec-head" style="margin-top:16px">
             <div><div class="sec-title">Dealer Performance</div><div class="sec-sub">Click a card to drill down</div></div>
             <span class="count-pill" id="dealer-count">0 dealers</span>
           </div>
@@ -683,11 +766,36 @@ input,select{font-family:inherit;font-size:inherit}
           <div class="ds-status-ico">☁️</div>
           <div class="ds-status-body">
             <div class="ds-status-title" id="ds-active-title">No dataset loaded</div>
-            <div class="ds-status-sub" id="ds-active-sub">Upload your dealer workbook (Sheets: Dealer Target Fy27 · FY27 Dump · FY26 Dump · ROI optional) to activate the dashboard.</div>
+            <div class="ds-status-sub" id="ds-active-sub">Upload the dealer workbook to activate the dashboard. Expected sheets: Dealer Target Fy27 · FY27 Dump · FY26 Dump · ROI (optional, for Partner Financial Health).</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
             <span class="ds-status-badge off" id="wb-status">○ Awaiting Upload</span>
             <span class="ds-status-badge off" id="roi-ds-status">○ ROI Missing</span>
+          </div>
+        </div>
+
+        <!-- Active Import Summary -->
+        <div class="chart-card" id="import-summary-card" style="margin-bottom:12px">
+          <div class="cc-head">
+            <div><div class="cc-title">Active Import Summary</div><div class="cc-sub">Where the current data came from</div></div>
+            <button class="btn outline" id="copy-support-btn" style="flex-shrink:0">📋 Copy Support Info</button>
+          </div>
+          <div class="diag-grid" id="import-summary-grid">
+            <div class="diag-item"><div class="dv">—</div><div class="dl">No data loaded yet</div></div>
+          </div>
+        </div>
+
+        <!-- Build Info -->
+        <div class="chart-card" style="margin-bottom:12px">
+          <div class="cc-head"><div><div class="cc-title">Build Info</div><div class="cc-sub">App version, independent of the loaded dataset</div></div></div>
+          <div class="build-info-block" id="dm-build-info"></div>
+        </div>
+
+        <!-- Import History -->
+        <div class="chart-card" id="import-history-card" style="margin-bottom:12px">
+          <div class="cc-head"><div><div class="cc-title">Import History</div><div class="cc-sub">Last 5 uploads · source, uploader, timestamp, ROI inclusion</div></div></div>
+          <div class="rank-list" id="import-history-list">
+            <div class="rank-row">No import history yet</div>
           </div>
         </div>
 
@@ -703,7 +811,7 @@ input,select{font-family:inherit;font-size:inherit}
           <div class="upload-area" id="upload-area" data-admin-only>
             <div class="upload-ico">📂</div>
             <p>Drag &amp; drop your Excel workbook here, or click to browse</p>
-            <small>Accepts .xlsx · Expects: Dealer Target Fy27 · FY27 Dump · FY26 Dump · ROI (optional, for Financial Health)</small>
+            <small>Accepts .xlsx · Expected sheets: Dealer Target Fy27 · FY27 Dump · FY26 Dump · ROI (optional, for Partner Financial Health)</small>
           </div>
           <input type="file" id="main-upload" accept=".xlsx,.xls" style="display:none">
           <div id="upload-result" class="hidden"></div>
@@ -712,7 +820,7 @@ input,select{font-family:inherit;font-size:inherit}
         <!-- Schema reference -->
         <div class="chart-card" style="margin-bottom:12px">
           <div class="cc-head">
-            <div><div class="cc-title">Workbook Schema Reference</div><div class="cc-sub">Expected workbook structure (ROI sheet is optional)</div></div>
+            <div><div class="cc-title">Workbook Schema Reference</div><div class="cc-sub">Dealer Target Fy27 · FY27 Dump · FY26 Dump · ROI (optional, for Partner Financial Health)</div></div>
             <button class="btn outline" id="dl-sample-btn" data-admin-only style="flex-shrink:0">⬇ Sample Template</button>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;font-size:11px;color:var(--t2);line-height:1.7">
@@ -748,6 +856,7 @@ input,select{font-family:inherit;font-size:inherit}
       <span class="src-badge" id="m-src-badge">UPLOAD</span>
       <button class="modal-close" id="modal-close">✕</button>
     </div>
+    <div class="risk-strip" id="m-risk-strip"></div>
     <div class="modal-body">
       <div class="msec"><div class="msec-title">Dealer Profile</div><div class="info-grid" id="m-profile"></div></div>
       <div class="msec">
@@ -845,6 +954,23 @@ service cloud.firestore {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 2 — CONSTANTS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+// ── App version / build identity — bump these on each release ──
+const APP_VERSION   = "v0.9.5";
+const BUILD_NUMBER  = "2026.07.06.01";
+const BUILD_DATE    = "06 Jul 2026, 01:10 AM IST";
+const ENVIRONMENT   = "DEV"; // DEV | UAT | PROD
+
+function formatBuildLine() {
+  return `App ${APP_VERSION} · Build ${BUILD_NUMBER}`;
+}
+function fmtDateTime(d) {
+  if(!d) return '—';
+  const dt = d instanceof Date ? d : new Date(d);
+  if(isNaN(dt)) return '—';
+  return dt.toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
 const FY27_MONTHS = ['Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26','Jan-27','Feb-27','Mar-27'];
 const FY26_MONTHS = ['Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26'];
 // FY27 month → corresponding FY26 month (for YTD comparison)
@@ -920,7 +1046,12 @@ const STATE = {
   dataLoaded: false,
   role: 'viewer',
   page: 'dashboard',
-  filters: { zone:'', terr:'', asm:'', type:'', tod:'', search:'' },
+  filters: { zone:'', terr:'', asm:'', type:'', tod:'', achband:'', presence:'', search:'' },
+  dataSourceType: 'none',        // 'none'|'demo'|'upload'|'firestore'|'sheets'
+  restoredFromFirestore: false,
+  importSaveStatus: null,        // null|'success'|'failed'|'skipped'
+  activeImportId: null,
+  isReadOnly: true,
 };
 
 // Partner Financial Health namespace — kept separate from core dealer STATE
@@ -951,18 +1082,57 @@ function toast(msg, type='inf') {
   setTimeout(() => t.remove(), 4000);
 }
 
+// ── App version display — populates login footer, sidebar footer, Data Management ──
+function envBadgeHTML() {
+  const cls = ENVIRONMENT.toLowerCase();
+  return `<span class="env-badge ${cls}">${ENVIRONMENT}</span>`;
+}
+function renderVersionInfo() {
+  const loginEl = $('login-version-footer');
+  if(loginEl) loginEl.innerHTML = `${formatBuildLine()} ${envBadgeHTML()}`;
+
+  const sbEl = $('sb-version-footer');
+  if(sbEl) sbEl.innerHTML = `${APP_VERSION} · ${BUILD_NUMBER} ${envBadgeHTML()}`;
+
+  const dmEl = $('dm-build-info');
+  if(dmEl) {
+    dmEl.innerHTML = `
+      <div>App Version: <strong>${APP_VERSION}</strong></div>
+      <div>Build Number: <strong>${BUILD_NUMBER}</strong></div>
+      <div>Build Date: <strong>${BUILD_DATE}</strong></div>
+      <div>Environment: ${envBadgeHTML()}</div>
+    `;
+  }
+}
+
 // ── Format helpers ─────────────────────────────────────
 function updateROIBadge() {
   const b = $('roi-badge');
   if(!b) return;
   b.classList.remove('hidden');
   if(STATE.finance && STATE.finance.enabled) {
-    b.textContent = 'ROI ✓';
+    b.textContent = 'ROI AVAILABLE';
     b.className = 'roi-badge avail';
   } else {
     b.textContent = 'ROI MISSING';
     b.className = 'roi-badge miss';
   }
+  updateFinanceNavVisibility();
+}
+// Finance nav is visible to admin always; visible to asm/viewer only once
+// finance data exists (read-only access to an existing module).
+function updateFinanceNavVisibility() {
+  const nav = $('nav-finance');
+  if(!nav) return;
+  const canSee = STATE.role === 'admin' || (STATE.finance && STATE.finance.enabled);
+  nav.classList.toggle('hidden', !canSee);
+}
+// Defensive guard for every write/mutation path — blocks non-admin even if
+// a control was somehow exposed, and gives a clear, consistent toast.
+function requireAdmin(actionLabel) {
+  if(STATE.role === 'admin') return true;
+  toast(`Read-only access: ${actionLabel || 'this action'} not permitted`, 'err');
+  return false;
 }
 function fL(v, digits=1) {
   // Format lakhs value: show Cr when ≥100L, else L
@@ -1146,6 +1316,18 @@ function aggregateDump27(ws, dealerByMobile, dealerByName, diag) {
   diag.fy27_skipped        = 0;
   diag.fy27_sales_lakhs    = 0;
 
+  // Validate required columns exist before processing — a renamed/missing
+  // column would otherwise silently produce 0 matches with no explanation.
+  const REQUIRED_FY27_COLS = ['Month', 'Mobile No', 'Dealer Name', 'Final basic Value ( without Inst)'];
+  if(rows.length) {
+    const actualCols = Object.keys(rows[0]);
+    const missing = REQUIRED_FY27_COLS.filter(c => !actualCols.includes(c));
+    if(missing.length) {
+      diag.errors.push(`FY27 Dump: missing required column(s) — ${missing.join(', ')}. Check for renamed headers.`);
+      return;
+    }
+  }
+
   for(const row of rows) {
     // Filter: only Dealer rows (skip Direct, After Sales, etc.)
     const dd = String(row['Dealer/Direct'] || '').trim();
@@ -1200,6 +1382,16 @@ function aggregateDump26(ws, dealerByMobile, dealerByName, diag) {
   diag.fy26_unmatched      = 0;
   diag.fy26_skipped        = 0;
   diag.fy26_sales_lakhs    = 0;
+
+  const REQUIRED_FY26_COLS = ['Month', 'Dealer Phone', 'Dealer Name', 'Final basic Value ( without Inst)'];
+  if(rows.length) {
+    const actualCols = Object.keys(rows[0]);
+    const missing = REQUIRED_FY26_COLS.filter(c => !actualCols.includes(c));
+    if(missing.length) {
+      diag.errors.push(`FY26 Dump: missing required column(s) — ${missing.join(', ')}. Check for renamed headers.`);
+      return;
+    }
+  }
 
   for(const row of rows) {
     // FY26 dump: filter Dealer rows (field exists)
@@ -1408,16 +1600,67 @@ function populateFilters(dealers) {
 function applyFilters() {
   const f = STATE.filters;
   const q = f.search.toLowerCase();
+  const scope = STATE.asmScope;
   STATE.filtered = STATE.dealers.filter(d => {
+    // ASM scope restriction — applied before any user-chosen filter so a
+    // scoped ASM can never see dealers outside their assignment, even if
+    // they manually clear filters.
+    if(scope) {
+      if(scope.asm_code && d.asm_code && d.asm_code !== scope.asm_code) return false;
+      if(scope.allowed_zones?.length && !scope.allowed_zones.includes(d.geo_zone)) return false;
+      if(scope.allowed_territories?.length && !scope.allowed_territories.includes(d.territory)) return false;
+    }
     if(f.zone && d.geo_zone    !== f.zone) return false;
     if(f.terr && d.territory   !== f.terr) return false;
     if(f.asm  && d.asm_name    !== f.asm)  return false;
     if(f.type && d.dealer_type !== f.type) return false;
     if(f.tod  && d.tod_status  !== f.tod)  return false;
+    if(f.achband) {
+      const a = d.achievement_pct;
+      if(f.achband==='lt25'    && !(a<25)) return false;
+      if(f.achband==='25-50'   && !(a>=25 && a<50)) return false;
+      if(f.achband==='50-75'   && !(a>=50 && a<75)) return false;
+      if(f.achband==='75-100'  && !(a>=75 && a<100)) return false;
+      if(f.achband==='ge100'   && !(a>=100)) return false;
+    }
+    if(f.presence) {
+      const hasFy27 = d.fy27_ytd > 0, hasFy26 = d.fy26_full > 0;
+      if(f.presence==='target_only' && d.match_type !== 'target_only') return false;
+      if(f.presence==='fy27' && !hasFy27) return false;
+      if(f.presence==='fy26' && !hasFy26) return false;
+      if(f.presence==='both' && !(hasFy27 && hasFy26)) return false;
+    }
     if(q && ![d.name, d.mobile, d.location, d.asm_name, d.geo_zone, d.territory]
               .join(' ').toLowerCase().includes(q)) return false;
     return true;
   });
+}
+
+// ── Active filter chips — glanceable + one-click remove ──
+const FILTER_LABELS = {
+  zone:'Zone', terr:'Territory', asm:'ASM', type:'Dealer Type', tod:'TOD Status',
+  achband:'Achievement', presence:'Sales Presence', search:'Search',
+};
+const ACHBAND_LABELS = { lt25:'< 25%', '25-50':'25–50%', '50-75':'50–75%', '75-100':'75–100%', ge100:'100%+' };
+const PRESENCE_LABELS = { target_only:'Target-only', fy27:'Has FY27 Sales', fy26:'Has FY26 Sales', both:'Matched Both Years' };
+function renderFilterChips() {
+  const el = $('filter-chips');
+  if(!el) return;
+  const f = STATE.filters;
+  const chips = [];
+  const push = (key, display) => { if(f[key]) chips.push({ key, display }); };
+  push('zone', f.zone); push('terr', f.terr); push('asm', f.asm); push('type', f.type); push('tod', f.tod);
+  push('achband', ACHBAND_LABELS[f.achband] || f.achband);
+  push('presence', PRESENCE_LABELS[f.presence] || f.presence);
+  push('search', f.search ? `"${f.search}"` : '');
+  el.innerHTML = chips.map(c => `<span class="filter-chip">${FILTER_LABELS[c.key]}: ${c.display}<button data-chip-clear="${c.key}">✕</button></span>`).join('');
+  qsa('[data-chip-clear]', el).forEach(btn => btn.addEventListener('click', () => {
+    const key = btn.dataset.chipClear;
+    STATE.filters[key] = '';
+    const selMap = { zone:'f-zone', terr:'f-terr', asm:'f-asm', type:'f-type', tod:'f-tod', achband:'f-achband', presence:'f-presence', search:'g-search' };
+    const selEl = $(selMap[key]); if(selEl) selEl.value = '';
+    renderDashboard();
+  }));
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1479,6 +1722,7 @@ function renderInsights(kpis, dealers) {
   const champs = kpis.aboveTarget;
 
   const pills = [];
+  if(STATE.restoredFromFirestore) pills.push(`<span class="insight-pill"><span class="ico">☁️</span>Data restored from Firestore${STATE.importMeta?.uploaded_by_name?' · uploaded by '+STATE.importMeta.uploaded_by_name:''}</span>`);
   if(topZone) pills.push(`<span class="insight-pill ok"><span class="ico">🏆</span>Top Zone: <strong>${topZone.z}</strong> · ${fL(topZone.v)}</span>`);
   if(topASM)  pills.push(`<span class="insight-pill ok"><span class="ico">👤</span>Lead ASM: <strong>${topASM.a}</strong> · ${fL(topASM.v)}</span>`);
   if(risk>0)  pills.push(`<span class="insight-pill warn"><span class="ico">⚠️</span><strong>${risk}</strong> dealers below 25% target</span>`);
@@ -1492,6 +1736,124 @@ function renderInsights(kpis, dealers) {
   } else {
     bar.style.display = 'none';
   }
+}
+
+/* ── Executive Summary strip — glanceable top-line numbers ── */
+function renderExecSummary(kpis, dealers) {
+  const el = $('exec-strip');
+  if(!el || !kpis) return;
+  const zones = [...new Set(dealers.map(d=>d.geo_zone).filter(Boolean))];
+  const zoneData = zones.map(z => ({ z, v: dealers.filter(d=>d.geo_zone===z).reduce((s,d)=>s+d.fy27_ytd,0) }));
+  zoneData.sort((a,b)=>b.v-a.v);
+  const topZone = zoneData[0], weakZone = zoneData[zoneData.length-1];
+  const asms = [...new Set(dealers.map(d=>d.asm_name).filter(Boolean))];
+  const asmData = asms.map(a => ({ a, v: dealers.filter(d=>d.asm_name===a).reduce((s,d)=>s+d.fy27_ytd,0) }));
+  asmData.sort((a,b)=>b.v-a.v);
+  const topASM = asmData[0];
+  const below25 = dealers.filter(d=>d.achievement_pct<25 && d.fy27_sales_target>0).length;
+
+  const items = [
+    { v: kpis.total, l:'Total Dealers' },
+    { v: kpis.active, l:'Active Dealers' },
+    { v: fL(kpis.fy27YTD), l:'FY27 YTD Sales' },
+    { v: fL(kpis.fy27Target), l:'FY27 Target' },
+    { v: fPct(kpis.achPct), l:'Achievement %' },
+    { v: fGrowth(kpis.yoyPct), l:'YoY Growth' },
+    { v: topZone ? topZone.z : '—', l:'Top Zone' },
+    { v: (weakZone && zones.length>1) ? weakZone.z : '—', l:'Weakest Zone' },
+    { v: topASM ? topASM.a.split(' ')[0] : '—', l:'Top ASM' },
+    { v: below25, l:'Below 25% Target' },
+  ];
+  el.innerHTML = items.map(i => `<div class="exec-item"><span class="ev">${i.v}</span><span class="el">${i.l}</span></div>`).join('');
+}
+
+/* ── Management Insights — ranked lists for fast decisions ── */
+const MGMT_RENDERERS = { topbottom:renderMgmtTopBottom, yoy:renderMgmtYoY, zones:renderMgmtZones, asms:renderMgmtASMs, bands:renderMgmtBands, attention:renderMgmtAttention };
+
+function renderManagementInsights(dealers) {
+  const sub = STATE.mgmtSubpage || 'topbottom';
+  (MGMT_RENDERERS[sub] || renderMgmtTopBottom)(dealers);
+}
+
+function mgmtRankRow(i, name, sub, val, cls) {
+  return `<div class="rank-row"><span class="rank-num">${i+1}</span><div style="flex:1;min-width:0"><div class="rank-name">${name}</div><div class="rank-sub">${sub}</div></div><span class="rank-val" style="color:${cls||'inherit'}">${val}</span></div>`;
+}
+
+function renderMgmtTopBottom(dealers) {
+  const root = $('mgmt-topbottom');
+  if(!root) return;
+  const withTarget = dealers.filter(d=>d.fy27_sales_target>0);
+  const top5 = [...dealers].sort((a,b)=>b.fy27_ytd-a.fy27_ytd).slice(0,5);
+  const bottom5 = [...withTarget].sort((a,b)=>a.achievement_pct-b.achievement_pct).slice(0,5);
+  const gapTop5 = [...dealers].filter(d=>d.target_gap>0).sort((a,b)=>b.target_gap-a.target_gap).slice(0,5);
+  root.innerHTML = `<div class="ana-grid">
+    <div class="chart-card"><div class="cc-head"><div class="cc-title">Top 5 Dealers — FY27 YTD</div></div><div class="rank-list">${top5.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fL(d.fy27_ytd),'var(--ok)')).join('')||'<div class="rank-row">No data</div>'}</div></div>
+    <div class="chart-card"><div class="cc-head"><div class="cc-title">Bottom 5 by Achievement %</div></div><div class="rank-list">${bottom5.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fPct(d.achievement_pct),'var(--err)')).join('')||'<div class="rank-row">No data</div>'}</div></div>
+  </div>
+  <div class="chart-card" style="margin-top:10px"><div class="cc-head"><div class="cc-title">Highest Target Gap — Furthest From AOP</div></div><div class="rank-list">${gapTop5.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fL(d.target_gap),'var(--warn)')).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
+}
+
+function renderMgmtYoY(dealers) {
+  const root = $('mgmt-yoy');
+  if(!root) return;
+  const withFy26 = dealers.filter(d=>d.fy26_ytd>0);
+  const gainers = [...withFy26].sort((a,b)=>b.yoy_pct-a.yoy_pct).slice(0,5);
+  const laggards = [...withFy26].sort((a,b)=>a.yoy_pct-b.yoy_pct).slice(0,5);
+  root.innerHTML = `<div class="ana-grid">
+    <div class="chart-card"><div class="cc-head"><div class="cc-title">Top YoY Gainers</div></div><div class="rank-list">${gainers.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fGrowth(d.yoy_pct),'var(--ok)')).join('')||'<div class="rank-row">No data</div>'}</div></div>
+    <div class="chart-card"><div class="cc-head"><div class="cc-title">Biggest YoY Laggards</div></div><div class="rank-list">${laggards.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fGrowth(d.yoy_pct),'var(--err)')).join('')||'<div class="rank-row">No data</div>'}</div></div>
+  </div>`;
+}
+
+function renderMgmtZones(dealers) {
+  const root = $('mgmt-zones');
+  if(!root) return;
+  const zones = [...new Set(dealers.map(d=>d.geo_zone).filter(Boolean))];
+  const rows = zones.map(z => {
+    const zd = dealers.filter(d=>d.geo_zone===z);
+    const ytd = zd.reduce((s,d)=>s+d.fy27_ytd,0), target = zd.reduce((s,d)=>s+d.fy27_sales_target,0);
+    return { z, ytd, achPct: target>0?ytd/target*100:0, count: zd.length };
+  }).sort((a,b)=>b.achPct-a.achPct);
+  root.innerHTML = `<div class="chart-card"><div class="cc-head"><div class="cc-title">Zone Leaderboard — by Achievement %</div></div><div class="rank-list">${rows.map((r,i)=>mgmtRankRow(i,r.z,`${r.count} dealers · ${fL(r.ytd)}`,fPct(r.achPct),achColor(r.achPct))).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
+}
+
+function renderMgmtASMs(dealers) {
+  const root = $('mgmt-asms');
+  if(!root) return;
+  const asms = [...new Set(dealers.map(d=>d.asm_name).filter(Boolean))];
+  const rows = asms.map(a => {
+    const ad = dealers.filter(d=>d.asm_name===a);
+    const ytd = ad.reduce((s,d)=>s+d.fy27_ytd,0), target = ad.reduce((s,d)=>s+d.fy27_sales_target,0);
+    return { a, ytd, achPct: target>0?ytd/target*100:0, count: ad.length };
+  }).sort((a,b)=>b.achPct-a.achPct);
+  root.innerHTML = `<div class="chart-card"><div class="cc-head"><div class="cc-title">ASM Leaderboard — by Achievement %</div></div><div class="rank-list">${rows.map((r,i)=>mgmtRankRow(i,r.a,`${r.count} dealers · ${fL(r.ytd)}`,fPct(r.achPct),achColor(r.achPct))).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
+}
+
+function renderMgmtBands(dealers) {
+  const root = $('mgmt-bands');
+  if(!root) return;
+  const withTarget = dealers.filter(d=>d.fy27_sales_target>0);
+  const buckets = ['<25%','25-50%','50-75%','75-100%','≥100%'];
+  const counts = [0,0,0,0,0];
+  withTarget.forEach(d => {
+    const a = d.achievement_pct;
+    if(a<25) counts[0]++; else if(a<50) counts[1]++; else if(a<75) counts[2]++; else if(a<100) counts[3]++; else counts[4]++;
+  });
+  root.innerHTML = `<div class="chart-card"><div class="cc-head"><div class="cc-title">Achievement Band Distribution</div><div class="cc-sub">Count of dealers with an FY27 target, by achievement band</div></div><div class="chart-wrap" style="height:200px"><canvas id="mgmt-bands-chart"></canvas></div></div>`;
+  const opts = countChartOpts(); opts.plugins.datalabels = dlCountBar();
+  opts.plugins.tooltip.callbacks.label = ctx => ` ${Math.round(ctx.raw)} dealer${ctx.raw!==1?'s':''}`;
+  mkChart('mgmt-bands-chart', { type:'bar', data:{ labels:buckets, datasets:[{ label:'Dealers', data:counts, backgroundColor:['#dc2626','#f97316','#d97706','#65a30d','#16a34a'], borderRadius:4 }] }, options:opts });
+}
+
+function renderMgmtAttention(dealers) {
+  const root = $('mgmt-attention');
+  if(!root) return;
+  const attention = dealers.filter(d=>d.achievement_pct<25 && d.fy27_sales_target>0).sort((a,b)=>a.achievement_pct-b.achievement_pct);
+  const targetOnly = dealers.filter(d=>d.match_type==='target_only');
+  root.innerHTML = `<div class="ana-grid">
+    <div class="chart-card"><div class="cc-head"><div class="cc-title">Needs Attention — Below 25% Target</div></div><div class="rank-list">${attention.slice(0,10).map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fPct(d.achievement_pct),'var(--err)')).join('')||'<div class="rank-row">None — all dealers above 25%</div>'}</div></div>
+    <div class="chart-card"><div class="cc-head"><div class="cc-title">Target-Only — No Sales Match</div></div><div class="rank-list">${targetOnly.slice(0,10).map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fL(d.fy27_sales_target),'var(--t3)')).join('')||'<div class="rank-row">None — all dealers matched to sales data</div>'}</div></div>
+  </div>`;
 }
 
 function dealerCardHTML(d) {
@@ -1579,18 +1941,40 @@ function renderDashboard() {
   $('dashboard-content').classList.remove('hidden');
 
   applyFilters();
+  renderFilterChips();
   const kpis = computeKPIs(STATE.filtered);
-  if(kpis) renderKPICards(kpis);
+  if(kpis) { renderKPICards(kpis); renderExecSummary(kpis, STATE.filtered); }
   renderInsights(kpis, STATE.filtered);
   $('dealer-count').textContent = `${STATE.filtered.length} dealers`;
   renderDealerGrid(STATE.filtered, 'dealer-grid');
   renderTrendChart(STATE.filtered);
   renderZoneChart(STATE.filtered);
+  renderManagementInsights(STATE.filtered);
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 9 — RENDER: DEALER MODAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Risk classification + monthly best/worst helpers for the modal ── */
+function riskLabel(d) {
+  let level = d.achievement_pct >= 75 ? 'strong' : d.achievement_pct >= 40 ? 'watch' : 'critical';
+  if(d.yoy_pct < -15) {
+    if(level === 'strong') level = 'watch';
+    else if(level === 'watch') level = 'critical';
+  }
+  const cls = { strong:'healthy', watch:'watchlist', critical:'critical' }[level];
+  const text = { strong:'Strong', watch:'Watch', critical:'Critical' }[level];
+  return { level, cls, text };
+}
+
+function dealerMonthlyStats(d) {
+  const vals = FY27_MONTHS.map(m => ({ m, v: d.fy27_monthly_dump[m] || d.fy27_monthly_sheet[m] || 0 }))
+    .filter(x => x.v > 0);
+  if(!vals.length) return { best:null, weak:null, loaded: STATE.diag?.fy27_months_available?.length || 0 };
+  const sorted = [...vals].sort((a,b)=>b.v-a.v);
+  return { best: sorted[0], weak: sorted[sorted.length-1], loaded: vals.length };
+}
+
 function openDealerModal(d) {
   STATE.currentDealer = d;
   $('m-name').textContent = d.name;
@@ -1599,6 +1983,25 @@ function openDealerModal(d) {
   const badge = $('m-src-badge');
   badge.className = `src-badge ${STATE.diag?.fileName ? 'upload' : 'demo'}`;
   badge.textContent = d.match_type === 'mobile' ? 'MOBILE MATCH' : d.match_type === 'name' ? 'NAME MATCH' : 'TARGET ONLY';
+
+  // Risk strip: glanceable risk level, match method, target gap, month highlights, finance snapshot
+  const risk = riskLabel(d);
+  const mstats = dealerMonthlyStats(d);
+  const riskParts = [
+    `<span class="rag-badge ${risk.cls}"><span class="rag-dot ${risk.cls}"></span>${risk.text}</span>`,
+    `<span>Match: <strong>${d.match_type === 'mobile' ? 'Mobile' : d.match_type === 'name' ? 'Name' : 'Target Only'}</strong></span>`,
+    `<span>Target Gap: <strong style="color:${d.target_gap>0?'var(--err)':'var(--ok)'}">${fL(Math.abs(d.target_gap))}</strong> ${d.target_gap>0?'remaining':'ahead'}</span>`,
+  ];
+  if(mstats.best) riskParts.push(`<span>Best Month: <strong>${mstats.best.m}</strong> (${fL(mstats.best.v)})</span>`);
+  if(mstats.weak) riskParts.push(`<span>Weakest: <strong>${mstats.weak.m}</strong> (${fL(mstats.weak.v)})</span>`);
+  riskParts.push(`<span>${mstats.loaded} month(s) loaded</span>`);
+  if(STATE.finance?.enabled) {
+    const nn = normName(d.name);
+    const snaps = buildPartnerFinanceSnapshots(STATE.finance.scenario);
+    const fsnap = (d.mobile && snaps.find(s => normMobile(s.partner_code)===d.mobile)) || snaps.find(s => normName(s.partner_name)===nn);
+    if(fsnap) riskParts.push(`<span class="fin-chip-mini">💹 ROI ${fPct(fsnap.annualized_roi)} · ${fsnap.rag}</span>`);
+  }
+  $('m-risk-strip').innerHTML = riskParts.join('');
 
   // Profile grid
   const profileRows = [
@@ -1923,10 +2326,78 @@ function renderAnalyticsCharts() {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 11 — DIAGNOSTICS PANEL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+// Source-type labels shown consistently across topbar, Data Management, finance
+const SOURCE_LABELS = { none:'NO DATA', demo:'DEMO', upload:'UPLOAD', firestore:'FIRESTORE', sheets:'SHEETS' };
+
+function renderImportSummary() {
+  const grid = $('import-summary-grid');
+  if(!grid) return;
+  if(!STATE.dataLoaded || !STATE.diag) {
+    grid.innerHTML = `<div class="diag-item"><div class="dv">—</div><div class="dl">No dataset loaded yet</div></div>`;
+    return;
+  }
+  const d = STATE.diag;
+  const meta = STATE.importMeta || {};
+  const importedOn = fmtDateTime(meta.uploaded_at?.toDate?.() || d.timestamp);
+  const restoredOn = STATE.dataSourceType === 'firestore' ? fmtDateTime(new Date()) : '—';
+  const items = [
+    { lbl:'Data Source',        v: SOURCE_LABELS[STATE.dataSourceType] || 'UPLOAD' },
+    { lbl:'File Name',          v: d.fileName || '—' },
+    { lbl:'Imported By',        v: meta.uploaded_by_name || '—' },
+    { lbl:'Imported At',        v: importedOn },
+    { lbl:'Last Restored At',   v: restoredOn },
+    { lbl:'Active Import ID',   v: STATE.activeImportId || '—' },
+    { lbl:'Firestore Save',     v: STATE.importSaveStatus === 'success' ? '✔ Saved' : STATE.importSaveStatus === 'failed' ? '✖ Failed' : STATE.importSaveStatus === 'skipped' ? '— Local only' : '—' },
+    { lbl:'Total Dealers',      v: STATE.dealers.length },
+    { lbl:'FY27 Matched Rows',  v: (d.fy27_matched_mobile||0) + (d.fy27_matched_name||0) },
+    { lbl:'FY26 Matched Rows',  v: (d.fy26_matched_mobile||0) + (d.fy26_matched_name||0) },
+    { lbl:'ROI Status',         v: STATE.finance?.enabled ? 'Available' : 'Missing' },
+    { lbl:'ROI Finance Rows',   v: STATE.finance?.rows?.length || 0 },
+    { lbl:'Import Status',      v: d.errors?.length ? 'Failed' : (d.warnings?.length ? 'Partial' : 'Success') },
+  ];
+  grid.innerHTML = items.map(s => `<div class="diag-item"><div class="dv">${s.v}</div><div class="dl">${s.lbl}</div></div>`).join('');
+}
+
+// ── Import History — last 5 uploads (active + archived), most recent first ──
+async function loadImportHistory() {
+  const list = $('import-history-list');
+  if(!list) return;
+  if(!FBDB) { list.innerHTML = `<div class="rank-row">No import history yet</div>`; return; }
+  try {
+    const snap = await FBDB.collection('imports').orderBy('uploaded_at', 'desc').limit(5).get();
+    if(snap.empty) { list.innerHTML = `<div class="rank-row">No import history yet</div>`; return; }
+    const rows = snap.docs.map(doc => doc.data());
+    renderImportHistoryList(rows);
+  } catch(e) {
+    console.warn('Import history load skipped:', e.code || e.message);
+    list.innerHTML = `<div class="rank-row">Import history unavailable</div>`;
+  }
+}
+
+function renderImportHistoryList(rows) {
+  const list = $('import-history-list');
+  if(!list) return;
+  if(!rows || !rows.length) { list.innerHTML = `<div class="rank-row">No import history yet</div>`; return; }
+  list.innerHTML = rows.map(r => {
+    const isActive = r.import_id === STATE.activeImportId || r.status === 'active';
+    const when = fmtDateTime(r.uploaded_at?.toDate?.() || r.uploaded_at);
+    const roiTag = r.finance_enabled ? `<span class="roi-badge avail" style="font-size:8px">ROI</span>` : '';
+    return `<div class="rank-row">
+      <span class="rag-dot ${isActive ? 'healthy' : 'watchlist'}" title="${isActive ? 'Active' : 'Archived'}"></span>
+      <div style="flex:1;min-width:0">
+        <div class="rank-name">${r.file_name || 'Unnamed import'} ${roiTag}</div>
+        <div class="rank-sub">${r.import_id || '—'} · by ${r.uploaded_by_name || '—'} · ${when}</div>
+      </div>
+      <span class="rank-val" style="font-size:10px;color:var(--t3)">${isActive ? 'Active' : 'Archived'}</span>
+    </div>`;
+  }).join('');
+}
+
 function renderDiagnostics(diag) {
   if(!diag) return;
   const p = $('diag-panel');
   p.classList.remove('hidden');
+  renderImportSummary();
 
   const statItems = [
     { lbl:'Dealer Master Rows',           v: diag.master_rows||0 },
@@ -2002,7 +2473,7 @@ function handleFile(file) {
       STATE.dealers       = dealers;
       STATE.diag          = diag;
       STATE.dataLoaded    = true;
-      STATE.filters       = { zone:'', terr:'', asm:'', type:'', tod:'', search:'' };
+      STATE.filters       = { zone:'', terr:'', asm:'', type:'', tod:'', achband:'', presence:'', search:'' };
 
       // FIX #3: Rebuild all filter dropdowns from actual loaded data
       populateFilters(dealers);
@@ -2055,8 +2526,11 @@ const PAGE_TITLES = {
 };
 
 function navigateTo(page) {
-  if(page === 'finance' && STATE.role !== 'admin') { toast('Partner Financial Health is admin-only.', 'err'); return; }
   if(page === 'finance' && !STATE.finance) { STATE.finance = { enabled:false, rows:[], diag:null, rollupLevel:'overall', scenario:'Base', subpage:'summary', auditLog:[], overrides:{} }; }
+  if(page === 'finance' && STATE.role !== 'admin' && !STATE.finance.enabled) {
+    toast('Partner Financial Health has no data yet — ask an admin to upload the ROI sheet.', 'err');
+    return;
+  }
   STATE.page = page;
   qsa('.page').forEach(p => p.classList.remove('active'));
   qsa('.nav-item').forEach(n => n.classList.remove('active'));
@@ -2162,7 +2636,7 @@ const DEV_MODE = false; // ← SET TO FALSE IN PRODUCTION
 
 // Firebase service references (populated in initFirebase)
 let FBAPP = null, FBAUTH = null, FBDB = null;
-const ALLOWED_ROLES = ['admin'];
+const ALLOWED_ROLES = ['admin', 'asm', 'viewer']; // admin=full access, asm/viewer=read-only
 
 /* ── 14a: Init Firebase ─────────────────────────────── */
 function initFirebase() {
@@ -2291,12 +2765,17 @@ async function boot(firebaseUser, profile) {
   rb.className    = `role-badge ${profile.role}`;
   rb.classList.remove('hidden');
 
+  STATE.isReadOnly = profile.role !== 'admin';
+
   // Apply role-based UI restrictions
   applyRoleScope(profile);
 
   // Load latest active dataset from Firestore
+  STATE.dataSourceType = 'none';
   await loadActiveImport();
   await loadFinanceAuditLog();
+  await loadImportHistory();
+  updateFinanceNavVisibility();
 
   setLoading(false);
   hideLoginScreen();
@@ -2311,6 +2790,11 @@ function applyRoleScope(profile) {
   // Show/hide admin-only elements
   qsa('[data-admin-only]').forEach(el => {
     el.classList.toggle('role-hidden', !isAdmin);
+  });
+
+  // Show read-only guidance notes for non-admin users
+  qsa('[data-viewer-note]').forEach(el => {
+    el.classList.toggle('hidden', isAdmin);
   });
 
   // Pre-filter dropdowns if ASM has a scope restriction
@@ -2373,13 +2857,16 @@ async function loadActiveImport() {
     STATE.dataLoaded    = true;
     STATE.activeImportId = importId;
     STATE.importMeta    = meta;
+    STATE.dataSourceType = 'firestore';
+    STATE.restoredFromFirestore = true;
+    STATE.importSaveStatus = 'success';
 
     // FIX #3: Rebuild filters from restored data
     populateFilters(dealers);
     applyFilters();
 
     // Update source badge
-    $('src-badge').textContent = 'FIRESTORE';
+    $('src-badge').textContent = SOURCE_LABELS.firestore;
     $('src-badge').className   = 'src-badge upload';
 
     // Update data sources page status card
@@ -2410,6 +2897,7 @@ async function loadActiveImport() {
     } catch(e) { console.warn('Finance data restore skipped:', e.message); }
 
     renderDiagnostics(diag);
+    renderImportSummary();
     updateROIBadge();
   } catch(err) {
     console.error('loadActiveImport error:', err);
@@ -2523,6 +3011,7 @@ async function saveImportToFirestore(dealers, diag, meta, financeRows = []) {
 /* ── 14i: Extended handleFile to persist to Firestore ─ */
 async function handleFileProduction(file) {
   if(!file) return;
+  if(!requireAdmin('uploading a workbook')) return;
   if(!file.name.match(/\.xlsx?$/i)) { toast('Please upload an .xlsx file', 'err'); return; }
 
   const srcBadge = $('src-badge');
@@ -2553,7 +3042,9 @@ async function handleFileProduction(file) {
   STATE.dealers    = dealers;
   STATE.diag       = diag;
   STATE.dataLoaded = true;
-  STATE.filters    = { zone:'', terr:'', asm:'', type:'', tod:'', search:'' };
+  STATE.dataSourceType = 'upload';
+  STATE.restoredFromFirestore = false;
+  STATE.filters    = { zone:'', terr:'', asm:'', type:'', tod:'', achband:'', presence:'', search:'' };
   populateFilters(dealers);
   applyFilters();
   applyRoleScope(STATE.userProfile);
@@ -2572,7 +3063,7 @@ async function handleFileProduction(file) {
   if(diag.finance?.errors?.length) await writeFinanceAudit('Finance row validation failure', { new_value: diag.finance.errors.join(' | '), source:'upload' });
 
   srcBadge.className   = 'src-badge upload';
-  srcBadge.textContent = 'UPLOAD';
+  srcBadge.textContent = SOURCE_LABELS.upload;
 
   const wb2 = $('wb-status');
   if(wb2) { wb2.textContent = '✔ Uploaded'; wb2.className = 'ds-status-badge on'; }
@@ -2591,19 +3082,26 @@ async function handleFileProduction(file) {
   }
 
   renderDiagnostics(diag);
+  renderImportSummary();
   renderDashboard();
   renderAllDealersPage();
   if(STATE.page === 'finance') renderFinanceDashboard();
 
   // Persist to Firestore (admin only, non-blocking for UI)
   if(FBDB && STATE.role === 'admin') {
-    await saveImportToFirestore(dealers, diag, {}, financeRows);
-    srcBadge.textContent = 'FIRESTORE';
+    const savedId = await saveImportToFirestore(dealers, diag, {}, financeRows);
+    STATE.importSaveStatus = savedId ? 'success' : 'failed';
+    if(savedId) { srcBadge.textContent = SOURCE_LABELS.firestore; STATE.dataSourceType = 'firestore'; renderImportSummary(); }
+    else { renderImportSummary(); }
+    await loadImportHistory();
   } else {
+    STATE.importSaveStatus = 'skipped';
+    renderImportSummary();
     setLoading(false);
   }
 
   updateROIBadge();
+  updateFinanceNavVisibility();
   // Navigate to dashboard
   if(STATE.page === 'data-sources') navigateTo('dashboard');
   toast(`Loaded ${dealers.length} dealers — FY27 YTD ${fL(diag.fy27_sales_lakhs||0)}`, 'ok');
@@ -2627,6 +3125,8 @@ function devBoot(email, pass) {
   STATE.role        = c.role;
   STATE.userProfile = c;
   STATE.uid         = 'dev-uid';
+  STATE.isReadOnly  = c.role !== 'admin';
+  STATE.dataSourceType = 'demo';
   const name = c.name;
   const init = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   $('sb-av').textContent = init; $('tb-av').textContent = init;
@@ -2636,6 +3136,7 @@ function devBoot(email, pass) {
   const rb = $('role-badge');
   rb.textContent = c.role; rb.className = `role-badge ${c.role}`; rb.classList.remove('hidden');
   applyRoleScope(c);
+  updateFinanceNavVisibility();
   showApp();
   renderDashboard();
 }
@@ -3172,11 +3673,14 @@ function dlDoughnutCount() {
 }
 
 function financeEmptyState(detail) {
+  const cta = STATE.role === 'admin'
+    ? `<button class="btn primary" onclick="navigateTo('data-sources')">📤 Go to Data Management</button>`
+    : `<p style="font-size:11px;color:var(--t3)">Ask an administrator to upload a workbook with an ROI sheet.</p>`;
   return `<div class="fin-empty">
     <div class="ico">💹</div>
-    <h3>Partner Financial Health unavailable</h3>
-    <p>${detail || 'Upload a workbook that includes an "ROI" sheet (Partner Code, Revenue, Gross Margin %, OPEX, CAPEX, Tax Rate) to activate ROI Intelligence, EBITDA/EBIT views, payback tracking and RAG grading.'}</p>
-    ${STATE.role==='admin' ? `<button class="btn primary" onclick="navigateTo('data-sources')">📤 Go to Data Sources</button>` : ''}
+    <h3>Partner Financial Health — ROI Missing</h3>
+    <p>${detail || 'No ROI sheet has been loaded yet. Once an admin uploads a workbook containing an ROI sheet (Partner Code, Revenue, Gross Margin %, OPEX, CAPEX, Tax Rate), ROI Intelligence, EBITDA/EBIT views, payback tracking and health grading will appear here.'}</p>
+    ${cta}
   </div>`;
 }
 
@@ -3222,6 +3726,7 @@ function renderFinSummary() {
   const missing = Math.max(STATE.dealers.length - snaps.filter(s=>s.match_type!=='unmapped').length, 0);
   const belowFD = snaps.filter(s=>s.annualized_roi!=null && s.annualized_roi < FINANCE_CONFIG.FD_BENCHMARK_PCT).length;
   const negEbit = snaps.filter(s=>s.ebit!=null && s.ebit < 0).length;
+  const negEbitda = snaps.filter(s=>s.ebitda!=null && s.ebitda < 0).length;
 
   const kpis = [
     finKPICard('Total Revenue', fL(totals.revenue), `${STATE.finance.scenario} scenario`, '#2563eb','💰',''),
@@ -3238,6 +3743,8 @@ function renderFinSummary() {
     finKPICard('Critical', critical, 'Below thresholds', '#dc2626','🚨', critical>0?'danger':''),
     finKPICard('Early Stage', early, '< 12 months, grace period', '#7c3aed','🌱',''),
     finKPICard('Missing Finance Data', missing, 'Dealers without ROI match', '#94a3b8','❓',''),
+    finKPICard('Negative EBITDA', negEbitda, 'Partners with EBITDA below zero', negEbitda>0?'#dc2626':'#16a34a','🔻', negEbitda>0?'danger':''),
+    finKPICard('Payback Risk', snaps.filter(s=>s.payback_months==null || s.payback_months>60).length, 'No payback or > 60 months', '#d97706','⏳','warn'),
   ];
 
   // Smart insight callouts
@@ -3257,7 +3764,16 @@ function renderFinSummary() {
   if(negEbit>0) pills.push(`<span class="insight-pill warn"><span class="ico">🔻</span><strong>${negEbit}</strong> partner${negEbit>1?'s':''} with negative EBIT</span>`);
   if(highPotentialEarly>0) pills.push(`<span class="insight-pill ok"><span class="ico">🌱</span><strong>${highPotentialEarly}</strong> early-stage with strong EBITDA margin</span>`);
 
+  const finSourceLabel = STATE.dataSourceType === 'firestore' ? 'Firestore Restored'
+    : STATE.dataSourceType === 'demo' ? 'Demo Finance' : 'ROI Sheet';
+  const readOnlyBanner = STATE.role !== 'admin'
+    ? `<div style="font-size:11px;color:var(--t3);background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:7px 11px;margin-bottom:10px">👁 Read-only view — finance edits require admin access</div>` : '';
+
   root.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-size:11px;color:var(--t3)">Source: <strong style="color:var(--t2)">${finSourceLabel}</strong></span>
+    </div>
+    ${readOnlyBanner}
     ${finRollupBarHTML()}
     <div class="kpi-grid">${kpis.join('')}</div>
     <div class="insight-bar" style="display:flex">${pills.join('')}</div>
@@ -3614,7 +4130,15 @@ function renderPartnerFinanceSection(dealer) {
   if(!body) return;
   // Update modal source label
   const srcLbl = $('m-fin-source-label');
-  if(srcLbl) { srcLbl.textContent = STATE.finance.enabled ? 'ROI Sheet' : 'ROI Missing'; srcLbl.style.background = STATE.finance.enabled ? 'var(--infot)' : 'var(--bg)'; srcLbl.style.color = STATE.finance.enabled ? 'var(--info)' : 'var(--t3)'; }
+  if(srcLbl) {
+    const label = !STATE.finance.enabled ? 'ROI Missing'
+      : STATE.dataSourceType === 'firestore' ? 'Firestore Restored'
+      : STATE.dataSourceType === 'demo' ? 'Demo Finance'
+      : 'ROI Sheet';
+    srcLbl.textContent = label;
+    srcLbl.style.background = STATE.finance.enabled ? 'var(--infot)' : 'var(--bg)';
+    srcLbl.style.color = STATE.finance.enabled ? 'var(--info)' : 'var(--t3)';
+  }
   if(!STATE.finance.enabled) {
     body.innerHTML = `<div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);border-left:3px solid var(--warn)"><div style="font-size:11px;font-weight:600;color:var(--warn);margin-bottom:4px">⚠️ ROI Data Not Available</div><div style="font-size:11px;color:var(--t2);line-height:1.6">Upload a workbook containing an <strong>ROI sheet</strong> (with columns: Phone No, Dealer name, Particulars/FY label, TOD Eligible Sales - DP, Margin, Total Operating Expenditure, Showroom Making Cost, Display Material Cost, Security Deposit, Depreciation) to activate financial health metrics for this partner.</div></div>`;
     return;
@@ -3687,6 +4211,7 @@ function renderPartnerFinanceSection(dealer) {
 
   const saveBtn = $('m-fin-save-override');
   if(saveBtn) saveBtn.addEventListener('click', async () => {
+    if(!requireAdmin('saving a finance override')) return;
     const code = saveBtn.dataset.partnerCode;
     const newGM  = parseFloat($('m-fin-gm-input').value);
     const newTax = parseFloat($('m-fin-tax-input').value);
@@ -3750,6 +4275,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Bootstrap: start with loading screen, init Firebase ──
   setLoading(true, 'Initialising…');
+  renderVersionInfo();
   initFirebase();
 
   // ── Login form ────────────────────────────────────────
@@ -3810,22 +4336,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Filters ───────────────────────────────────────────
   $('apply-filters').addEventListener('click', () => {
-    STATE.filters.zone = $('f-zone').value;
-    STATE.filters.terr = $('f-terr').value;
-    STATE.filters.asm  = $('f-asm').value;
-    STATE.filters.type = $('f-type').value;
-    STATE.filters.tod  = $('f-tod').value;
+    STATE.filters.zone     = $('f-zone').value;
+    STATE.filters.terr     = $('f-terr').value;
+    STATE.filters.asm      = $('f-asm').value;
+    STATE.filters.type     = $('f-type').value;
+    STATE.filters.tod      = $('f-tod').value;
+    STATE.filters.achband  = $('f-achband').value;
+    STATE.filters.presence = $('f-presence').value;
     renderDashboard();
   });
   $('reset-filters').addEventListener('click', () => {
-    ['f-zone','f-terr','f-asm','f-type','f-tod'].forEach(id => { const e=$(id); if(e) e.value=''; });
+    ['f-zone','f-terr','f-asm','f-type','f-tod','f-achband','f-presence'].forEach(id => { const e=$(id); if(e) e.value=''; });
     $('g-search').value = '';
-    STATE.filters = { zone:'', terr:'', asm:'', type:'', tod:'', search:'' };
+    STATE.filters = { zone:'', terr:'', asm:'', type:'', tod:'', achband:'', presence:'', search:'' };
     renderDashboard();
   });
   $('g-search').addEventListener('input', e => {
     STATE.filters.search = e.target.value;
     applyFilters();
+    renderFilterChips();
     renderDealerGrid(STATE.filtered, 'dealer-grid');
     $('dealer-count').textContent = `${STATE.filtered.length} dealers`;
   });
@@ -3873,8 +4402,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 120);
   });
 
+  // ── Copy Support Info — clipboard snapshot for troubleshooting ──
+  const copyBtn = $('copy-support-btn');
+  if(copyBtn) copyBtn.addEventListener('click', async () => {
+    const d = STATE.diag || {};
+    const meta = STATE.importMeta || {};
+    const importedOn = fmtDateTime(meta.uploaded_at?.toDate?.() || d.timestamp);
+    const restoredOn = STATE.dataSourceType === 'firestore' ? fmtDateTime(new Date()) : '—';
+    const lines = [
+      `App Version: ${APP_VERSION}`,
+      `Build Number: ${BUILD_NUMBER}`,
+      `Build Date: ${BUILD_DATE}`,
+      `Environment: ${ENVIRONMENT}`,
+      `--- Dataset ---`,
+      `Active Import ID: ${STATE.activeImportId || '—'}`,
+      `File Name: ${d.fileName || '—'}`,
+      `Imported By: ${meta.uploaded_by_name || '—'}`,
+      `Imported At: ${importedOn}`,
+      `Last Restored At: ${restoredOn}`,
+      `Data Source: ${SOURCE_LABELS[STATE.dataSourceType] || '—'}`,
+      `Firestore Save Status: ${STATE.importSaveStatus || '—'}`,
+      `ROI Enabled: ${STATE.finance?.enabled ? 'Yes' : 'No'}`,
+      `ROI Row Count: ${STATE.finance?.rows?.length || 0}`,
+      `Dealer Count: ${STATE.dealers.length}`,
+      `--- Session ---`,
+      `Current User Role: ${STATE.role || '—'}`,
+    ];
+    const text = lines.join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Support info copied to clipboard', 'ok');
+    } catch(e) {
+      toast('Could not copy to clipboard', 'err');
+      console.warn('Clipboard write failed:', e.message);
+    }
+  });
+
   // ── Sample template download ───────────────────────────
   $('dl-sample-btn').addEventListener('click', () => {
+    if(!requireAdmin('downloading the sample template')) return;
     if(typeof XLSX === 'undefined') { toast('XLSX library not loaded', 'err'); return; }
     const wb = XLSX.utils.book_new();
     const pH = ['','','S.No','Existing/New','Email ID','Phone No','Dealer Name','Location','CRM Activate Date','ASM EMP Code','ASM Name','Region','Zone','UEOB FY26','FY27 OBK AOP','FY27 ORP AOP','FY27 Sales AOP','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26','Jan-27','Feb-27','Mar-27','FY27 Actual - Sales','% of FY27 Actual','FY26 Target - Sales','Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25','Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Mar-26','FY26 Actual - Sales','% of FY26 Actual','Growth Vs FY26 Actual vs FY27 Sales','Comments','TOD Letter Sent Status','Target as on 27 Apr 26','Changes from Last Target'];
@@ -3902,6 +4468,16 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
   qsa('.fin-tab').forEach(tab => {
     tab.addEventListener('click', () => financeNavigateTo(tab.dataset.finsub));
+  });
+  qsa('.mgmt-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      STATE.mgmtSubpage = tab.dataset.mgmtsub;
+      qsa('.mgmt-tab').forEach(t => t.classList.toggle('active', t === tab));
+      qsa('.mgmt-subpage').forEach(p => p.classList.remove('active'));
+      const target = $('mgmt-' + tab.dataset.mgmtsub);
+      if(target) target.classList.add('active');
+      renderManagementInsights(STATE.filtered);
+    });
   });
 });
 
