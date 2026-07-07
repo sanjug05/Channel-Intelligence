@@ -149,6 +149,8 @@ input,select{font-family:inherit;font-size:inherit}
 .empty-state p{font-size:12px;line-height:1.6;max-width:380px;margin:0 auto 16px}
 
 /* ── Insight bar ── */
+#scope-banner{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--info);background:var(--infot);padding:7px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+#scope-banner strong{font-weight:700}
 .insight-bar{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-top:2px solid var(--p);border-radius:var(--r);overflow:hidden}
 .insight-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);padding:8px 12px;border-right:1px solid var(--border)}
 .insight-pill:last-child{border-right:none}
@@ -162,6 +164,8 @@ input,select{font-family:inherit;font-size:inherit}
 .fg{display:flex;flex-direction:column;gap:3px}
 .fg label{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
 .fg select{padding:5px 22px 5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 10 10'%3E%3Cpath fill='%2394A3B8' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;min-width:100px;transition:border .15s}
+.fg input[type=search]{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px;outline:none;transition:border .15s}
+.fg input[type=search]:focus{border-color:var(--p)}
 .fg select:focus{border-color:var(--p)}
 .filter-actions{display:flex;gap:6px;align-self:flex-end}
 .btn-xs{padding:5px 10px;border-radius:var(--r-sm);font-size:11px;font-weight:500;cursor:pointer;transition:.15s}
@@ -589,6 +593,9 @@ input,select{font-family:inherit;font-size:inherit}
       </div>
     </header>
 
+    <!-- Scope banner: tells ASM-scoped users why their view is restricted -->
+    <div id="scope-banner" class="hidden"></div>
+
     <!-- CONTENT PAGES -->
     <main id="main-content">
 
@@ -612,6 +619,7 @@ input,select{font-family:inherit;font-size:inherit}
           <div class="exec-strip" id="exec-strip"></div>
 
           <div class="filters-bar">
+            <div class="fg" style="flex:1 1 200px;min-width:160px"><label>Search</label><input type="search" id="dash-search" placeholder="Name, mobile, ASM, zone…"></div>
             <div class="fg"><label>Zone</label><select id="f-zone"></select></div>
             <div class="fg"><label>Territory</label><select id="f-terr"></select></div>
             <div class="fg"><label>ASM</label><select id="f-asm"></select></div>
@@ -690,10 +698,17 @@ input,select{font-family:inherit;font-size:inherit}
 
       <!-- ═══ ALL DEALERS PAGE ═══ -->
       <section id="page-dealers" class="page">
-        <div class="sec-head" style="margin-bottom:14px">
-          <div><div class="sec-title">All Dealers</div><div class="sec-sub">Full dealer registry</div></div>
+        <div class="sec-head" style="margin-bottom:10px">
+          <div><div class="sec-title">All Dealers</div><div class="sec-sub">Full dealer registry — filters carry over from Dashboard</div></div>
           <span class="count-pill" id="all-dealer-count">—</span>
         </div>
+        <div class="filters-bar" style="margin-bottom:8px">
+          <div class="fg" style="flex:1 1 240px;min-width:180px"><label>Search</label><input type="search" id="all-dealer-search" placeholder="Name, mobile, ASM, zone…"></div>
+          <div class="filter-actions">
+            <button class="btn-xs out" id="all-dealer-clear-filters">Clear All Filters</button>
+          </div>
+        </div>
+        <div class="filter-chips" id="all-dealer-chips"></div>
         <div class="dealer-grid" id="all-dealer-grid"></div>
       </section>
 
@@ -1643,9 +1658,19 @@ const FILTER_LABELS = {
 };
 const ACHBAND_LABELS = { lt25:'< 25%', '25-50':'25–50%', '50-75':'50–75%', '75-100':'75–100%', ge100:'100%+' };
 const PRESENCE_LABELS = { target_only:'Target-only', fy27:'Has FY27 Sales', fy26:'Has FY26 Sales', both:'Matched Both Years' };
+function syncSearchInputs(value) {
+  ['g-search', 'dash-search', 'all-dealer-search'].forEach(id => {
+    const el = $(id);
+    if(el && el.value !== value) el.value = value;
+  });
+}
+
+function renderCurrentPage() {
+  if(STATE.page === 'dealers') renderAllDealersPage();
+  else renderDashboard();
+}
+
 function renderFilterChips() {
-  const el = $('filter-chips');
-  if(!el) return;
   const f = STATE.filters;
   const chips = [];
   const push = (key, display) => { if(f[key]) chips.push({ key, display }); };
@@ -1653,14 +1678,21 @@ function renderFilterChips() {
   push('achband', ACHBAND_LABELS[f.achband] || f.achband);
   push('presence', PRESENCE_LABELS[f.presence] || f.presence);
   push('search', f.search ? `"${f.search}"` : '');
-  el.innerHTML = chips.map(c => `<span class="filter-chip">${FILTER_LABELS[c.key]}: ${c.display}<button data-chip-clear="${c.key}">✕</button></span>`).join('');
-  qsa('[data-chip-clear]', el).forEach(btn => btn.addEventListener('click', () => {
-    const key = btn.dataset.chipClear;
-    STATE.filters[key] = '';
-    const selMap = { zone:'f-zone', terr:'f-terr', asm:'f-asm', type:'f-type', tod:'f-tod', achband:'f-achband', presence:'f-presence', search:'g-search' };
-    const selEl = $(selMap[key]); if(selEl) selEl.value = '';
-    renderDashboard();
-  }));
+  const html = chips.map(c => `<span class="filter-chip">${FILTER_LABELS[c.key]}: ${c.display}<button data-chip-clear="${c.key}">✕</button></span>`).join('');
+
+  ['filter-chips', 'all-dealer-chips'].forEach(containerId => {
+    const el = $(containerId);
+    if(!el) return;
+    el.innerHTML = html;
+    qsa('[data-chip-clear]', el).forEach(btn => btn.addEventListener('click', () => {
+      const key = btn.dataset.chipClear;
+      STATE.filters[key] = '';
+      const selMap = { zone:'f-zone', terr:'f-terr', asm:'f-asm', type:'f-type', tod:'f-tod', achband:'f-achband', presence:'f-presence' };
+      const selEl = $(selMap[key]); if(selEl) selEl.value = '';
+      if(key === 'search') syncSearchInputs('');
+      renderCurrentPage();
+    }));
+  });
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2511,8 +2543,13 @@ function handleFile(file) {
 }
 
 function renderAllDealersPage() {
-  $('all-dealer-count').textContent = `${STATE.dealers.length} dealers`;
-  renderDealerGrid(STATE.dealers, 'all-dealer-grid');
+  applyFilters();
+  renderFilterChips();
+  const showingFiltered = STATE.filtered.length !== STATE.dealers.length;
+  $('all-dealer-count').textContent = showingFiltered
+    ? `${STATE.filtered.length} of ${STATE.dealers.length} dealers`
+    : `${STATE.dealers.length} dealers`;
+  renderDealerGrid(STATE.filtered, 'all-dealer-grid');
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2807,6 +2844,22 @@ function applyRoleScope(profile) {
   } else {
     STATE.asmScope = null;
   }
+  renderScopeBanner();
+}
+
+// Tells an ASM-scoped user why they see fewer dealers than the full roster —
+// without this, a restricted view looks like missing/broken data.
+function renderScopeBanner() {
+  const b = $('scope-banner');
+  if(!b) return;
+  const scope = STATE.asmScope;
+  if(!scope) { b.classList.add('hidden'); b.innerHTML = ''; return; }
+  const parts = [];
+  if(scope.asm_code) parts.push(`ASM code <strong>${scope.asm_code}</strong>`);
+  if(scope.allowed_zones?.length) parts.push(`zone(s) <strong>${scope.allowed_zones.join(', ')}</strong>`);
+  if(scope.allowed_territories?.length) parts.push(`territory <strong>${scope.allowed_territories.join(', ')}</strong>`);
+  b.innerHTML = `<span>👤</span><span>Scoped view — showing dealers assigned to ${parts.join(' · ') || 'you'} only.</span>`;
+  b.classList.remove('hidden');
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3013,6 +3066,16 @@ async function handleFileProduction(file) {
   if(!file) return;
   if(!requireAdmin('uploading a workbook')) return;
   if(!file.name.match(/\.xlsx?$/i)) { toast('Please upload an .xlsx file', 'err'); return; }
+
+  if(STATE.dataLoaded && STATE.dealers.length) {
+    const activeName = STATE.diag?.fileName || 'the current dataset';
+    const confirmed = confirm(
+      `This will replace "${activeName}" (${STATE.dealers.length} dealers) with "${file.name}" for ALL users immediately.\n\n` +
+      `The previous dataset will be archived, not deleted, but everyone will see the new data right away.\n\n` +
+      `Continue with the upload?`
+    );
+    if(!confirmed) { toast('Upload cancelled', 'inf'); return; }
+  }
 
   const srcBadge = $('src-badge');
   srcBadge.textContent = 'PARSING…';
@@ -4345,18 +4408,27 @@ document.addEventListener('DOMContentLoaded', () => {
     STATE.filters.presence = $('f-presence').value;
     renderDashboard();
   });
-  $('reset-filters').addEventListener('click', () => {
+  const clearAllFilters = () => {
     ['f-zone','f-terr','f-asm','f-type','f-tod','f-achband','f-presence'].forEach(id => { const e=$(id); if(e) e.value=''; });
-    $('g-search').value = '';
+    syncSearchInputs('');
     STATE.filters = { zone:'', terr:'', asm:'', type:'', tod:'', achband:'', presence:'', search:'' };
-    renderDashboard();
-  });
-  $('g-search').addEventListener('input', e => {
-    STATE.filters.search = e.target.value;
-    applyFilters();
-    renderFilterChips();
-    renderDealerGrid(STATE.filtered, 'dealer-grid');
-    $('dealer-count').textContent = `${STATE.filtered.length} dealers`;
+    renderCurrentPage();
+  };
+  $('reset-filters').addEventListener('click', clearAllFilters);
+  const allDealerClearBtn = $('all-dealer-clear-filters');
+  if(allDealerClearBtn) allDealerClearBtn.addEventListener('click', clearAllFilters);
+
+  // Search — one shared state, three entry points (topbar, Dashboard, All Dealers).
+  // Typing in any one keeps the others in sync and re-renders whichever page is open.
+  ['g-search', 'dash-search', 'all-dealer-search'].forEach(id => {
+    const el = $(id);
+    if(!el) return;
+    el.addEventListener('input', e => {
+      STATE.filters.search = e.target.value;
+      syncSearchInputs(e.target.value);
+      renderFilterChips();
+      renderCurrentPage();
+    });
   });
 
   // ── File Upload (routes through handleFileProduction) ──
