@@ -166,6 +166,8 @@ input,select{font-family:inherit;font-size:inherit}
 .fg select{padding:5px 22px 5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 10 10'%3E%3Cpath fill='%2394A3B8' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;min-width:100px;transition:border .15s}
 .fg input[type=search]{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px;outline:none;transition:border .15s}
 .fg input[type=search]:focus{border-color:var(--p)}
+.sort-select{padding:5px 22px 5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t2);font-size:11px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 10 10'%3E%3Cpath fill='%2394A3B8' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;transition:border .15s}
+.sort-select:focus{border-color:var(--p)}
 .fg select:focus{border-color:var(--p)}
 .filter-actions{display:flex;gap:6px;align-self:flex-end}
 .btn-xs{padding:5px 10px;border-radius:var(--r-sm);font-size:11px;font-weight:500;cursor:pointer;transition:.15s}
@@ -313,10 +315,12 @@ input,select{font-family:inherit;font-size:inherit}
 
 /* ── Toast ── */
 #toast-wrap{position:fixed;bottom:18px;right:18px;z-index:2000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
-.toast{padding:10px 13px;border-radius:var(--r);background:var(--card);border:1px solid var(--border);box-shadow:var(--shm);font-size:12px;display:flex;align-items:center;gap:8px;animation:slideIn .2s ease;max-width:300px;pointer-events:all}
+.toast{padding:10px 13px;border-radius:var(--r);background:var(--card);border:1px solid var(--border);box-shadow:var(--shm);font-size:12px;display:flex;align-items:flex-start;gap:8px;animation:slideIn .2s ease;max-width:340px;pointer-events:all}
 .toast.ok{border-left:2px solid var(--ok)}
-.toast.err{border-left:2px solid var(--err)}
+.toast.err{border-left:2px solid var(--err);max-width:380px}
 .toast.inf{border-left:2px solid var(--p)}
+.toast-close{flex-shrink:0;color:var(--t3);font-size:11px;line-height:1;padding:2px;margin-top:1px}
+.toast-close:hover{color:var(--t)}
 
 /* ── Role-gated elements ── */
 [data-admin-only]{transition:opacity .2s}
@@ -690,7 +694,18 @@ input,select{font-family:inherit;font-size:inherit}
 
           <div class="sec-head" style="margin-top:16px">
             <div><div class="sec-title">Dealer Performance</div><div class="sec-sub">Click a card to drill down</div></div>
-            <span class="count-pill" id="dealer-count">0 dealers</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <select id="dash-sort" class="sort-select">
+                <option value="default">Sort: Default</option>
+                <option value="name">Name (A–Z)</option>
+                <option value="ach_desc">Achievement % (High–Low)</option>
+                <option value="ach_asc">Achievement % (Low–High)</option>
+                <option value="sales_desc">FY27 Sales (High–Low)</option>
+                <option value="yoy_desc">YoY Growth (High–Low)</option>
+                <option value="gap_desc">Target Gap (High–Low)</option>
+              </select>
+              <span class="count-pill" id="dealer-count">0 dealers</span>
+            </div>
           </div>
           <div class="dealer-grid" id="dealer-grid"></div>
         </div>
@@ -700,7 +715,18 @@ input,select{font-family:inherit;font-size:inherit}
       <section id="page-dealers" class="page">
         <div class="sec-head" style="margin-bottom:10px">
           <div><div class="sec-title">All Dealers</div><div class="sec-sub">Full dealer registry — filters carry over from Dashboard</div></div>
-          <span class="count-pill" id="all-dealer-count">—</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <select id="all-dealer-sort" class="sort-select">
+              <option value="default">Sort: Default</option>
+              <option value="name">Name (A–Z)</option>
+              <option value="ach_desc">Achievement % (High–Low)</option>
+              <option value="ach_asc">Achievement % (Low–High)</option>
+              <option value="sales_desc">FY27 Sales (High–Low)</option>
+              <option value="yoy_desc">YoY Growth (High–Low)</option>
+              <option value="gap_desc">Target Gap (High–Low)</option>
+            </select>
+            <span class="count-pill" id="all-dealer-count">—</span>
+          </div>
         </div>
         <div class="filters-bar" style="margin-bottom:8px">
           <div class="fg" style="flex:1 1 240px;min-width:180px"><label>Search</label><input type="search" id="all-dealer-search" placeholder="Name, mobile, ASM, zone…"></div>
@@ -1062,6 +1088,7 @@ const STATE = {
   role: 'viewer',
   page: 'dashboard',
   filters: { zone:'', terr:'', asm:'', type:'', tod:'', achband:'', presence:'', search:'' },
+  sortBy: 'default',
   dataSourceType: 'none',        // 'none'|'demo'|'upload'|'firestore'|'sheets'
   restoredFromFirestore: false,
   importSaveStatus: null,        // null|'success'|'failed'|'skipped'
@@ -1092,9 +1119,14 @@ function toast(msg, type='inf') {
   const ico = {ok:'✅',err:'❌',inf:'ℹ️'};
   const t = document.createElement('div');
   t.className = `toast ${type}`;
-  t.innerHTML = `<span>${ico[type]||ico.inf}</span><span>${msg}</span>`;
+  // Errors stay up longer (and scale with message length) since technical
+  // details are easy to miss if they vanish at the same speed as a success
+  // confirmation. All toasts get a manual close button too.
+  const duration = type === 'err' ? Math.min(12000, Math.max(7000, msg.length * 90)) : 4000;
+  t.innerHTML = `<span>${ico[type]||ico.inf}</span><span style="flex:1">${msg}</span><button class="toast-close" aria-label="Dismiss">✕</button>`;
   $('toast-wrap').appendChild(t);
-  setTimeout(() => t.remove(), 4000);
+  const timer = setTimeout(() => t.remove(), duration);
+  t.querySelector('.toast-close').addEventListener('click', () => { clearTimeout(timer); t.remove(); });
 }
 
 // ── App version display — populates login footer, sidebar footer, Data Management ──
@@ -1150,13 +1182,21 @@ function requireAdmin(actionLabel) {
   return false;
 }
 function fL(v, digits=1) {
-  // Format lakhs value: show Cr when ≥100L, else L
+  // Auto-switching Cr/L/K — good for a single headline KPI number, but not
+  // for scanning a list where every row should share the same unit.
   if(v===null||v===undefined||isNaN(v)) return '—';
   const abs = Math.abs(v);
   if(abs >= 100) return `₹${(v/100).toFixed(2)}Cr`;
   if(abs >= 1)   return `₹${v.toFixed(digits)}L`;
   if(abs > 0)    return `₹${(v*100).toFixed(0)}K`;
   return '₹0';
+}
+// Fixed-unit lakhs formatter — always ₹X.XL, even past 100L. Used anywhere
+// values are compared side-by-side (dealer cards, rank lists, leaderboards)
+// so the reader isn't mentally converting Cr↔L↔K row to row.
+function fLakh(v, digits=1) {
+  if(v===null||v===undefined||isNaN(v)) return '—';
+  return `₹${v.toFixed(digits)}L`;
 }
 function fPct(v, digits=1) {
   if(v===null||v===undefined||isNaN(v)) return '—';
@@ -1649,6 +1689,23 @@ function applyFilters() {
               .join(' ').toLowerCase().includes(q)) return false;
     return true;
   });
+  sortDealersInPlace(STATE.filtered);
+}
+
+// Sorts an array of dealer objects in place per STATE.sortBy. Keeps 'default'
+// as the original workbook row order (no-op) so nothing changes unless the
+// user deliberately picks a sort.
+function sortDealersInPlace(arr) {
+  switch(STATE.sortBy) {
+    case 'name':       arr.sort((a,b) => a.name.localeCompare(b.name)); break;
+    case 'ach_desc':   arr.sort((a,b) => b.achievement_pct - a.achievement_pct); break;
+    case 'ach_asc':    arr.sort((a,b) => a.achievement_pct - b.achievement_pct); break;
+    case 'sales_desc': arr.sort((a,b) => b.fy27_ytd - a.fy27_ytd); break;
+    case 'yoy_desc':   arr.sort((a,b) => b.yoy_pct - a.yoy_pct); break;
+    case 'gap_desc':   arr.sort((a,b) => b.target_gap - a.target_gap); break;
+    default: break; // 'default' — leave as-is
+  }
+  return arr;
 }
 
 // ── Active filter chips — glanceable + one-click remove ──
@@ -1819,10 +1876,10 @@ function renderMgmtTopBottom(dealers) {
   const bottom5 = [...withTarget].sort((a,b)=>a.achievement_pct-b.achievement_pct).slice(0,5);
   const gapTop5 = [...dealers].filter(d=>d.target_gap>0).sort((a,b)=>b.target_gap-a.target_gap).slice(0,5);
   root.innerHTML = `<div class="ana-grid">
-    <div class="chart-card"><div class="cc-head"><div class="cc-title">Top 5 Dealers — FY27 YTD</div></div><div class="rank-list">${top5.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fL(d.fy27_ytd),'var(--ok)')).join('')||'<div class="rank-row">No data</div>'}</div></div>
+    <div class="chart-card"><div class="cc-head"><div class="cc-title">Top 5 Dealers — FY27 YTD</div></div><div class="rank-list">${top5.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fLakh(d.fy27_ytd),'var(--ok)')).join('')||'<div class="rank-row">No data</div>'}</div></div>
     <div class="chart-card"><div class="cc-head"><div class="cc-title">Bottom 5 by Achievement %</div></div><div class="rank-list">${bottom5.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fPct(d.achievement_pct),'var(--err)')).join('')||'<div class="rank-row">No data</div>'}</div></div>
   </div>
-  <div class="chart-card" style="margin-top:10px"><div class="cc-head"><div class="cc-title">Highest Target Gap — Furthest From AOP</div></div><div class="rank-list">${gapTop5.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fL(d.target_gap),'var(--warn)')).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
+  <div class="chart-card" style="margin-top:10px"><div class="cc-head"><div class="cc-title">Highest Target Gap — Furthest From AOP</div></div><div class="rank-list">${gapTop5.map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fLakh(d.target_gap),'var(--warn)')).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
 }
 
 function renderMgmtYoY(dealers) {
@@ -1846,7 +1903,7 @@ function renderMgmtZones(dealers) {
     const ytd = zd.reduce((s,d)=>s+d.fy27_ytd,0), target = zd.reduce((s,d)=>s+d.fy27_sales_target,0);
     return { z, ytd, achPct: target>0?ytd/target*100:0, count: zd.length };
   }).sort((a,b)=>b.achPct-a.achPct);
-  root.innerHTML = `<div class="chart-card"><div class="cc-head"><div class="cc-title">Zone Leaderboard — by Achievement %</div></div><div class="rank-list">${rows.map((r,i)=>mgmtRankRow(i,r.z,`${r.count} dealers · ${fL(r.ytd)}`,fPct(r.achPct),achColor(r.achPct))).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
+  root.innerHTML = `<div class="chart-card"><div class="cc-head"><div class="cc-title">Zone Leaderboard — by Achievement %</div></div><div class="rank-list">${rows.map((r,i)=>mgmtRankRow(i,r.z,`${r.count} dealers · ${fLakh(r.ytd)}`,fPct(r.achPct),achColor(r.achPct))).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
 }
 
 function renderMgmtASMs(dealers) {
@@ -1858,7 +1915,7 @@ function renderMgmtASMs(dealers) {
     const ytd = ad.reduce((s,d)=>s+d.fy27_ytd,0), target = ad.reduce((s,d)=>s+d.fy27_sales_target,0);
     return { a, ytd, achPct: target>0?ytd/target*100:0, count: ad.length };
   }).sort((a,b)=>b.achPct-a.achPct);
-  root.innerHTML = `<div class="chart-card"><div class="cc-head"><div class="cc-title">ASM Leaderboard — by Achievement %</div></div><div class="rank-list">${rows.map((r,i)=>mgmtRankRow(i,r.a,`${r.count} dealers · ${fL(r.ytd)}`,fPct(r.achPct),achColor(r.achPct))).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
+  root.innerHTML = `<div class="chart-card"><div class="cc-head"><div class="cc-title">ASM Leaderboard — by Achievement %</div></div><div class="rank-list">${rows.map((r,i)=>mgmtRankRow(i,r.a,`${r.count} dealers · ${fLakh(r.ytd)}`,fPct(r.achPct),achColor(r.achPct))).join('')||'<div class="rank-row">No data</div>'}</div></div>`;
 }
 
 function renderMgmtBands(dealers) {
@@ -1884,7 +1941,7 @@ function renderMgmtAttention(dealers) {
   const targetOnly = dealers.filter(d=>d.match_type==='target_only');
   root.innerHTML = `<div class="ana-grid">
     <div class="chart-card"><div class="cc-head"><div class="cc-title">Needs Attention — Below 25% Target</div></div><div class="rank-list">${attention.slice(0,10).map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fPct(d.achievement_pct),'var(--err)')).join('')||'<div class="rank-row">None — all dealers above 25%</div>'}</div></div>
-    <div class="chart-card"><div class="cc-head"><div class="cc-title">Target-Only — No Sales Match</div></div><div class="rank-list">${targetOnly.slice(0,10).map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fL(d.fy27_sales_target),'var(--t3)')).join('')||'<div class="rank-row">None — all dealers matched to sales data</div>'}</div></div>
+    <div class="chart-card"><div class="cc-head"><div class="cc-title">Target-Only — No Sales Match</div></div><div class="rank-list">${targetOnly.slice(0,10).map((d,i)=>mgmtRankRow(i,d.name,d.geo_zone,fLakh(d.fy27_sales_target),'var(--t3)')).join('')||'<div class="rank-row">None — all dealers matched to sales data</div>'}</div></div>
   </div>`;
 }
 
@@ -1913,11 +1970,11 @@ function dealerCardHTML(d) {
     <div class="dc-kpis">
       <div>
         <span class="dk-lbl">FY27 AOP</span>
-        <span class="dk-val">${fL(d.fy27_sales_target)}</span>
+        <span class="dk-val">${fLakh(d.fy27_sales_target)}</span>
       </div>
       <div>
         <span class="dk-lbl">FY27 YTD</span>
-        <span class="dk-val ${d.fy27_ytd>0?'ok':'err'}">${fL(d.fy27_ytd)}</span>
+        <span class="dk-val ${d.fy27_ytd>0?'ok':'err'}">${fLakh(d.fy27_ytd)}</span>
       </div>
       <div>
         <span class="dk-lbl">Achievement</span>
@@ -1931,7 +1988,7 @@ function dealerCardHTML(d) {
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
         <span class="dk-lbl">FY26 Actual</span>
-        <span class="dk-val" style="font-size:12px">${fL(d.fy26_full)}</span>
+        <span class="dk-val" style="font-size:12px">${fLakh(d.fy26_full)}</span>
       </div>
       <div style="text-align:right">
         <span class="dk-lbl">YoY Growth</span>
@@ -4336,6 +4393,17 @@ async function loadFinanceAuditLog() {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 document.addEventListener('DOMContentLoaded', () => {
 
+  // ── Theme restore — the only localStorage use in this app. Theme is a
+  // non-sensitive UI preference, distinct from the confidential dealer/
+  // finance data, which always comes from Firestore, never local storage. ──
+  try {
+    const savedTheme = localStorage.getItem('ci_theme');
+    if(savedTheme === 'dark' || savedTheme === 'light') {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const tb = $('theme-btn'); if(tb) tb.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
+  } catch(e) { /* localStorage unavailable (private browsing etc.) — non-critical */ }
+
   // ── Bootstrap: start with loading screen, init Firebase ──
   setLoading(true, 'Initialising…');
   renderVersionInfo();
@@ -4431,6 +4499,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Sort — same pattern as search: one shared state, two entry points.
+  ['dash-sort', 'all-dealer-sort'].forEach(id => {
+    const el = $(id);
+    if(!el) return;
+    el.addEventListener('change', e => {
+      STATE.sortBy = e.target.value;
+      ['dash-sort', 'all-dealer-sort'].forEach(otherId => {
+        const otherEl = $(otherId);
+        if(otherEl && otherEl.value !== STATE.sortBy) otherEl.value = STATE.sortBy;
+      });
+      renderCurrentPage();
+    });
+  });
+
   // ── File Upload (routes through handleFileProduction) ──
   const setupUpload = (inputId, areaId = null) => {
     const input = $(inputId);
@@ -4461,12 +4543,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Modal ─────────────────────────────────────────────
   $('modal-close').addEventListener('click', closeModal);
   $('dealer-modal').addEventListener('click', e => { if(e.target === $('dealer-modal')) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && !$('dealer-modal').classList.contains('hidden')) closeModal();
+  });
 
   // ── Theme ─────────────────────────────────────────────
   $('theme-btn').addEventListener('click', () => {
     const dk = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.documentElement.setAttribute('data-theme', dk ? 'light' : 'dark');
+    const next = dk ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
     $('theme-btn').textContent = dk ? '🌙' : '☀️';
+    try { localStorage.setItem('ci_theme', next); } catch(e) { /* non-critical */ }
     setTimeout(() => {
       renderTrendChart(STATE.filtered);
       renderZoneChart(STATE.filtered);
