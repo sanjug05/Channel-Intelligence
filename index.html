@@ -777,6 +777,7 @@ input,select{font-family:inherit;font-size:inherit}
         </div>
         <div class="fin-tabbar" id="fin-tabbar">
           <div class="fin-tab active" data-finsub="summary">Portfolio Summary</div>
+          <div class="fin-tab" data-finsub="trend">Trend</div>
           <div class="fin-tab" data-finsub="roi">ROI Distribution</div>
           <div class="fin-tab" data-finsub="ebitda">Operating Profit / PBIT</div>
           <div class="fin-tab" data-finsub="pl">Partner P&amp;L</div>
@@ -787,6 +788,7 @@ input,select{font-family:inherit;font-size:inherit}
         </div>
 
         <div id="fin-summary" class="fin-subpage active"></div>
+        <div id="fin-trend" class="fin-subpage"></div>
         <div id="fin-roi" class="fin-subpage"></div>
         <div id="fin-ebitda" class="fin-subpage"></div>
         <div id="fin-pl" class="fin-subpage"></div>
@@ -1104,6 +1106,8 @@ STATE.finance = {
   expenseMonths: 3,      // as-on-date month count for opex proration — mirrors
                           // the source workbook's manually-set $B$3 cell; move
                           // forward each quarter (e.g. 6 for half-year, 9, 12)
+  history: [],           // portfolio-level finance_summary per past import (Trend tab)
+  trendPartner: '',      // partner_code currently selected in the Trend tab
 };
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2882,6 +2886,7 @@ async function boot(firebaseUser, profile) {
   await loadActiveImport();
   await loadFinanceAuditLog();
   await loadImportHistory();
+  await loadFinanceHistory();
   updateFinanceNavVisibility();
 
   setLoading(false);
@@ -3040,6 +3045,25 @@ async function saveImportToFirestore(dealers, diag, meta, financeRows = []) {
   const now       = firebase.firestore.FieldValue.serverTimestamp();
   const BATCH_SIZE = 400;
 
+  // Lightweight portfolio-level finance snapshot — stored on the import doc
+  // itself so quarter-over-quarter trend can be read back cheaply (one doc
+  // per import) without pulling every partner's finance subdoc every time.
+  let financeSummary = null;
+  if(financeRows.length) {
+    try {
+      const calcRows = financeRows.map(r => calcFinanceRow(r));
+      const agg = sumFinanceGroup(calcRows);
+      const counts = { healthy:0, stable:0, watch:0, critical:0, inactive:0 };
+      calcRows.forEach(c => { const g = gradeFinanceRAG(c).grade; if(counts[g]!=null) counts[g]++; });
+      financeSummary = {
+        customer_price: agg.customer_price, operating_profit: agg.operating_profit,
+        pbit: agg.pbit, roi_pct: agg.roi_pct, active_count: agg.active_count,
+        profitable_count: agg.profitable_count, total_count: calcRows.length,
+        health_counts: counts, expense_months_used: STATE.finance.expenseMonths,
+      };
+    } catch(e) { console.warn('finance_summary computation skipped:', e.message); }
+  }
+
   const ptrData = {
     import_id:          importId,
     uploaded_by_uid:    STATE.uid,
@@ -3053,6 +3077,7 @@ async function saveImportToFirestore(dealers, diag, meta, financeRows = []) {
     status:             'active',
     finance_enabled:    financeRows.length > 0,
     finance_row_count:  financeRows.length,
+    finance_summary:    financeSummary,
   };
 
   const fsErr = (path, err) => {
@@ -3098,7 +3123,7 @@ async function saveImportToFirestore(dealers, diag, meta, financeRows = []) {
       for(let i = 0; i < financeRows.length; i += BATCH_SIZE) {
         const batch = FBDB.batch();
         financeRows.slice(i, i + BATCH_SIZE).forEach(r => {
-          const key = `${r.partner_code}_${r.month}_${r.year}_${r.scenario}`.replace(/[^A-Za-z0-9_]/g,'').slice(0,140);
+          const key = String(r.partner_code || '').replace(/[^A-Za-z0-9_]/g,'').slice(0,140) || `row_${i}`;
           batch.set(importRef.collection('finance').doc(key), r);
         });
         try { await batch.commit(); }
@@ -3194,6 +3219,10 @@ async function handleFileProduction(file) {
     source: 'upload',
   });
   if(diag.finance?.errors?.length) await writeFinanceAudit('Finance row validation failure', { new_value: diag.finance.errors.join(' | '), source:'upload' });
+  const revenueMissingCount = diag.finance?.revenue_missing_count || 0;
+  if(revenueMissingCount > 0) {
+    toast(`⚠️ ${revenueMissingCount} partner(s) have Opex filled in but zero sales — check if this period's revenue was entered`, 'err');
+  }
 
   srcBadge.className   = 'src-badge upload';
   srcBadge.textContent = SOURCE_LABELS.upload;
@@ -3227,6 +3256,9 @@ async function handleFileProduction(file) {
     if(savedId) { srcBadge.textContent = SOURCE_LABELS.firestore; STATE.dataSourceType = 'firestore'; renderImportSummary(); }
     else { renderImportSummary(); }
     await loadImportHistory();
+    await loadFinanceHistory();
+    renderImportSummary();
+    setLoading(false);
   } else {
     STATE.importSaveStatus = 'skipped';
     renderImportSummary();
@@ -3570,14 +3602,27 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
     }
     row.match_type = matchType;
 
+    // Data-quality flag: costs (opex/depreciation) are filled in but revenue
+    // fields are all zero/blank — usually means this period's sales haven't
+    // been entered yet, not that the partner genuinely had no sales.
+    const hasCosts = isComputedSchema
+      ? (row.opex > 0 || row.depreciation > 0 || row.operating_profit < 0)
+      : ((row.monthly_manpower||0) > 0 || (row.monthly_overheads||0) > 0 || (row.depreciation||0) > 0);
+    const hasRevenue = isComputedSchema
+      ? (row.customer_price > 0 || (row.total_income||0) > 0)
+      : (row.customer_price > 0 || (row.sales_margin||0) > 0 || (row.tod||0) > 0);
+    row.revenue_missing_flag = hasCosts && !hasRevenue;
+
     fdiag.valid_rows++;
     out.push(row);
   }
 
   fdiag.unmapped_partners = unmappedCodes.size;
+  fdiag.revenue_missing_count = out.filter(r => r.revenue_missing_flag).length;
   if(fdiag.missing_partner_code) fdiag.warnings.push(`${fdiag.missing_partner_code} ROI row(s) skipped — no name, phone, or code to identify the partner.`);
   if(fdiag.unmapped_partners) fdiag.warnings.push(`${fdiag.unmapped_partners} partner(s) could not be matched to the dealer master — shown under "Unmapped".`);
   if(fdiag.inactive_rows) fdiag.warnings.push(`${fdiag.inactive_rows} row(s) have a non-Active status and are graded "Inactive" regardless of their numbers.`);
+  if(fdiag.revenue_missing_count) fdiag.warnings.push(`⚠️ DATA QUALITY: ${fdiag.revenue_missing_count} of ${out.length} partner(s) have Opex/Depreciation filled in but zero Customer Price, Sales Margin, and TOD — this period's sales may not have been entered yet, not that these partners had no sales.`);
   fdiag.warnings.push(isComputedSchema
     ? 'Detected pre-computed Partner Health Data columns — Operating Profit/PBIT/ROI read directly from the sheet.'
     : 'Detected raw Q1-FY27-style partner economics — Operating Profit, PBIT, ROI and Health Status computed here using the same formulas as the Partner Health Data sheet.');
@@ -3853,11 +3898,20 @@ function renderFinSummary() {
         : `<span style="margin-left:10px">Expense Months: <strong style="color:var(--t2)">${STATE.finance.expenseMonths}</strong></span>`)
     : '';
 
+  const revenueMissingCount = STATE.finance.diag?.revenue_missing_count || 0;
+  const dataQualityBanner = revenueMissingCount > 0
+    ? `<div style="font-size:11px;color:var(--warn);background:var(--warnt);border:1px solid var(--warn);border-radius:var(--r-sm);padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:7px">
+        <span style="font-size:14px">⚠️</span>
+        <span><strong>${revenueMissingCount} of ${snaps.length} partner${revenueMissingCount>1?'s have':' has'}</strong> Opex/Depreciation filled in but zero Customer Price, Sales Margin, and TOD — this period's sales may not be entered yet, not that ${revenueMissingCount>1?'these partners':'this partner'} had no sales. Check the source sheet before trusting the P&amp;L below.</span>
+      </div>`
+    : '';
+
   root.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
       <span style="font-size:11px;color:var(--t3)">Source: <strong style="color:var(--t2)">${finSourceLabel}</strong> · Schema: <strong style="color:var(--t2)">${STATE.finance.diag?.schema_detected==='computed'?'Pre-computed':'Raw partner economics'}</strong>${expenseMonthsControl}</span>
     </div>
     ${isRawSchema ? `<p style="font-size:10px;color:var(--t3);margin:-4px 0 10px">Opex is prorated as (Monthly Manpower + Monthly Overheads) × Expense Months — an as-on-date assumption, same as the source workbook's own setting. Move it forward each quarter (e.g. 6 for half-year, 9, 12).</p>` : ''}
+    ${dataQualityBanner}
     ${readOnlyBanner}
     ${finRollupBarHTML()}
     <div class="kpi-grid">${kpis.join('')}</div>
@@ -4171,9 +4225,125 @@ function renderFinAuditLog() {
     </div>`).join('');
 }
 
+// ── 18p2: Trend — quarter-over-quarter portfolio + partner history ──
+function renderFinTrend() {
+  const root = $('fin-trend');
+  if(!STATE.finance.enabled) { root.innerHTML = financeEmptyState(); return; }
+  const history = STATE.finance.history || [];
+  if(history.length === 0) {
+    root.innerHTML = financeEmptyState('No historical imports with finance data found yet. Trend builds up automatically each time a new workbook with an ROI sheet is uploaded — check back after your next quarterly upload.');
+    return;
+  }
+  if(history.length === 1) {
+    const h = history[0];
+    root.innerHTML = `<div class="fin-empty">
+      <div class="ico">📈</div>
+      <h3>Only One Data Point So Far</h3>
+      <p>This is the first import with finance data (${h.file_name || 'current upload'}, ${fmtDateTime(h.uploaded_at)}). Trend charts will appear once a second quarter is uploaded — nothing is lost between uploads; every import is kept for comparison.</p>
+      <div class="fin-grid-3" style="margin-top:12px;text-align:left">
+        ${finKPICard('Operating Profit', fLakh(h.operating_profit), '', h.operating_profit>=0?'#16a34a':'#dc2626','📈','')}
+        ${finKPICard('PBIT', fLakh(h.pbit), '', h.pbit>=0?'#16a34a':'#dc2626','📐','')}
+        ${finKPICard('Healthy Partners', h.health_counts?.healthy||0, `of ${h.total_count}`, '#16a34a','💚','')}
+      </div>
+    </div>`;
+    return;
+  }
+
+  const partnerOpts = STATE.finance.rows
+    .map(r => ({ code:r.partner_code, name:r.partner_name }))
+    .sort((a,b) => a.name.localeCompare(b.name))
+    .map(p => `<option value="${p.code}" ${STATE.finance.trendPartner===p.code?'selected':''}>${p.name}</option>`).join('');
+
+  root.innerHTML = `
+    <div class="fin-grid-3">
+      ${finKPICard('Imports Tracked', history.length, 'Quarters with finance data', '#2563eb','🗓️','')}
+      ${finKPICard('Latest Operating Profit', fLakh(history[history.length-1].operating_profit), history[history.length-1].file_name||'', history[history.length-1].operating_profit>=0?'#16a34a':'#dc2626','📈','')}
+      ${finKPICard('Trend', history[history.length-1].operating_profit >= history[0].operating_profit ? 'Improving' : 'Declining', `vs ${history[0].file_name||'first import'}`, history[history.length-1].operating_profit >= history[0].operating_profit ? '#16a34a' : '#dc2626', history[history.length-1].operating_profit >= history[0].operating_profit ? '📈':'📉', '')}
+    </div>
+    <div class="chart-card" style="margin-bottom:10px">
+      <div class="cc-head"><div><div class="cc-title">Portfolio Operating Profit &amp; PBIT — By Import</div><div class="cc-sub">Every uploaded quarter, in order</div></div></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="fin-trend-chart"></canvas></div>
+    </div>
+    <div class="chart-card" style="margin-bottom:10px">
+      <div class="cc-head"><div><div class="cc-title">Health Status Mix — By Import</div><div class="cc-sub">Count of partners in each health band, over time</div></div></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="fin-trend-health-chart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-head"><div><div class="cc-title">Partner Trend</div><div class="cc-sub">Pick a partner to see their history across imports</div></div></div>
+      <div class="fg" style="max-width:280px;margin-bottom:10px"><label>Partner</label><select id="fin-trend-partner-select"><option value="">Select a partner…</option>${partnerOpts}</select></div>
+      <div id="fin-trend-partner-detail"><p style="font-size:11px;color:var(--t3)">Select a partner above to see their Operating Profit, PBIT and Health Status across every import they appeared in.</p></div>
+    </div>
+  `;
+
+  renderFinTrendCharts(history);
+
+  const sel = $('fin-trend-partner-select');
+  if(sel) sel.addEventListener('change', async () => {
+    STATE.finance.trendPartner = sel.value;
+    const detail = $('fin-trend-partner-detail');
+    if(!sel.value) { detail.innerHTML = `<p style="font-size:11px;color:var(--t3)">Select a partner above to see their Operating Profit, PBIT and Health Status across every import they appeared in.</p>`; return; }
+    detail.innerHTML = `<p style="font-size:11px;color:var(--t3)">Loading…</p>`;
+    const partnerHistory = await loadPartnerFinanceHistory(sel.value);
+    renderPartnerTrendDetail(partnerHistory, sel.options[sel.selectedIndex].text);
+  });
+}
+
+function renderFinTrendCharts(history) {
+  const labels = history.map(h => h.file_name || fmtDateTime(h.uploaded_at));
+  const t = themeVars();
+  const opts = salesChartOpts();
+  opts.plugins.datalabels = dlSalesBar(t);
+  mkChart('fin-trend-chart', {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'Operating Profit', data:history.map(h=>h.operating_profit), borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.08)', tension:.3, pointRadius:3, borderWidth:2 },
+      { label:'PBIT', data:history.map(h=>h.pbit), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)', tension:.3, pointRadius:3, borderWidth:2 },
+    ]},
+    options: opts,
+  });
+
+  const healthOpts = countChartOpts();
+  healthOpts.plugins.legend = { labels:{ color:t.tick, font:{size:10,family:'Inter'}, boxWidth:10, padding:9 } };
+  mkChart('fin-trend-health-chart', {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'Healthy',  data:history.map(h=>h.health_counts?.healthy||0),  backgroundColor:'#16a34a', stack:'s' },
+      { label:'Stable',   data:history.map(h=>h.health_counts?.stable||0),   backgroundColor:'#0891b2', stack:'s' },
+      { label:'Watch',    data:history.map(h=>h.health_counts?.watch||0),    backgroundColor:'#d97706', stack:'s' },
+      { label:'Critical', data:history.map(h=>h.health_counts?.critical||0),backgroundColor:'#dc2626', stack:'s' },
+    ]},
+    options: { ...healthOpts, scales:{ ...healthOpts.scales, x:{...healthOpts.scales.x, stacked:true}, y:{...healthOpts.scales.y, stacked:true} } },
+  });
+}
+
+function renderPartnerTrendDetail(partnerHistory, partnerName) {
+  const detail = $('fin-trend-partner-detail');
+  if(!partnerHistory.length) { detail.innerHTML = `<p style="font-size:11px;color:var(--t3)">No history found for ${partnerName} in any tracked import.</p>`; return; }
+  const rows = partnerHistory.map(h => `<div class="rank-row">
+    <div style="flex:1;min-width:0"><div class="rank-name">${h.file_name || fmtDateTime(h.uploaded_at)}</div><div class="rank-sub">${fmtDateTime(h.uploaded_at)}</div></div>
+    ${ragBadgeHTML(h.rag)}
+    <span class="rank-val" style="margin-left:8px;color:${h.pbit>=0?'var(--ok)':'var(--err)'}">${fLakh(h.pbit)} PBIT</span>
+  </div>`).join('');
+  detail.innerHTML = `
+    <div class="chart-wrap" style="height:180px;margin-bottom:10px"><canvas id="fin-trend-partner-chart"></canvas></div>
+    <div class="rank-list">${rows}</div>
+  `;
+  const t = themeVars();
+  const opts = salesChartOpts();
+  opts.plugins.legend = { labels:{ color:t.tick, font:{size:10,family:'Inter'}, boxWidth:10, padding:9 } };
+  mkChart('fin-trend-partner-chart', {
+    type:'line',
+    data:{ labels: partnerHistory.map(h=>h.file_name || fmtDateTime(h.uploaded_at)), datasets:[
+      { label:'Operating Profit', data:partnerHistory.map(h=>h.operating_profit), borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.08)', tension:.3, pointRadius:3, borderWidth:2 },
+      { label:'PBIT', data:partnerHistory.map(h=>h.pbit), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)', tension:.3, pointRadius:3, borderWidth:2 },
+    ]},
+    options: opts,
+  });
+}
+
 // ── 18q: Sub-tab navigation + dispatcher ────────────────
 const FIN_RENDERERS = {
-  summary: renderFinSummary, roi: renderFinROI, ebitda: renderFinEBITDA,
+  summary: renderFinSummary, trend: renderFinTrend, roi: renderFinROI, ebitda: renderFinEBITDA,
   pl: renderFinPL, payback: renderFinPayback, scenario: renderFinScenario,
   grades: renderFinGrades, audit: renderFinAuditLog,
 };
@@ -4319,6 +4489,48 @@ async function loadFinanceAuditLog() {
     if(e.code === 'permission-denied') console.warn('Finance audit log: add rule for finance_audit_logs/{logId}');
     // Collection may not exist yet or rules not deployed — non-critical
   }
+}
+
+// ── Quarter-over-quarter finance trend ──────────────────
+// Portfolio-level: every import already carries a lightweight
+// `finance_summary` snapshot (written in saveImportToFirestore), so this
+// is a single ordered query — no need to read every partner's finance
+// subcollection for every historical import.
+async function loadFinanceHistory() {
+  if(!FBDB || !FBAUTH?.currentUser) return;
+  try {
+    const snap = await FBDB.collection('imports').orderBy('uploaded_at', 'asc').limit(50).get();
+    STATE.finance.history = snap.docs
+      .map(d => d.data())
+      .filter(v => v.finance_enabled && v.finance_summary)
+      .map(v => ({
+        import_id: v.import_id, file_name: v.file_name,
+        uploaded_at: v.uploaded_at?.toDate?.() || null,
+        status: v.status, ...v.finance_summary,
+      }));
+  } catch(e) {
+    if(e.code === 'permission-denied') console.warn('Finance history: needs read access to imports/{importId}');
+    STATE.finance.history = [];
+  }
+}
+
+// Partner-level: only fetched lazily when a specific partner is selected in
+// the Trend tab — one cheap doc-by-key get() per historical import.
+async function loadPartnerFinanceHistory(partnerCode) {
+  if(!FBDB || !STATE.finance.history?.length) return [];
+  const out = [];
+  for(const imp of STATE.finance.history) {
+    try {
+      const doc = await FBDB.collection('imports').doc(imp.import_id).collection('finance').doc(partnerCode).get();
+      if(doc.exists) {
+        const calc = calcFinanceRow(doc.data());
+        const rag = gradeFinanceRAG(calc);
+        out.push({ import_id: imp.import_id, uploaded_at: imp.uploaded_at, file_name: imp.file_name,
+          operating_profit: calc.operating_profit, pbit: calc.pbit, roi_pct: calc.roi_pct, rag: rag.grade });
+      }
+    } catch(e) { /* partner may not have existed in that import — skip */ }
+  }
+  return out;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
