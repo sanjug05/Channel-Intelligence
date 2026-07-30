@@ -1005,8 +1005,8 @@ const FIREBASE_CONFIG = {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // ── App version / build identity — bump these on each release ──
-const APP_VERSION   = "v1.1.0";
-const BUILD_NUMBER  = "2026.07.30.03";
+const APP_VERSION   = "v1.2.0";
+const BUILD_NUMBER  = "2026.07.30.05";
 const BUILD_DATE    = "30 Jul 2026 IST";
 const ENVIRONMENT   = "DEV"; // DEV | UAT | PROD
 
@@ -1096,7 +1096,6 @@ const STATE = {
   restoredFromFirestore: false,
   importSaveStatus: null,        // null|'success'|'failed'|'skipped'
   activeImportId: null,
-  isReadOnly: true,
   mgmtSubpage: 'topbottom',
   kpiHistory: [],        // portfolio-level kpi_summary per past import (Historical Trend tab)
   trendZone: '',         // zone currently selected in the Historical Trend tab
@@ -1264,31 +1263,6 @@ function normName(v) {
     .trim();
 }
 
-// ── Excel date serial → 'Mon-YY' (FIX #2: skip plausible year integers) ─
-function excelSerialToLabel(v) {
-  if(typeof v === 'string') {
-    if(/^[A-Za-z]{3}-\d{2}$/.test(v.trim())) return v.trim();
-    try {
-      const d = new Date(v);
-      if(!isNaN(d) && d.getFullYear() > 1990)
-        return MONTHS_SHORT[d.getUTCMonth()] + '-' + String(d.getUTCFullYear()).slice(2);
-    } catch(e) {}
-    return v;
-  }
-  if(typeof v === 'number') {
-    // FIX #2: Skip plausible year integers (1990–2100) — do NOT treat as serial date
-    if(v >= 1990 && v <= 2100) return String(Math.round(v));
-    // Valid Excel date serial range (~2009–2040)
-    if(v > 40000 && v < 55000) {
-      const ms = Math.round((v - 25569) * 86400 * 1000);
-      const d  = new Date(ms);
-      if(!isNaN(d))
-        return MONTHS_SHORT[d.getUTCMonth()] + '-' + String(d.getUTCFullYear()).slice(2);
-    }
-  }
-  return String(v||'');
-}
-
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 5 — ETL ENGINE
    Specific parser for: Dealer Target Fy27 / FY27 Dump / FY26 Dump
@@ -1335,8 +1309,9 @@ function parseTargetSheet(ws) {
     const name   = String(r[TC.DEALER_NAME] || '').trim();
     const mobile = normMobile(r[TC.PHONE]);
     if(!name && !mobile) continue;           // skip truly empty rows
-    if(name.toLowerCase().includes('total') ||
-       name.toLowerCase().includes('grand')) continue; // skip summary rows
+    const looksLikeSummaryLabel = name.toLowerCase().includes('total') || name.toLowerCase().includes('grand');
+    const hasAsmAssigned = String(r[TC.ASM_NAME] || '').trim() !== '';
+    if(looksLikeSummaryLabel && !mobile && !hasAsmAssigned) continue; // skip summary/subtotal rows only when corroborated by no mobile + no ASM (a real dealer named e.g. "Total Glass Solutions" would have both, so won't be dropped)
 
     // Parse FY27 monthly actuals (cols 19-30) and FY26 monthly actuals (cols 34-45)
     const fy27_monthly_sheet = {};
@@ -2604,69 +2579,10 @@ function renderDiagnostics(diag) {
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 12 — FILE UPLOAD HANDLER
+   (the actual upload path is handleFileProduction() in Section 14i,
+   which persists to Firestore; renderAllDealersPage below is shared
+   by both the initial demo/local-only path and the production path)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function handleFile(file) {
-  if(!file) return;
-  if(!file.name.match(/\.xlsx?$/i)) { toast('Please upload an .xlsx file', 'err'); return; }
-
-  const srcBadge = $('src-badge');
-  srcBadge.textContent = 'LOADING…';
-  srcBadge.className   = 'src-badge demo';
-  toast(`Parsing ${file.name}…`, 'inf');
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const wb = XLSX.read(new Uint8Array(e.target.result), { type:'array', cellDates:false });
-      const { dealers, diag, availableMonths } = importWorkbook(wb, file.name);
-
-      if(diag.errors.length && !dealers.length) {
-        toast('Import failed: ' + diag.errors[0], 'err');
-        renderDiagnostics(diag);
-        srcBadge.textContent = 'ERROR';
-        return;
-      }
-
-      STATE.dealers       = dealers;
-      STATE.diag          = diag;
-      STATE.dataLoaded    = true;
-      STATE.filters       = { zone:'', terr:'', asm:'', type:'', tod:'', achband:'', presence:'', search:'' };
-
-      // FIX #3: Rebuild all filter dropdowns from actual loaded data
-      populateFilters(dealers);
-      applyFilters();
-
-      srcBadge.className   = 'src-badge upload';
-      srcBadge.textContent = 'UPLOAD';
-
-      $('wb-status').textContent = `✔ ${file.name} — ${dealers.length} dealers`;
-      $('wb-status').className   = 'ds-status on';
-
-      // Update upload result
-      const r = $('upload-result');
-      r.className   = 'upload-result ok';
-      r.textContent = `✅ Imported ${dealers.length} dealers · FY27: ${fL(diag.fy27_sales_lakhs||0)} · FY26: ${fL(diag.fy26_sales_lakhs||0)}`;
-      r.classList.remove('hidden');
-
-      const qr = $('quick-upload');
-      if(qr) qr.value = '';
-
-      renderDiagnostics(diag);
-      renderDashboard();
-      renderAllDealersPage();
-
-      // Navigate to dashboard if on data-sources page
-      if(STATE.page === 'data-sources') navigateTo('dashboard');
-
-      toast(`Loaded ${dealers.length} dealers — FY27 YTD ${fL(diag.fy27_sales_lakhs||0)}`, 'ok');
-    } catch(err) {
-      toast('Error: ' + err.message, 'err');
-      console.error(err);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
 function renderAllDealersPage() {
   applyFilters();
   renderFilterChips();
@@ -2937,8 +2853,6 @@ async function boot(firebaseUser, profile) {
   rb.className    = `role-badge ${profile.role}`;
   rb.classList.remove('hidden');
 
-  STATE.isReadOnly = profile.role !== 'admin';
-
   // Apply role-based UI restrictions
   applyRoleScope(profile);
 
@@ -3043,7 +2957,6 @@ async function loadActiveImport() {
     computeMetrics(dealers);
 
     STATE.dealers       = dealers;
-    STATE.filteredPartners = [...dealers];
     STATE.diag          = diag;
     STATE.dataLoaded    = true;
     STATE.activeImportId = importId;
@@ -3380,7 +3293,6 @@ function devBoot(email, pass) {
   STATE.role        = c.role;
   STATE.userProfile = c;
   STATE.uid         = 'dev-uid';
-  STATE.isReadOnly  = c.role !== 'admin';
   STATE.dataSourceType = 'demo';
   const name = c.name;
   const init = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
@@ -3541,6 +3453,33 @@ function normPartnerCode(v) {
   return String(v||'').trim().toUpperCase().replace(/\s+/g,'');
 }
 
+// ── 18a2: Percentage cell-format detection ──────────────
+// ROI (and PBDIT%/PBIT%/Margin%) can legitimately exceed 100% once a
+// partner's CAPEX is mostly depreciated, so "is this raw value a fraction
+// or already a percent" can't be answered from magnitude alone (1.5 is
+// equally plausible as "1.5%" or "150%"). Excel's own cell number-format
+// is the actual source of truth: a cell formatted as a percentage always
+// stores its underlying value as a fraction (150% displayed → raw 1.5).
+// We sample the first non-empty cell in a column and trust its format;
+// if the column truly has no readable format info at all (e.g. no data,
+// or the file lost formatting on the way in), fall back to the old
+// magnitude heuristic as a last resort rather than silently guessing wrong.
+function colIsPercentFormatted(ws, colIndex, hdrRowIndex, sampleRows = 8) {
+  if(colIndex === -1) return null;
+  for(let i = hdrRowIndex + 1; i < hdrRowIndex + 1 + sampleRows; i++) {
+    const addr = XLSX.utils.encode_cell({ r:i, c:colIndex });
+    const cell = ws[addr];
+    if(!cell || cell.v === undefined || cell.v === '') continue;
+    return !!((cell.z && /%/.test(cell.z)) || (cell.w && /%/.test(cell.w)));
+  }
+  return null; // no non-empty cell found to inspect in the sample
+}
+function resolveIsFraction(colFmtFlag, value) {
+  if(colFmtFlag === true || colFmtFlag === false) return colFmtFlag;
+  // Unknown formatting — only remaining option is the old magnitude guess.
+  return value != null && value <= 1 && value !== 0;
+}
+
 // ── 18b: Parse + validate ROI sheet — dual-path detection ─
 function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, masterDiag) {
   const fdiag = {
@@ -3654,6 +3593,15 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
   }
   fdiag.schema_detected = isComputedSchema ? 'computed' : 'raw';
 
+  // Column-level percent-format detection (see colIsPercentFormatted above)
+  // — computed once per column rather than per-row, since a spreadsheet
+  // column's formatting is expected to be consistent top to bottom.
+  const marginPctFmtA = colIsPercentFormatted(ws, CA.marginPct, hdrIdx);
+  const marginPctFmtB = colIsPercentFormatted(ws, CB.marginPct, hdrIdx);
+  const roiPctFmt      = colIsPercentFormatted(ws, CA.roi, hdrIdx);
+  const pbditPctFmt     = colIsPercentFormatted(ws, CA.pbditPct, hdrIdx);
+  const pbitPctFmtA     = colIsPercentFormatted(ws, CA.pbitPct, hdrIdx);
+
   const dataRows = raw.slice(hdrIdx + 1);
   fdiag.total_rows = dataRows.length;
   const unmappedCodes = new Set();
@@ -3684,21 +3632,25 @@ function parseROISheet(ws, dealerByMobile, dealerByName, dealerByPartnerCode, ma
 
     if(isComputedSchema) {
       row.customer_price = parseNum(r[CA.cp], 0);
-      row.margin_pct     = parseNum(r[CA.marginPct], 0) <= 1 ? parseNum(r[CA.marginPct],0)*100 : parseNum(r[CA.marginPct],0);
+      const marginRawA = parseNum(r[CA.marginPct], 0);
+      row.margin_pct     = resolveIsFraction(marginPctFmtA, marginRawA) ? marginRawA * 100 : marginRawA;
       row.total_income    = CA.totalIncome !== -1 ? parseNum(r[CA.totalIncome], 0) : null;
       row.opex            = CA.opex !== -1 ? parseNum(r[CA.opex], 0) : null;
       row.operating_profit= parseNum(r[CA.opProfit], 0);
       row.depreciation    = CA.depreciation !== -1 ? parseNum(r[CA.depreciation], 0) : 0;
       row.pbit            = parseNum(r[CA.pbit], 0);
       row.roi_direct       = CA.roi !== -1 && r[CA.roi] !== '' ? parseNum(r[CA.roi], null) : null;
+      row.roi_direct_is_fraction = resolveIsFraction(roiPctFmt, row.roi_direct);
       row.pbdit_pct_direct = CA.pbditPct !== -1 && r[CA.pbditPct] !== '' ? parseNum(r[CA.pbditPct], null) : null;
+      row.pbdit_pct_direct_is_fraction = resolveIsFraction(pbditPctFmt, row.pbdit_pct_direct);
       row.pbit_pct_direct  = CA.pbitPct !== -1 && r[CA.pbitPct] !== '' ? parseNum(r[CA.pbitPct], null) : null;
+      row.pbit_pct_direct_is_fraction = resolveIsFraction(pbitPctFmtA, row.pbit_pct_direct);
       row.health_status_direct = CA.healthStatus !== -1 ? String(r[CA.healthStatus]||'').trim() : '';
       row.capex_nbv = null; // not derivable without CAPEX/Age columns in this schema
       row.age_months = null;
     } else {
       const gmRaw = parseNum(r[CB.marginPct], 0);
-      row.margin_pct = gmRaw <= 1 ? gmRaw * 100 : gmRaw;
+      row.margin_pct = resolveIsFraction(marginPctFmtB, gmRaw) ? gmRaw * 100 : gmRaw;
       row.customer_price = parseNum(r[CB.cp], 0);
       row.sales_margin = CB.salesMargin !== -1 ? parseNum(r[CB.salesMargin], 0) : 0;
       row.tod = CB.tod !== -1 ? parseNum(r[CB.tod], 0) : 0;
@@ -3787,9 +3739,9 @@ function calcFinanceRow(row) {
     // Computed-schema row — read directly, only recompute if margin % was overridden
     const marginPct = row.margin_pct_override != null ? row.margin_pct_override : row.margin_pct;
     const capexNbv = row.capex_nbv;
-    const roi = row.roi_direct != null ? row.roi_direct * (row.roi_direct <= 1 && row.roi_direct !== 0 ? 100 : 1) : (capexNbv > 0 ? (row.operating_profit / capexNbv * 100) : null);
-    const pbditPct = row.pbdit_pct_direct != null ? (row.pbdit_pct_direct <= 1 ? row.pbdit_pct_direct*100 : row.pbdit_pct_direct) : (row.customer_price > 0 ? row.operating_profit/row.customer_price*100 : null);
-    const pbitPct  = row.pbit_pct_direct != null ? (row.pbit_pct_direct <= 1 ? row.pbit_pct_direct*100 : row.pbit_pct_direct) : (row.customer_price > 0 ? row.pbit/row.customer_price*100 : null);
+    const roi = row.roi_direct != null ? row.roi_direct * (row.roi_direct_is_fraction ? 100 : 1) : (capexNbv > 0 ? (row.operating_profit / capexNbv * 100) : null);
+    const pbditPct = row.pbdit_pct_direct != null ? (row.pbdit_pct_direct_is_fraction ? row.pbdit_pct_direct*100 : row.pbdit_pct_direct) : (row.customer_price > 0 ? row.operating_profit/row.customer_price*100 : null);
+    const pbitPct  = row.pbit_pct_direct != null ? (row.pbit_pct_direct_is_fraction ? row.pbit_pct_direct*100 : row.pbit_pct_direct) : (row.customer_price > 0 ? row.pbit/row.customer_price*100 : null);
     const gapToPbitPositive = Math.max(0, -row.pbit);
     const salesLiftNeeded = marginPct > 0 ? gapToPbitPositive / (marginPct/100) : null;
     return {
