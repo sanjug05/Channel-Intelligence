@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Channel Intel">
+<link rel="manifest" href="manifest.webmanifest">
 <style>
 /* ── Variables ── */
 :root{
@@ -45,6 +46,8 @@ input,select{font-family:inherit;font-size:inherit}
 
 /* ── PWA Banner ── */
 #pwa-banner{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:2px solid var(--p);padding:10px 18px;display:none;align-items:center;justify-content:space-between;gap:12px;z-index:3000;box-shadow:0 -4px 20px rgba(0,0,0,.12);flex-wrap:wrap}
+#update-banner{position:fixed;top:0;left:0;right:0;background:var(--card);border-bottom:2px solid var(--info);padding:10px 18px;display:none;align-items:center;justify-content:space-between;gap:12px;z-index:3100;box-shadow:0 4px 20px rgba(0,0,0,.12);flex-wrap:wrap}
+#update-banner.show{display:flex}
 #pwa-banner.show{display:flex}
 .pwa-text{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:500}
 .pwa-icon{font-size:22px}
@@ -522,6 +525,18 @@ input,select{font-family:inherit;font-size:inherit}
 </div>
 
 <!-- ═══════════════════════════════════════════════════
+     APP UPDATE BANNER — shown when a new deployed version
+     has finished installing in the background via sw.js
+═══════════════════════════════════════════════════ -->
+<div id="update-banner">
+  <div class="pwa-text"><span class="pwa-icon">🔄</span><span>A new version of <strong>Channel Intelligence</strong> is ready</span></div>
+  <div class="pwa-btns">
+    <button class="btn-install" id="update-refresh-btn">⟳ Refresh Now</button>
+    <button class="btn-dismiss-pwa" id="update-dismiss-btn">Later</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
      LOGIN
 ═══════════════════════════════════════════════════ -->
 <div id="login-screen">
@@ -684,6 +699,8 @@ input,select{font-family:inherit;font-size:inherit}
             <div class="mgmt-tab" data-mgmtsub="asms">ASM Leaderboard</div>
             <div class="mgmt-tab" data-mgmtsub="bands">Achievement Bands</div>
             <div class="mgmt-tab" data-mgmtsub="attention">Needs Attention</div>
+            <div class="mgmt-tab" data-mgmtsub="followups">Follow-Ups</div>
+            <div class="mgmt-tab" data-mgmtsub="trend">Historical Trend</div>
           </div>
           <div id="mgmt-topbottom" class="mgmt-subpage active"></div>
           <div id="mgmt-yoy" class="mgmt-subpage"></div>
@@ -691,6 +708,8 @@ input,select{font-family:inherit;font-size:inherit}
           <div id="mgmt-asms" class="mgmt-subpage"></div>
           <div id="mgmt-bands" class="mgmt-subpage"></div>
           <div id="mgmt-attention" class="mgmt-subpage"></div>
+          <div id="mgmt-followups" class="mgmt-subpage"></div>
+          <div id="mgmt-trend" class="mgmt-subpage"></div>
 
           <div class="sec-head" style="margin-top:16px">
             <div><div class="sec-title">Dealer Performance</div><div class="sec-sub">Click a card to drill down</div></div>
@@ -704,6 +723,7 @@ input,select{font-family:inherit;font-size:inherit}
                 <option value="yoy_desc">YoY Growth (High–Low)</option>
                 <option value="gap_desc">Target Gap (High–Low)</option>
               </select>
+              <button class="btn-xs out" id="dash-export-btn" title="Export the currently filtered list to Excel">⬇ Export</button>
               <span class="count-pill" id="dealer-count">0 dealers</span>
             </div>
           </div>
@@ -725,6 +745,7 @@ input,select{font-family:inherit;font-size:inherit}
               <option value="yoy_desc">YoY Growth (High–Low)</option>
               <option value="gap_desc">Target Gap (High–Low)</option>
             </select>
+            <button class="btn-xs out" id="all-dealer-export-btn" title="Export the currently filtered list to Excel">⬇ Export</button>
             <span class="count-pill" id="all-dealer-count">—</span>
           </div>
         </div>
@@ -908,6 +929,8 @@ input,select{font-family:inherit;font-size:inherit}
         <div class="stat-grid c3" id="m-fy27"></div>
         <div class="achieve-bar-wrap" style="margin-top:8px"><div class="achieve-bar" id="m-ach-bar"></div></div>
         <div style="font-size:11px;color:var(--t3);margin-top:4px" id="m-ach-label"></div>
+        <button class="btn-xs out" id="m-load-history-btn" style="margin-top:8px">📈 View Achievement History Across Imports</button>
+        <div id="m-history-wrap"></div>
       </div>
       <div class="msec"><div class="msec-title">FY26 Sales Performance</div><div class="stat-grid c3" id="m-fy26"></div></div>
       <div class="msec"><div class="msec-title">YoY Comparison</div><div class="stat-grid c3" id="m-yoy"></div></div>
@@ -924,6 +947,15 @@ input,select{font-family:inherit;font-size:inherit}
         <div class="modal-chart-wrap"><canvas id="m-trend-chart"></canvas></div>
       </div>
       <div class="msec"><div class="msec-title">Verification &amp; Notes</div><div class="notes-box" id="m-notes">—</div></div>
+      <div class="msec">
+        <div class="msec-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Team Notes &amp; Follow-Up</span>
+          <span id="m-flag-badge"></span>
+        </div>
+        <div id="m-flag-box"></div>
+        <div id="m-notes-list" class="rank-list" style="margin-bottom:8px"></div>
+        <div id="m-notes-form"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -955,44 +987,17 @@ const FIREBASE_CONFIG = {
   appId:             '1:175667492150:web:cb124eb267b4689e6a2f97',
 };
 
-/* ── FIREBASE COLLECTION DESIGN ──────────────────────────
- /users/{uid}
-   role: 'admin' | 'asm' | 'viewer'
-   name: string, asm_code: string (filters asm-role view)
-   email: string, created_at: timestamp
-
- /dealers/{mobile}           ← primary key = normalized mobile
-   (all fields from dealer object below)
-   updated_at, updated_by: uid
-
- /sales_fy27/{id}
-   mobile, dealer_name, month ('Apr-26'…), sales_lakhs,
-   asm_name, territory, geo_zone, updated_at
-
- /sales_fy26/{id}            ← same shape as fy27
-
- /imports/{id}
-   file_name, imported_by, imported_at,
-   diagnostics: {}, status: 'success'|'partial'|'failed'
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-── FIRESTORE SECURITY RULES SUGGESTION ──────────────────
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{db}/documents {
-    function auth()    { return request.auth != null; }
-    function role()    { return get(/databases/$(db)/documents/users/$(request.auth.uid)).data.role; }
-    function isAdmin() { return auth() && role()=='admin'; }
-    function isASM()   { return auth() && role() in ['admin','asm']; }
-    function isView()  { return auth(); }
-
-    match /users/{uid}      { allow read: if auth() && request.auth.uid==uid; allow write: if isAdmin(); }
-    match /dealers/{mobile} { allow read: if isView(); allow write: if isAdmin(); }
-    match /sales_fy27/{id}  { allow read: if isView(); allow write: if isAdmin(); }
-    match /sales_fy26/{id}  { allow read: if isView(); allow write: if isAdmin(); }
-    match /imports/{id}     { allow read: if isASM();  allow write: if isAdmin(); }
-  }
-}
+/* ── FIREBASE COLLECTION DESIGN — see Section 14 for the real one ──
+ AUDIT NOTE: this block used to sketch /dealers/{mobile}, /sales_fy27/{id},
+ /sales_fy26/{id} collections and a matching rule set. The app does NOT
+ use any of those — it actually reads/writes /users, /appState,
+ /imports/{id} (+ dealers/meta/finance subcollections), and
+ /finance_audit_logs (see Section 14H for the exact shapes). Deploying
+ the old rule set below as literally written would leave every one of
+ those real paths with NO rule at all, so uploads/restores would fail
+ with permission-denied. The correct, already-matching rules to deploy
+ are the block directly above Section 14 ("FIRESTORE SECURITY RULES —
+ deploy this block exactly in Firebase Console") — use that one only.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1000,9 +1005,9 @@ service cloud.firestore {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // ── App version / build identity — bump these on each release ──
-const APP_VERSION   = "v0.9.5";
-const BUILD_NUMBER  = "2026.07.06.01";
-const BUILD_DATE    = "06 Jul 2026, 01:10 AM IST";
+const APP_VERSION   = "v1.1.0";
+const BUILD_NUMBER  = "2026.07.30.03";
+const BUILD_DATE    = "30 Jul 2026 IST";
 const ENVIRONMENT   = "DEV"; // DEV | UAT | PROD
 
 function formatBuildLine() {
@@ -1092,6 +1097,18 @@ const STATE = {
   importSaveStatus: null,        // null|'success'|'failed'|'skipped'
   activeImportId: null,
   isReadOnly: true,
+  mgmtSubpage: 'topbottom',
+  kpiHistory: [],        // portfolio-level kpi_summary per past import (Historical Trend tab)
+  trendZone: '',         // zone currently selected in the Historical Trend tab
+};
+
+// Dealer notes & follow-up flags — team collaboration layer, kept separate
+// from the imported dealer data since notes persist across re-uploads
+// (keyed by mobile / normalized name, same key used for the Firestore
+// dealers subcollection, so a note survives the dealer being re-imported).
+STATE.notes = {
+  byKey: {},   // key -> { dealer_key, dealer_name, mobile, entries:[...], flag:{...}|null }
+  loaded: false,
 };
 
 // Partner Financial Health namespace — kept separate from core dealer STATE
@@ -1488,7 +1505,7 @@ function aggregateDump26(ws, dealerByMobile, dealerByName, diag) {
     let dealer = null;
     if(mobile && dealerByMobile.has(mobile)) {
       dealer = dealerByMobile.get(mobile);
-      if(dealer.match_type === 'target_only') { dealer.match_type = 'name'; diag.fy26_matched_mobile++; }
+      if(dealer.match_type === 'target_only') { dealer.match_type = 'mobile'; diag.fy26_matched_mobile++; }
     } else {
       const nn = normName(dname);
       if(nn && dealerByName.has(nn)) {
@@ -1874,7 +1891,7 @@ function renderExecSummary(kpis, dealers) {
 }
 
 /* ── Management Insights — ranked lists for fast decisions ── */
-const MGMT_RENDERERS = { topbottom:renderMgmtTopBottom, yoy:renderMgmtYoY, zones:renderMgmtZones, asms:renderMgmtASMs, bands:renderMgmtBands, attention:renderMgmtAttention };
+const MGMT_RENDERERS = { topbottom:renderMgmtTopBottom, yoy:renderMgmtYoY, zones:renderMgmtZones, asms:renderMgmtASMs, bands:renderMgmtBands, attention:renderMgmtAttention, followups:renderMgmtFollowups, trend:renderMgmtTrend };
 
 function renderManagementInsights(dealers) {
   const sub = STATE.mgmtSubpage || 'topbottom';
@@ -1966,12 +1983,15 @@ function dealerCardHTML(d) {
   const achColor_ = achColor(d.achievement_pct);
   const achPct    = Math.min(d.achievement_pct, 100);
   const matchIcon = d.match_type === 'mobile' ? '' : d.match_type === 'name' ? '🔤' : '⚠️';
+  const noteRec = STATE.notes.byKey[noteKeyForDealer(d)];
+  const hasActiveFlag = !!(noteRec && noteRec.flag && noteRec.flag.active);
   const chips = [
     d.geo_zone    ? `<span class="chip zone">${d.geo_zone}</span>` : '',
     d.territory   ? `<span class="chip terr">${d.territory}</span>` : '',
     d.dealer_type === 'New' ? `<span class="chip new-d">New</span>` : d.dealer_type === 'Existing' ? `<span class="chip ex">Existing</span>` : '',
     d.tod_status && d.tod_status !== '' ? `<span class="chip tod">TOD</span>` : '',
     d.match_type === 'target_only' ? `<span class="chip no-match" title="Not found in sales dump">No Sales Data</span>` : '',
+    hasActiveFlag ? `<span class="chip no-match" title="${(noteRec.flag.reason||'').replace(/"/g,'&quot;')}">🚩 Follow-up</span>` : '',
   ].filter(Boolean).join('');
 
   return `
@@ -1981,7 +2001,7 @@ function dealerCardHTML(d) {
     <div class="dc-meta">
       <span title="ASM">👤 ${d.asm_name||'—'}</span>
       <span title="Location">📍 ${d.location||d.city||'—'}</span>
-      ${d.mobile?`<span title="Mobile">📱 ${d.mobile}</span>`:''}
+      ${d.mobile?`<a href="tel:${d.mobile}" title="Call ${d.mobile}" onclick="event.stopPropagation()">📱 ${d.mobile}</a><a href="https://wa.me/91${d.mobile}" target="_blank" rel="noopener" title="WhatsApp" onclick="event.stopPropagation()">💬</a>`:''}
     </div>
     <div class="dc-divider"></div>
     <div class="dc-kpis">
@@ -2112,7 +2132,7 @@ function openDealerModal(d) {
   // Profile grid
   const profileRows = [
     ['Dealer Name', d.name],
-    ['Mobile',      d.mobile || '—'],
+    ['Mobile',      d.mobile ? `${d.mobile} <a href="tel:${d.mobile}" title="Call" style="margin-left:6px">📞</a><a href="https://wa.me/91${d.mobile}" target="_blank" rel="noopener" title="WhatsApp" style="margin-left:4px">💬</a>` : '—'],
     ['Location',    d.location || d.city || '—'],
     ['State',       d.state || '—'],
     ['ASM',         d.asm_name || '—'],
@@ -2179,9 +2199,40 @@ function openDealerModal(d) {
   $('dealer-modal').classList.remove('hidden');
   setTimeout(() => renderModalChart(d), 80);
   renderPartnerFinanceSection(d);
+  renderDealerNotesSection(d);
+
+  // Achievement History Across Imports — lazy-loaded on demand (costs one
+  // Firestore read per historical import), reset fresh each time the modal opens
+  const histBtn = $('m-load-history-btn');
+  const histWrap = $('m-history-wrap');
+  if(histWrap) histWrap.innerHTML = '';
+  if(histBtn) {
+    histBtn.disabled = false;
+    histBtn.style.display = '';
+    histBtn.textContent = '📈 View Achievement History Across Imports';
+    histBtn.onclick = async () => {
+      histBtn.disabled = true;
+      histBtn.textContent = 'Loading…';
+      const hist = await loadDealerAchievementHistory(d);
+      histBtn.style.display = 'none';
+      if(!hist.length) {
+        histWrap.innerHTML = `<p style="font-size:11px;color:var(--t3);margin-top:8px">No historical import data found for this dealer yet — this builds up automatically from future uploads.</p>`;
+        return;
+      }
+      histWrap.innerHTML = `<div class="chart-wrap" style="height:160px;margin-top:8px"><canvas id="m-history-chart"></canvas></div>`;
+      const labels = hist.map(h => h.file_name || fmtDateTime(h.uploaded_at));
+      const opts = pctChartOpts();
+      opts.plugins.legend = { display:false };
+      mkChart('m-history-chart', {
+        type:'line',
+        data:{ labels, datasets:[{ label:'Achievement %', data:hist.map(h=>h.achievement_pct), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)', tension:.3, pointRadius:3, borderWidth:2, spanGaps:true }] },
+        options: opts,
+      });
+    };
+  }
 }
 
-function closeModal() { $('dealer-modal').classList.add('hidden'); destroyChart('m-trend-chart'); }
+function closeModal() { $('dealer-modal').classList.add('hidden'); destroyChart('m-trend-chart'); destroyChart('m-history-chart'); }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 10 — CHARTS
@@ -2713,6 +2764,10 @@ function navigateTo(page) {
          allow read:  if isAdmin();
          allow write: if isAdmin();
        }
+       match /dealer_notes/{key} {
+         allow read:  if isAnyUser();
+         allow write: if isAtLeastASM();
+       }
      }
    }
 
@@ -2729,6 +2784,7 @@ function navigateTo(page) {
 
    /imports/{importId}             ← one doc per upload
      (same as appState/currentImport) + status: 'active'|'archived'
+     + finance_summary {...} (Finance Trend tab) + kpi_summary {...} (Historical Trend tab)
 
    /imports/{importId}/meta/summary
      { diagnostics: {...} }
@@ -2741,6 +2797,11 @@ function navigateTo(page) {
 
    /finance_audit_logs/{logId}
      timestamp, user, action, partner_code, old_value, new_value, source, notes
+
+   /dealer_notes/{key}             ← key = mobile, else normalized-name slug
+     dealer_key, dealer_name, mobile,
+     entries: [ { id, text, author, author_uid, created_at } ],
+     flag: { active, reason, assignee, due_date, created_by, created_at, resolved_at } | null
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const DEV_MODE = false; // ← SET TO FALSE IN PRODUCTION
@@ -2887,6 +2948,8 @@ async function boot(firebaseUser, profile) {
   await loadFinanceAuditLog();
   await loadImportHistory();
   await loadFinanceHistory();
+  await loadAllDealerNotes();
+  await loadKPIHistory();
   updateFinanceNavVisibility();
 
   setLoading(false);
@@ -3064,6 +3127,29 @@ async function saveImportToFirestore(dealers, diag, meta, financeRows = []) {
     } catch(e) { console.warn('finance_summary computation skipped:', e.message); }
   }
 
+  // Lightweight portfolio-level KPI snapshot — same pattern as financeSummary
+  // above, but for the core dealer/zone KPIs, feeding the "Historical Trend"
+  // tab under Management Insights (portfolio + per-zone achievement over time).
+  let kpiSummary = null;
+  try {
+    const kpis = computeKPIs(dealers);
+    if(kpis) {
+      const zones = [...new Set(dealers.map(d=>d.geo_zone).filter(Boolean))];
+      const zoneSummary = zones.map(z => {
+        const zd = dealers.filter(d=>d.geo_zone===z);
+        const ytd = zd.reduce((s,d)=>s+d.fy27_ytd,0);
+        const target = zd.reduce((s,d)=>s+d.fy27_sales_target,0);
+        return { zone:z, ytd, target, achPct: target>0?ytd/target*100:0 };
+      });
+      kpiSummary = {
+        total: kpis.total, active: kpis.active, fy27_target: kpis.fy27Target, fy27_ytd: kpis.fy27YTD,
+        fy26_full: kpis.fy26Full, ach_pct: kpis.achPct, yoy_pct: kpis.yoyPct,
+        on_track: kpis.onTrack, above_target: kpis.aboveTarget, avg_ach: kpis.avgAch,
+        zone_summary: zoneSummary,
+      };
+    }
+  } catch(e) { console.warn('kpi_summary computation skipped:', e.message); }
+
   const ptrData = {
     import_id:          importId,
     uploaded_by_uid:    STATE.uid,
@@ -3078,6 +3164,7 @@ async function saveImportToFirestore(dealers, diag, meta, financeRows = []) {
     finance_enabled:    financeRows.length > 0,
     finance_row_count:  financeRows.length,
     finance_summary:    financeSummary,
+    kpi_summary:        kpiSummary,
   };
 
   const fsErr = (path, err) => {
@@ -3247,6 +3334,7 @@ async function handleFileProduction(file) {
   renderImportSummary();
   renderDashboard();
   renderAllDealersPage();
+  if(STATE.page === 'analytics') renderAnalyticsCharts();
   if(STATE.page === 'finance') renderFinanceDashboard();
 
   // Persist to Firestore (admin only, non-blocking for UI)
@@ -3257,6 +3345,8 @@ async function handleFileProduction(file) {
     else { renderImportSummary(); }
     await loadImportHistory();
     await loadFinanceHistory();
+    await loadKPIHistory();
+    if(STATE.page === 'dashboard' && STATE.mgmtSubpage === 'trend') renderManagementInsights(STATE.filtered);
     renderImportSummary();
     setLoading(false);
   } else {
@@ -3375,6 +3465,56 @@ $('pwa-install-btn').addEventListener('click', async () => {
   }
 });
 $('pwa-dismiss-btn').addEventListener('click', () => $('pwa-banner').classList.remove('show'));
+
+// ── Service worker registration + update detection ──────
+// beforeinstallprompt (above) only fires once Chrome/Edge/Android consider
+// the app installable, which requires BOTH a linked manifest (added in
+// <head>) AND an active, fetch-handling service worker — this is that
+// second half. It also drives the separate "new version available" banner:
+// sw.js is written to never auto-activate a waiting update (see sw.js
+// comments), so nothing changes under a user mid-session until they
+// explicitly click Refresh.
+let swWaitingWorker = null;
+function showUpdateBanner(worker) {
+  swWaitingWorker = worker;
+  $('update-banner').classList.add('show');
+}
+function registerServiceWorker() {
+  if(!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('sw.js');
+      if(reg.waiting) showUpdateBanner(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if(!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          // A controller already existing means this is an UPDATE to an
+          // already-running app, not the very first install — that's the
+          // only case that should interrupt the user with a banner.
+          if(newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateBanner(newWorker);
+          }
+        });
+      });
+      // Long-lived tabs (dashboards left open all day) won't otherwise
+      // notice a new deploy until next navigation — nudge a check hourly.
+      setInterval(() => reg.update().catch(()=>{}), 60 * 60 * 1000);
+    } catch(e) { console.warn('Service worker registration failed:', e); }
+  });
+  let reloadedAfterUpdate = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if(reloadedAfterUpdate) return;
+    reloadedAfterUpdate = true;
+    window.location.reload();
+  });
+}
+registerServiceWorker();
+$('update-refresh-btn').addEventListener('click', () => {
+  if(swWaitingWorker) swWaitingWorker.postMessage({ type:'SKIP_WAITING' });
+  $('update-banner').classList.remove('show');
+});
+$('update-dismiss-btn').addEventListener('click', () => $('update-banner').classList.remove('show'));
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 18 — PARTNER FINANCIAL HEALTH (ROI INTELLIGENCE)
@@ -4147,7 +4287,7 @@ function renderFinScenario() {
       ${finKPICard('Fixable by Sales', canFixYes, 'Achievable sales lift at current margin','#16a34a','✅','ok')}
     </div>
     <div class="chart-card" style="overflow-x:auto">
-      <div class="cc-head"><div><div class="cc-title">Action Plan — What Is Needed to Make Partners Positive</div><div class="cc-sub">Sorted worst PBIT first</div></div></div>
+      <div class="cc-head"><div><div class="cc-title">Action Plan — What Is Needed to Make Partners Positive</div><div class="cc-sub">Sorted worst PBIT first</div></div><button class="btn outline" id="fin-scenario-export-btn" style="flex-shrink:0">⬇ Export</button></div>
       <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:820px">
         <thead><tr style="text-align:left;border-bottom:1px solid var(--border);color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.05em">
           <th style="padding:6px 8px 6px 0">Dealer</th><th>Health</th><th style="text-align:right">CP Sales</th><th style="text-align:right">Income</th><th style="text-align:right">Opex</th><th style="text-align:right">PBIT</th><th style="text-align:right">Gap</th><th style="text-align:right">Margin %</th><th style="text-align:right">Lift Needed</th><th>Can Fix?</th><th>Priority</th><th>Primary Action</th>
@@ -4156,6 +4296,18 @@ function renderFinScenario() {
       </table>
     </div>
   `;
+  const expBtn = $('fin-scenario-export-btn');
+  if(expBtn) expBtn.addEventListener('click', () => {
+    const exportRows = negative.map(s => ({
+      'Dealer': s.partner_name, 'Health': s.rag,
+      'CP Sales (L)': Number(s.customer_price.toFixed(2)), 'Total Income (L)': Number(s.total_income.toFixed(2)),
+      'Opex (L)': Number(s.opex.toFixed(2)), 'PBIT (L)': Number(s.pbit.toFixed(2)),
+      'Gap to PBIT+ (L)': Number(s.gap_to_pbit_positive.toFixed(2)), 'Margin %': Number(s.margin_pct_effective.toFixed(1)),
+      'Sales Lift Needed (L)': s.sales_lift_needed!=null?Number(s.sales_lift_needed.toFixed(2)):'',
+      'Can Fix By Sales': s.can_fix_by_sales, 'Priority': s.priority, 'Primary Action': s.primary_action,
+    }));
+    exportRowsToExcel(exportRows, `ActionPlan_${new Date().toISOString().slice(0,10)}.xlsx`);
+  });
 }
 
 // ── 18o: Financial Health Grades (Inactive/Critical/Watch/Stable/Healthy) ──
@@ -4534,6 +4686,383 @@ async function loadPartnerFinanceHistory(partnerCode) {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION 18B — DEALER NOTES & FOLLOW-UP FLAGS (team collaboration)
+   Firestore shape:  /dealer_notes/{key}
+     { dealer_key, dealer_name, mobile,
+       entries: [ { id, text, author, author_uid, created_at } ],
+       flag: { active, reason, assignee, due_date, created_by, created_at, resolved_at } | null }
+   key = mobile, falling back to a normalized-name slug — same key pattern
+   used for the per-import dealers subcollection, so a note/flag survives
+   the dealer being re-imported in a later workbook.
+   REQUIRES a Firestore rule for /dealer_notes/{key} (read: any signed-in
+   user; write: admin or asm) — see the rules block above Section 14.
+   Without that rule deployed, notes/flags still work locally for the
+   session but won't sync or persist for other users.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function noteKeyForDealer(d) {
+  return d.mobile || normName(d.name).replace(/\s/g,'_').slice(0,50);
+}
+function canEditNotes() { return STATE.role === 'admin' || STATE.role === 'asm'; }
+
+async function loadAllDealerNotes() {
+  STATE.notes.byKey = {};
+  if(!FBDB || !FBAUTH?.currentUser) { STATE.notes.loaded = true; return; }
+  try {
+    const snap = await FBDB.collection('dealer_notes').get();
+    snap.docs.forEach(doc => { STATE.notes.byKey[doc.id] = doc.data(); });
+  } catch(e) {
+    if(e.code === 'permission-denied') console.warn('dealer_notes: needs a Firestore rule — see the rules block above Section 14');
+  }
+  STATE.notes.loaded = true;
+}
+
+async function addDealerNote(dealer, text) {
+  if(!canEditNotes()) { toast('Only admin/ASM can add notes', 'err'); return false; }
+  if(!text || !text.trim()) return false;
+  const key = noteKeyForDealer(dealer);
+  const entry = {
+    id: 'n' + Date.now() + Math.floor(Math.random()*1000),
+    text: text.trim(),
+    author: STATE.userProfile?.name || STATE.userProfile?.email || 'user',
+    author_uid: STATE.uid || '',
+    created_at: new Date().toISOString(),
+  };
+  const existing = STATE.notes.byKey[key] || { dealer_key:key, dealer_name:dealer.name, mobile:dealer.mobile||'', entries:[], flag:null };
+  existing.entries = [entry, ...(existing.entries||[])];
+  existing.dealer_name = dealer.name;
+  existing.mobile = dealer.mobile || '';
+  STATE.notes.byKey[key] = existing;
+  if(FBDB && FBAUTH?.currentUser) {
+    try {
+      await FBDB.collection('dealer_notes').doc(key).set({
+        dealer_key:key, dealer_name:dealer.name, mobile:dealer.mobile||'',
+        entries: firebase.firestore.FieldValue.arrayUnion(entry),
+      }, { merge:true });
+    } catch(e) {
+      toast('Note saved locally but failed to sync — check the dealer_notes Firestore rule', 'err');
+      console.error('addDealerNote failed:', e);
+    }
+  }
+  return true;
+}
+
+async function setDealerFlag(dealer, { reason, assignee, due_date }) {
+  if(!canEditNotes()) { toast('Only admin/ASM can set follow-ups', 'err'); return false; }
+  const key = noteKeyForDealer(dealer);
+  const flag = {
+    active:true, reason: reason||'', assignee: assignee||'', due_date: due_date||'',
+    created_by: STATE.userProfile?.name || STATE.userProfile?.email || 'user',
+    created_at: new Date().toISOString(), resolved_at:null,
+  };
+  const existing = STATE.notes.byKey[key] || { dealer_key:key, dealer_name:dealer.name, mobile:dealer.mobile||'', entries:[], flag:null };
+  existing.flag = flag;
+  existing.dealer_name = dealer.name; existing.mobile = dealer.mobile || '';
+  STATE.notes.byKey[key] = existing;
+  if(FBDB && FBAUTH?.currentUser) {
+    try { await FBDB.collection('dealer_notes').doc(key).set({ dealer_key:key, dealer_name:dealer.name, mobile:dealer.mobile||'', flag }, { merge:true }); }
+    catch(e) { toast('Flag saved locally but failed to sync — check the dealer_notes Firestore rule', 'err'); console.error(e); }
+  }
+  return true;
+}
+
+async function resolveDealerFlag(dealer) {
+  if(!canEditNotes()) { toast('Only admin/ASM can resolve follow-ups', 'err'); return false; }
+  const key = noteKeyForDealer(dealer);
+  const existing = STATE.notes.byKey[key];
+  if(!existing || !existing.flag) return false;
+  existing.flag = { ...existing.flag, active:false, resolved_at: new Date().toISOString() };
+  if(FBDB && FBAUTH?.currentUser) {
+    try { await FBDB.collection('dealer_notes').doc(key).set({ flag: existing.flag }, { merge:true }); }
+    catch(e) { toast('Could not sync resolve — check connection', 'err'); console.error(e); }
+  }
+  return true;
+}
+
+// ── Dealer modal — Team Notes & Follow-Up section ──
+function renderDealerNotesSection(dealer) {
+  const key = noteKeyForDealer(dealer);
+  const rec = STATE.notes.byKey[key];
+  const canEdit = canEditNotes();
+  const flagBox = $('m-flag-box');
+  const flagBadge = $('m-flag-badge');
+  if(!flagBox || !flagBadge) return;
+
+  if(rec && rec.flag && rec.flag.active) {
+    const today = new Date(new Date().toDateString());
+    const overdue = !!(rec.flag.due_date && new Date(rec.flag.due_date) < today);
+    flagBadge.innerHTML = `<span class="chip ${overdue?'no-match':'tod'}">${overdue?'OVERDUE':'FOLLOW-UP OPEN'}</span>`;
+    flagBox.innerHTML = `
+      <div style="background:${overdue?'var(--errt)':'var(--warnt)'};border-radius:var(--r-sm);padding:9px 11px;margin-bottom:8px;font-size:11px;color:var(--t)">
+        <div><strong>🚩 ${rec.flag.reason||'Follow-up required'}</strong></div>
+        <div style="color:var(--t2);margin-top:2px">Assigned to ${rec.flag.assignee||'—'} · Due ${rec.flag.due_date||'—'} · Raised by ${rec.flag.created_by||'—'}</div>
+        ${canEdit?`<button class="btn-xs out" id="m-resolve-flag-btn" style="margin-top:6px">✓ Mark Resolved</button>`:''}
+      </div>`;
+    const rb = $('m-resolve-flag-btn');
+    if(rb) rb.onclick = async () => { await resolveDealerFlag(dealer); toast('Follow-up marked resolved', 'ok'); renderDealerNotesSection(dealer); if(STATE.page==='dashboard') renderManagementInsights(STATE.filtered); renderDealerGrid(STATE.filtered, STATE.page==='dealers'?'all-dealer-grid':'dealer-grid'); };
+  } else {
+    flagBadge.innerHTML = '';
+    flagBox.innerHTML = canEdit ? `
+      <div class="fin-override-row" style="flex-wrap:wrap;gap:6px">
+        <input type="text" id="m-flag-reason" placeholder="Reason (e.g. payment overdue)" style="flex:1 1 160px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px">
+        <input type="text" id="m-flag-assignee" placeholder="Assignee" style="width:100px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px">
+        <input type="date" id="m-flag-due" style="padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px">
+        <button class="btn-xs sol" id="m-set-flag-btn">🚩 Flag for Follow-up</button>
+      </div>` : `<p style="font-size:11px;color:var(--t3)">No open follow-up.</p>`;
+    const sb = $('m-set-flag-btn');
+    if(sb) sb.onclick = async () => {
+      const reason = $('m-flag-reason').value.trim();
+      const assignee = $('m-flag-assignee').value.trim();
+      const due = $('m-flag-due').value;
+      if(!reason) { toast('Enter a reason for the follow-up', 'err'); return; }
+      await setDealerFlag(dealer, { reason, assignee, due_date: due });
+      toast('Follow-up flagged', 'ok');
+      renderDealerNotesSection(dealer);
+      if(STATE.page==='dashboard') renderManagementInsights(STATE.filtered);
+      renderDealerGrid(STATE.filtered, STATE.page==='dealers'?'all-dealer-grid':'dealer-grid');
+    };
+  }
+
+  const list = $('m-notes-list');
+  const entries = (rec && rec.entries) || [];
+  list.innerHTML = entries.length ? entries.slice(0,20).map(e => `
+    <div class="rank-row" style="align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;color:var(--t)">${e.text}</div>
+        <div style="font-size:9px;color:var(--t3);margin-top:2px">${e.author} · ${fmtDateTime(e.created_at)}</div>
+      </div>
+    </div>`).join('') : `<div class="rank-row" style="color:var(--t3)">No notes yet</div>`;
+
+  const form = $('m-notes-form');
+  form.innerHTML = canEdit ? `
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <input type="text" id="m-note-input" placeholder="Add a note (visit, call, commitment)…" style="flex:1;padding:6px 9px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg);color:var(--t);font-size:11px">
+      <button class="btn-xs sol" id="m-add-note-btn">Add</button>
+    </div>` : '';
+  const ab = $('m-add-note-btn');
+  if(ab) ab.onclick = async () => {
+    const input = $('m-note-input');
+    const ok = await addDealerNote(dealer, input.value);
+    if(ok) { input.value=''; renderDealerNotesSection(dealer); toast('Note added', 'ok'); }
+  };
+  const ni = $('m-note-input');
+  if(ni) ni.onkeydown = e => { if(e.key==='Enter') $('m-add-note-btn')?.click(); };
+}
+
+// ── Management Insights — "Follow-Ups" tab: every open flag, soonest due first ──
+function renderMgmtFollowups(dealers) {
+  const root = $('mgmt-followups');
+  if(!root) return;
+  const flagged = [];
+  dealers.forEach(d => {
+    const rec = STATE.notes.byKey[noteKeyForDealer(d)];
+    if(rec && rec.flag && rec.flag.active) flagged.push({ d, flag: rec.flag });
+  });
+  if(!flagged.length) {
+    root.innerHTML = `<div class="chart-card"><div class="rank-list"><div class="rank-row">No open follow-ups — nothing flagged right now.</div></div></div>`;
+    return;
+  }
+  flagged.sort((a,b) => {
+    const da = a.flag.due_date ? new Date(a.flag.due_date).getTime() : Infinity;
+    const db = b.flag.due_date ? new Date(b.flag.due_date).getTime() : Infinity;
+    return da - db;
+  });
+  const today = new Date(new Date().toDateString());
+  const rows = flagged.map(({d,flag}) => {
+    const overdue = !!(flag.due_date && new Date(flag.due_date) < today);
+    return `<div class="rank-row" style="cursor:pointer" data-followup-mobile="${d.mobile}" data-followup-name="${d.name.replace(/"/g,'&quot;')}">
+      <span class="rag-dot ${overdue?'critical':'watchlist'}"></span>
+      <div style="flex:1;min-width:0">
+        <div class="rank-name">${d.name}</div>
+        <div class="rank-sub">${flag.reason||'—'} · ${flag.assignee||'Unassigned'}</div>
+      </div>
+      <span class="rank-val" style="color:${overdue?'var(--err)':'var(--warn)'}">${flag.due_date||'No due date'}</span>
+    </div>`;
+  }).join('');
+  root.innerHTML = `<div class="chart-card"><div class="cc-head"><div><div class="cc-title">Open Follow-Ups</div><div class="cc-sub">${flagged.length} dealer(s) flagged — sorted by due date, overdue first</div></div></div><div class="rank-list">${rows}</div></div>`;
+  qsa('[data-followup-mobile]', root).forEach(el => el.addEventListener('click', () => {
+    const mob = el.dataset.followupMobile, name = el.dataset.followupName;
+    const d = STATE.dealers.find(x => x.mobile === mob && x.name === name) || STATE.dealers.find(x=>x.mobile===mob) || STATE.dealers.find(x=>x.name===name);
+    if(d) openDealerModal(d);
+  }));
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION 18C — EXCEL EXPORT (dealer lists & finance action plan)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function exportRowsToExcel(rows, filename) {
+  if(typeof XLSX === 'undefined') { toast('XLSX library not loaded', 'err'); return; }
+  if(!rows || !rows.length) { toast('Nothing to export — the current view has no rows', 'err'); return; }
+  try {
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Export');
+    XLSX.writeFile(wb, filename);
+    toast(`Exported ${rows.length} row(s)`, 'ok');
+  } catch(e) { toast('Export failed: ' + e.message, 'err'); console.error(e); }
+}
+
+function dealerExportRows(dealers) {
+  return dealers.map(d => {
+    const rec = STATE.notes.byKey[noteKeyForDealer(d)];
+    return {
+      'Dealer Name': d.name,
+      'Mobile': d.mobile,
+      'Zone': d.geo_zone,
+      'Territory': d.territory,
+      'ASM': d.asm_name,
+      'Dealer Type': d.dealer_type,
+      'TOD Status': d.tod_status,
+      'FY27 Sales AOP (L)': Number((d.fy27_sales_target||0).toFixed(2)),
+      'FY27 YTD (L)': Number((d.fy27_ytd||0).toFixed(2)),
+      'Achievement %': Number((d.achievement_pct||0).toFixed(1)),
+      'YoY Growth %': Number((d.yoy_pct||0).toFixed(1)),
+      'Target Gap (L)': Number((d.target_gap||0).toFixed(2)),
+      'FY26 Full Year (L)': Number((d.fy26_full||0).toFixed(2)),
+      'Match Type': d.match_type,
+      'Follow-up Open': (rec && rec.flag && rec.flag.active) ? 'Yes' : '',
+    };
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION 18D — HISTORICAL KPI TREND (across imports)
+   Mirrors the Finance module's Trend tab exactly: a lightweight
+   kpi_summary snapshot is written onto each import's pointer doc in
+   saveImportToFirestore(), then read back here as an ordered list —
+   one cheap query, no per-dealer reads needed for the portfolio/zone
+   charts. Per-dealer history (in the modal) does one doc read per
+   historical import, same pattern as loadPartnerFinanceHistory.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function loadKPIHistory() {
+  if(!FBDB || !FBAUTH?.currentUser) return;
+  try {
+    const snap = await FBDB.collection('imports').orderBy('uploaded_at', 'asc').limit(50).get();
+    STATE.kpiHistory = snap.docs.map(d => d.data())
+      .filter(v => v.kpi_summary)
+      .map(v => ({ import_id:v.import_id, file_name:v.file_name, uploaded_at: v.uploaded_at?.toDate?.() || null, status:v.status, ...v.kpi_summary }));
+  } catch(e) {
+    if(e.code === 'permission-denied') console.warn('KPI history: needs read access to imports/{importId}');
+    STATE.kpiHistory = [];
+  }
+}
+
+async function loadDealerAchievementHistory(dealer) {
+  if(!FBDB || !STATE.kpiHistory?.length) return [];
+  const key = noteKeyForDealer(dealer);
+  const out = [];
+  for(const imp of STATE.kpiHistory) {
+    try {
+      const doc = await FBDB.collection('imports').doc(imp.import_id).collection('dealers').doc(key).get();
+      if(doc.exists) {
+        const dd = doc.data();
+        out.push({ import_id: imp.import_id, file_name: imp.file_name, uploaded_at: imp.uploaded_at,
+          fy27_ytd: dd.fy27_ytd, achievement_pct: dd.achievement_pct, yoy_pct: dd.yoy_pct });
+      }
+    } catch(e) { /* dealer may not have existed in that import — skip */ }
+  }
+  return out;
+}
+
+function renderMgmtTrend(dealers) {
+  const root = $('mgmt-trend');
+  if(!root) return;
+  const history = STATE.kpiHistory || [];
+  if(!history.length) {
+    root.innerHTML = `<div class="chart-card"><div class="rank-list"><div class="rank-row">No historical imports tracked yet — trend builds up automatically from your next upload onward. Nothing is lost between uploads; every import is kept for comparison.</div></div></div>`;
+    return;
+  }
+  if(history.length === 1) {
+    const h = history[0];
+    root.innerHTML = `<div class="chart-card">
+      <div class="cc-head"><div class="cc-title">Only One Data Point So Far</div></div>
+      <p style="font-size:11px;color:var(--t2);line-height:1.6;margin-bottom:10px">This is the first tracked import (${h.file_name||'current upload'}, ${fmtDateTime(h.uploaded_at)}). Trend charts appear once a second import is uploaded.</p>
+      <div class="stat-grid c3">
+        <div class="sbox"><div class="sl">FY27 YTD</div><div class="sv">${fLakh(h.fy27_ytd)}</div></div>
+        <div class="sbox"><div class="sl">Achievement %</div><div class="sv">${fPct(h.ach_pct)}</div></div>
+        <div class="sbox"><div class="sl">On Track</div><div class="sv">${h.on_track}/${h.total}</div></div>
+      </div></div>`;
+    return;
+  }
+
+  const zones = [...new Set(history.flatMap(h => (h.zone_summary||[]).map(z=>z.zone)))].sort();
+  const zoneOpts = zones.map(z => `<option value="${z}" ${STATE.trendZone===z?'selected':''}>${z}</option>`).join('');
+  const latest = history[history.length-1], first = history[0];
+
+  root.innerHTML = `
+    <div class="fin-grid-3">
+      ${finKPICard('Imports Tracked', history.length, 'Uploads with KPI data', '#2563eb','🗓️','')}
+      ${finKPICard('Latest Achievement', fPct(latest.ach_pct), latest.file_name||'', achColor(latest.ach_pct||0), '🎯','')}
+      ${finKPICard('Trend', latest.fy27_ytd >= first.fy27_ytd ? 'Improving' : 'Declining', `vs ${first.file_name||'first import'}`, latest.fy27_ytd >= first.fy27_ytd ? '#16a34a':'#dc2626', latest.fy27_ytd >= first.fy27_ytd ? '📈':'📉', '')}
+    </div>
+    <div class="ana-grid" style="margin-bottom:10px">
+      <div class="chart-card">
+        <div class="cc-head"><div class="cc-title">FY27 YTD Sales — By Import</div></div>
+        <div class="chart-wrap" style="height:200px"><canvas id="mgmt-trend-sales-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="cc-head"><div class="cc-title">Achievement % — By Import</div></div>
+        <div class="chart-wrap" style="height:200px"><canvas id="mgmt-trend-ach-chart"></canvas></div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-bottom:10px">
+      <div class="cc-head"><div class="cc-title">On-Track vs Needs-Attention — By Import</div></div>
+      <div class="chart-wrap" style="height:200px"><canvas id="mgmt-trend-health-chart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="cc-head"><div><div class="cc-title">Zone Trend</div><div class="cc-sub">Achievement % by zone, across imports</div></div></div>
+      <div class="fg" style="max-width:220px;margin-bottom:10px"><label>Zone</label><select id="mgmt-trend-zone-select"><option value="">Select a zone…</option>${zoneOpts}</select></div>
+      <div id="mgmt-trend-zone-wrap"><p style="font-size:11px;color:var(--t3)">Select a zone above to see its achievement % history.</p></div>
+    </div>
+  `;
+
+  const labels = history.map(h => h.file_name || fmtDateTime(h.uploaded_at));
+  const salesOpts = salesChartOpts(); salesOpts.plugins.legend = { display:false };
+  mkChart('mgmt-trend-sales-chart', {
+    type:'line',
+    data:{ labels, datasets:[{ label:'FY27 YTD', data:history.map(h=>h.fy27_ytd), borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)', tension:.3, pointRadius:3, borderWidth:2 }] },
+    options: salesOpts,
+  });
+
+  const achOpts = pctChartOpts(); achOpts.plugins.legend = { display:false };
+  mkChart('mgmt-trend-ach-chart', {
+    type:'line',
+    data:{ labels, datasets:[{ label:'Achievement %', data:history.map(h=>h.ach_pct), borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,0.08)', tension:.3, pointRadius:3, borderWidth:2 }] },
+    options: achOpts,
+  });
+
+  const t = themeVars();
+  const healthOpts = countChartOpts();
+  healthOpts.plugins.legend = { labels:{ color:t.tick, font:{size:10,family:'Inter'}, boxWidth:10, padding:9 } };
+  mkChart('mgmt-trend-health-chart', {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'On Track (≥50%)', data:history.map(h=>h.on_track), backgroundColor:'#16a34a', stack:'s' },
+      { label:'Needs Attention', data:history.map(h=>h.total-h.on_track), backgroundColor:'#dc2626', stack:'s' },
+    ]},
+    options: { ...healthOpts, scales:{ ...healthOpts.scales, x:{...healthOpts.scales.x, stacked:true}, y:{...healthOpts.scales.y, stacked:true} } },
+  });
+
+  const zsel = $('mgmt-trend-zone-select');
+  if(zsel) zsel.addEventListener('change', () => { STATE.trendZone = zsel.value; renderMgmtTrendZoneChart(history, zsel.value); });
+  if(STATE.trendZone) renderMgmtTrendZoneChart(history, STATE.trendZone);
+}
+
+function renderMgmtTrendZoneChart(history, zone) {
+  const wrap = $('mgmt-trend-zone-wrap');
+  if(!wrap) return;
+  if(!zone) { wrap.innerHTML = `<p style="font-size:11px;color:var(--t3)">Select a zone above to see its achievement % history.</p>`; return; }
+  const data = history.map(h => { const z = (h.zone_summary||[]).find(zz=>zz.zone===zone); return z ? z.achPct : null; });
+  wrap.innerHTML = `<div class="chart-wrap" style="height:200px"><canvas id="mgmt-trend-zone-chart"></canvas></div>`;
+  const labels = history.map(h => h.file_name || fmtDateTime(h.uploaded_at));
+  const opts = pctChartOpts(); opts.plugins.legend = { display:false };
+  mkChart('mgmt-trend-zone-chart', {
+    type:'line',
+    data:{ labels, datasets:[{ label:zone, data, borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.08)', tension:.3, pointRadius:3, borderWidth:2, spanGaps:true }] },
+    options: opts,
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    SECTION 17 — INIT & EVENT LISTENERS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -4703,10 +5232,18 @@ document.addEventListener('DOMContentLoaded', () => {
       renderTrendChart(STATE.filtered);
       renderZoneChart(STATE.filtered);
       if(STATE.page === 'analytics') renderAnalyticsCharts();
+      if(STATE.page === 'finance') renderFinanceDashboard();
+      if(STATE.page === 'dashboard' && STATE.mgmtSubpage === 'bands') renderManagementInsights(STATE.filtered);
     }, 120);
   });
 
   // ── Copy Support Info — clipboard snapshot for troubleshooting ──
+  // ── Excel export — Dashboard & All Dealers (exports whatever is currently filtered) ──
+  const dashExportBtn = $('dash-export-btn');
+  if(dashExportBtn) dashExportBtn.addEventListener('click', () => exportRowsToExcel(dealerExportRows(STATE.filtered), `Dealers_${new Date().toISOString().slice(0,10)}.xlsx`));
+  const allExportBtn = $('all-dealer-export-btn');
+  if(allExportBtn) allExportBtn.addEventListener('click', () => exportRowsToExcel(dealerExportRows(STATE.filtered), `Dealers_${new Date().toISOString().slice(0,10)}.xlsx`));
+
   const copyBtn = $('copy-support-btn');
   if(copyBtn) copyBtn.addEventListener('click', async () => {
     const d = STATE.diag || {};
